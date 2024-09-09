@@ -6,8 +6,9 @@
   </div>
   <div class="contentRight" v-show="props.isClass">
     <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild" />
-    <rbcclassification @rbcUpdate="rbcUpdate" :parsedData="props.parsedData" v-if="!bmIsBoolen" class="contentRightChild"/>
-    <wbcclassification @classInfoUpdate="classInfoUpdate" :parsedData="props.parsedData" :bmIsBoolen="bmIsBoolen" class="contentRightChild"/>
+<!--    <rbcclassification @rbcUpdate="rbcUpdate" :parsedData="props.parsedData" v-if="!bmIsBoolen" class="contentRightChild"/>-->
+<!--    <wbcclassification @classInfoUpdate="classInfoUpdate" :parsedData="props.parsedData" :bmIsBoolen="bmIsBoolen" class="contentRightChild"/>-->
+    <RealTimeProcess class="contentRightChild realtime"/>
     <div class="contentBottom">
       <FoundingCells :parsedData="props.parsedData" :pb100aCassette="pb100aCassette"/>
     </div>
@@ -25,12 +26,12 @@ import FoundingCells from "@/views/analysis/commponent/foundingCells.vue";
 import {defineEmits, defineProps, onMounted, ref, onBeforeMount, computed, watch} from "vue";
 import router from "@/router";
 import {useStore} from "vuex";
+import RealTimeProcess from "@/views/analysis/commponent/realTimeProcess.vue";
 const emits = defineEmits();
 
 const store = useStore();
 const bmIsBoolen = ref(false);
 const props = defineProps(['parsedData','isClass', 'startStatus', 'pb100aCassette']);
-const pbVersion = ref<any>('');
 const initValData = ref(false);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 
@@ -39,7 +40,6 @@ onBeforeMount(async () => {
     router.push('/database')
   }
 
-  pbVersion.value = window.PB_VERSION;
   bmIsBoolen.value = window.PROJECT_TYPE === 'bm' ? true : false;
 });
 

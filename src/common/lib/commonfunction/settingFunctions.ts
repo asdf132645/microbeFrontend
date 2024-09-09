@@ -14,15 +14,21 @@ import {
     createLisCodeRbcApi,
     getLisCodeWbcApi, getLisCodeRbcApi
 } from '@/common/api/service/setting/settingApi';
-import { defaultBmClassList, defaultWbcClassList } from "@/store/modules/analysis/wbcclassification";
-import { defaultCbcList, defaultRbcDegree, lisCodeRbcOption, lisCodeWbcOption, normalRange, rbcClassList } from "@/common/defines/constFile/settings";
+import {
+    defaultCbcList,
+    defaultRbcDegree,
+    lisCodeRbcOption,
+    lisCodeWbcOption,
+    normalRange,
+    rbcClassList
+} from "@/common/defines/constFile/settings";
 
 const rbcClassListArr = reactive<any>({value: []}); // reactive로 변경
 
 const projectType = window.PROJECT_TYPE === 'bm';
 const defaultCellImgData = {
     testTypeCd: projectType ? '02' : '01',
-    diffCellAnalyzingCount: projectType ? '500':'100',
+    diffCellAnalyzingCount: projectType ? '500' : '100',
     diffWbcPositionMargin: '0',
     diffRbcPositionMargin: '0',
     diffPltPositionMargin: '0',
@@ -102,7 +108,7 @@ export const initializeAllSettings = async () => {
 const firstGetSettings = async (initializeType: string) => {
     const getRequest = settingsConstant.value[initializeType].getRequest;
     try {
-        const { data } = await getRequest() || {};
+        const {data} = await getRequest() || {};
 
         if (!data || data.length === 0) {
             const sendingFormStr = settingsConstant.value[initializeType]?.sendingForm;
@@ -112,7 +118,7 @@ const firstGetSettings = async (initializeType: string) => {
             const anotherDefaultValue = await defaultComputedValueForCreateRequest(initializeType)
 
             if (sendingFormStr) {
-                await createRequest({ [sendingFormStr]: anotherDefaultValue || defaultItem });
+                await createRequest({[sendingFormStr]: anotherDefaultValue || defaultItem});
             } else {
                 await createRequest(anotherDefaultValue || defaultItem);
             }
@@ -150,14 +156,6 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
                 autoBackUpStartDate: null,
             };
             return cellImgSet;
-
-        case 'orderClass':
-            const orderList: any = window.PROJECT_TYPE === 'bm' ? defaultBmClassList : defaultWbcClassList;
-            for (const index in orderList) {
-                orderList[index].orderIdx = index;
-            }
-            return orderList;
-
         case 'rbcDegree':
             await combindDegree();
             const rbcDegreeList: any = [];

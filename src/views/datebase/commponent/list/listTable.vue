@@ -13,6 +13,7 @@
       <col width="3%"/>
       <col width="3%"/>
       <col width="3%"/>
+      <col width="3%"/>
       <col width="15%"/>
       <col width="3%"/>
       <col width="3%"/>
@@ -26,6 +27,7 @@
         <input type="checkbox" v-model="selectAllCheckbox" @change="selectAllItems"/>
       </th>
       <th>Type</th>
+      <th>Cassette ID</th>
       <th>State</th>
       <th>Tray Slot</th>
       <th>Barcode NO</th>
@@ -62,6 +64,8 @@
           <input type="checkbox" v-model="item.checked" :checked="item.checked"/>
         </td>
         <td> {{ projectType !== 'bm' ? getTestTypeText(item?.testType) : getBmTestTypeText(item?.testType) }}</td>
+        <td>{{ item?.cassetId }}</td>
+
         <td>
           <font-awesome-icon
               :icon="['fas', `${!item?.lock_status ? 'lock-open' : 'lock' }`]"

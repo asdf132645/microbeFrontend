@@ -7,9 +7,6 @@
       <li><span class="proSpan">Patient ID</span> <span class="proVal">{{ processInfoItem?.patientId }}</span></li>
       <li><span class="proSpan">Patient Name</span> <span class="proVal">{{ processInfoItem?.patientName }}</span></li>
       <li>
-        <span class="proSpan">{{ projectBm ? 'BM CELL Count ' : 'WBC Count ' }} </span>
-        <span class="proVal">{{ processInfoItem?.wbcCount }}</span></li>
-      <li>
         <!--0019 길병원-->
         <span class="proSpan">
           {{ siteCd === '0019' ? 'Order Date' : 'Analyzed Date' }}

@@ -90,7 +90,7 @@ const viewerCheckApp = ref('');
 const projectBm = ref(false);
 const parsedDataProps = ref<any>({});
 const startStatus = ref(false);
-const pbVersion = ref<any>('');
+const microbeVersion = ref<any>('100a');
 const pb100aCassette = ref<any>('');
 const deleteData = ref(false);
 let socketTimeoutId: number | undefined = undefined; // 타이머 ID 저장
@@ -233,7 +233,6 @@ const leave = async (event: any) => {
 
 onBeforeMount(() => {
   projectBm.value = window.PROJECT_TYPE === 'bm';
-  pbVersion.value = window.PB_VERSION;
 })
 const isIpMatching = (url: any, ip: any) => {
   // URL에서 IP 주소 추출
@@ -457,7 +456,7 @@ async function socketData(data: any) {
           await store.dispatch('commonModule/setCommonInfo', {slideProceeding: data?.iCasStat.indexOf("2")});
         }
 
-        if (pbVersion.value === '100a') {
+        if (microbeVersion.value === '100a') {
           if (data?.iCasChange === '1') {
             pb100aCassette.value = 'reset';
           } else {
@@ -468,7 +467,7 @@ async function socketData(data: any) {
         // iCasStat (0 - 없음, 1 - 있음, 2 - 진행중, 3 - 완료, 4 - 에러, 9 - 스캔)
         if ((dataICasStat.search(regex) < 0) || data?.oCasStat === '111111111111' && !commonDataGet.value.runningInfoStop) {
           tcpReq().embedStatus.runIngComp.reqUserId = userModuleDataGet.value.userId;
-          if (pbVersion.value !== '100a') {
+          if (microbeVersion.value !== '100a') {
             await store.dispatch('commonModule/setCommonInfo', {reqArr: tcpReq().embedStatus.runIngComp});
             await store.dispatch('commonModule/setCommonInfo', {runningInfoStop: true});
           } else {

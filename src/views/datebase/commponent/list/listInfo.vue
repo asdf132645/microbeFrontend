@@ -10,7 +10,18 @@
             <span class="mb1">Order ID:</span>
             <span class="mb2">{{ selectedItem?.slotId }}</span>
           </li>
-          <li>NS, NB Integration: {{integrationFindNe(selectedItem.wbcInfoAfter)}}</li>
+          <li class="flexColumn">
+            <span class="mb1">Cassette ID:</span>
+            <span class="mb2">{{ selectedItem?.cassetId }}</span>
+          </li>
+          <li class="flexColumn">
+            <span class="mb1">Patient ID:</span>
+            <span class="mb2">{{ selectedItem?.patientId }}</span>
+          </li>
+          <li class="flexColumn">
+            <span class="mb1">Patient Name:</span>
+            <span class="mb2">{{ selectedItem?.patientNm }}</span>
+          </li>
         </ul>
         <div>
           <img v-show="!barCodeImageShowError" @error="onImageError" :src="pilePath"
@@ -18,42 +29,7 @@
         </div>
       </div>
     </div>
-    <div class="resultInformationContainer" style="padding-top: 0;">
-      <h3 class="mt2 mb1 hh3title">Result Information</h3>
-      <ul class="resInfoTopContainer">
-        <li v-if="selectedItem?.testType === '01' || selectedItem?.testType === '04' || projectType === 'bm'">
-          <div class="resInfoContainer">
-            <li class="resInfoWrapper mb1">
-              <p>Class</p>
-              <p>Count</p>
-              <p>Percent</p>
-            </li>
-            <template v-for="result in wbcInfoAfter" :key="result.title">
-              <li v-if="showClassificationResults(result.title) && result.count > 0"
-                  class="resInfoWrapper resInfoWrapperLine">
-                <p>{{ result.title }}</p>
-                <p>{{ result.count }}</p>
-                <p>{{ result.percent + '%' }}</p>
-              </li>
-            </template>
-            <li class="resInfoWrapper mt1 mb2">
-              <p>Total</p>
-              <p>{{ wbcTotal }}</p>
-              <p>100%</p>
-            </li>
 
-            <template v-for="result in wbcInfoAfter" :key="result.title">
-              <li v-if="showClassificationNonWbcResults(result.title) && result.count > 0"
-                  class="resInfoWrapper resInfoWrapperLine">
-                <p>{{ result.title }}</p>
-                <p>{{ result.count }}</p>
-                <p>-</p>
-              </li>
-            </template>
-          </div>
-        </li>
-      </ul>
-    </div>
   </div>
 </template>
 
@@ -214,23 +190,6 @@ const getStringArrayBySiteCd = (siteCd, testType) => {
   // testType에 따라 제외할 부분 정의
   return (testType === '01' || testType === '04') ? arraysForSiteCd.includesStr : arraysForSiteCd.includesStr2;
 };
-
-const formatDateString = (dateString) => {
-  const momentObj = moment(dateString, 'YYYYMMDDHHmmssSSSSS');
-  return momentObj.format('YYYY-MM-DD HH:mm:ss');
-}
-
-const showClassificationResults = (classificationResult) => {
-  return (
-      classificationResult &&
-      classificationResult.length > 0 &&
-      !nonWbcTitles.includes(classificationResult)
-  );
-};
-
-const showClassificationNonWbcResults = (classificationResult) => {
-  return (classificationResult && classificationResult.length > 0 && nonWbcTitles.includes(classificationResult))
-}
 
 
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;

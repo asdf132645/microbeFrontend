@@ -49,10 +49,9 @@ const getEngineVersion = () => {
     { key: 'DeepNet Version', name: deepNetVersion.value },
     { key: 'Web Frontend Version', name: window.WEB_FRONTEND_VERSION as string},
     { key: 'Web Backend Version', name: window.WEB_BACKEND_VERSION as string},
-    { key: 'PB Version', name: window.PB_VERSION as string}
+    { key: 'MICROBE Version', name: window.MICROBE_VERSION as string}
   ];
 
-  console.log(isProjectBm.value)
   // Engine Versions
   if (isProjectBm.value) {
 
@@ -62,9 +61,9 @@ const getEngineVersion = () => {
     ]
   } else {
     engineVersionArr.value = [
-      { key: 'PB SEG Version', name: pbSegEngineVersion.value },
-      { key: 'PB WBC Version', name: pbWbcEngineVersion.value },
-      { key: 'PB RBC Version', name: pbRbcEngineVersion.value },
+      { key: 'MICROBE SEG Version', name: pbSegEngineVersion.value },
+      { key: 'MICROBE WBC Version', name: pbWbcEngineVersion.value },
+      { key: 'MICROBE RBC Version', name: pbRbcEngineVersion.value },
     ]
   }
 }

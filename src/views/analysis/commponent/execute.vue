@@ -1,9 +1,6 @@
 <template>
   <div class="execute">
     <div class='startDiv'>
-      <select v-model="analysisType" :disabled="isRunningState" @change="sendSearchCardCount">
-        <option v-for="option in testTypeArr" :key="option.value" :value="option.value">{{ option.text }}</option>
-      </select>
       <p class="startStopP" v-if="showStopBtn" @click="isInit === 'Y' && toggleStartStop('start')">
         <font-awesome-icon
             :icon="['fas', 'circle-play']"
@@ -18,11 +15,6 @@
     <div class="stopDiv">
       <select v-model="wbcCount" :disabled="isRunningState">
         <option v-for="option in countType" :key="option.value" :value="option.value">{{ option.text }}</option>
-      </select>
-      <select class="stopDivSelect" v-model="stitchCount" :disabled="isRunningState">
-        <option v-for="option in stitchCountOptions" :key="option.value" :value="option.value">
-          {{ option.text }}
-        </option>
       </select>
       <div class="initBtn" @click="sendInit" :class="{'isInitDisabled': isInit === 'Y'}">
         <font-awesome-icon :icon="['fas', 'rotate-right']" style="font-size: 0.9rem;"
@@ -200,18 +192,18 @@ const emitSocketData = async (type: string, payload: any) => {
   EventBus.publish('childEmitSocketData', payload);
 };
 
-const sendSearchCardCount = () => {
-  const reqDttm = getDateTimeStr(); // 현재 날짜와 시간을 가져오는 함수
-  const req = {
-    jobCmd: 'SEARCH_CARD_COUNT',
-    reqUserId: userId.value,
-    reqDttm: reqDttm,
-    testType: analysisType.value,
-  }
-  tcpReq().embedStatus.searchCardCount.reqUserId = userId.value;
-  tcpReq().embedStatus.searchCardCount.testType = analysisType.value;
-  EventBus.publish('childEmitSocketData', req);
-}
+// const sendSearchCardCount = () => {
+//   const reqDttm = getDateTimeStr(); // 현재 날짜와 시간을 가져오는 함수
+//   const req = {
+//     jobCmd: 'SEARCH_CARD_COUNT',
+//     reqUserId: userId.value,
+//     reqDttm: reqDttm,
+//     testType: analysisType.value,
+//   }
+//   tcpReq().embedStatus.searchCardCount.reqUserId = userId.value;
+//   tcpReq().embedStatus.searchCardCount.testType = analysisType.value;
+//   EventBus.publish('childEmitSocketData', req);
+// }
 
 const toggleStartStop = (action: 'start' | 'stop') => {
   if (action === 'start') {
