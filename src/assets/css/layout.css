@@ -2111,7 +2111,7 @@ ul.cellImgBox {
 .red {
     color: #b00505;
 }
-.wbcClassScroll {
+.moClassScroll {
     max-height: 63vh;
     overflow-x: auto;
 }
