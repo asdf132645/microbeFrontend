@@ -1,12 +1,5 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
 import {bmTestType, testType} from "@/common/defines/constFile/dataBase";
-interface CommonCode {
-    grpCd: string;
-    cd: string;
-    cdNm: string; // Add cdNm property to the CommonCode interface
-}
-
-
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
 

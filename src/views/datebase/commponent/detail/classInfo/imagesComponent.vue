@@ -50,8 +50,6 @@ import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue"
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfo.vue";
 import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
-
-const selectedTitle = ref('');
 const wbcInfo = ref<any>(null);
 
 const selectItems = ref<any>(null);
@@ -59,18 +57,12 @@ const store = useStore();
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
-
 const iaRootPath = ref<any>(store.state.commonModule.iaRootPath);
 const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId);
-
-
-const imgSet = ref(false);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
-
 const instance = getCurrentInstance();
 const projectType = ref<any>('bm');
 
-const showSize = ref(false);
 
 const isNext = ref(false);
 const classCompareShow = ref(false);
@@ -112,18 +104,6 @@ const nextPage = () => {
 const isNextFalse = () => {
   isNext.value = false;
 }
-
-const handleClickOutside = (event: any) => {
-  // 클릭 이벤트의 대상이 imgSet이 아닌지 확인
-  if (!event.target.closest('.imgSetWrap')) {
-    imgSet.value = false;
-    selectedTitle.value = '';
-  }
-
-  if (!event.target.closest('.sizeContainer, .sizeButton')) {
-    showSize.value = false;
-  }
-};
 
 watch(userModuleDataGet.value, (newUserId, oldUserId) => {
   userId.value = newUserId.id;

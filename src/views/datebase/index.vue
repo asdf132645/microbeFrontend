@@ -6,21 +6,21 @@
 
   <div>
     <h3 class="titleH3">
-      Classification List
-      <button @click="classListToggleEvent" class="classificationListBtn">
-        <font-awesome-icon :icon="['fas', 'list-check']"/>
-      </button>
+<!--      Classification List-->
+<!--      <button @click="classListToggleEvent" class="classificationListBtn">-->
+<!--        <font-awesome-icon :icon="['fas', 'list-check']"/>-->
+<!--      </button>-->
     </h3>
     <div class='listBoxTable'>
       <div class="filterListDiv">
         <div>
-          <select v-model="searchType" class="searchSelect">
-            <option value="barcodeNo">Barcode No</option>
-            <option value="patientId">Patient ID</option>
-            <option value="patientNm">Patient Name</option>
-          </select>
-          <input type="text" v-model='searchText' class="searchInputBox" @keydown.enter="handleEnter" ref="barcodeInput"
-                 @input="handleInput"/>
+<!--          <select v-model="searchType" class="searchSelect">-->
+<!--            <option value="barcodeNo">Barcode No</option>-->
+<!--            <option value="patientId">Patient ID</option>-->
+<!--            <option value="patientNm">Patient Name</option>-->
+<!--          </select>-->
+<!--          <input type="text" v-model='searchText' class="searchInputBox" @keydown.enter="handleEnter" ref="barcodeInput"-->
+<!--                 @input="handleInput"/>-->
           <button class="searchClass" @click="dateRefresh">
             <font-awesome-icon :icon="['fas', 'calendar-days']"/>
             Refresh
