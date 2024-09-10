@@ -1,4 +1,3 @@
-
 .mt1 {
     margin-top: 10px;
 }
@@ -2858,6 +2857,12 @@ ul.wbcHotKeysItems li {
 
 ul.wbcHotKeysItems {
     margin-bottom: 30px;
+}
+
+.settingGramRangeContainer {
+    width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
 }
 
 .alignDiv {

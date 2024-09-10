@@ -345,7 +345,7 @@ const barcodeCopy = async () => {
   textarea.select();
   document.execCommand('copy');
   document.body.removeChild(textarea);
-  showSuccessAlert(messages.IDS_MSG_SUCCESS);
+  showSuccessAlert(messages.SUCCESS_ALERT);
 }
 
 const commitConfirmed = () => {
@@ -651,7 +651,7 @@ const cmcSeoulLisAndCbcDataGet = () => {
             lisBtnColor.value = true;
             const updatedRuningInfo = {...result.data, ...updatedItem}
             await resRunningItem(updatedRuningInfo, true);
-            showSuccessAlert(messages.IDS_MSG_SUCCESS);
+            showSuccessAlert(messages.SUCCESS_ALERT);
           } else {
             const index = json.root.ResultFlag.error2._text.indexOf('!');  // '!'의 위치를 찾음
             const result = index !== -1 ? json.root.ResultFlag.error2._text.substring(0, index + 1) : json.root.ResultFlag.error2._text;
@@ -732,7 +732,7 @@ const otherDataSend = async () => {
         }
         try {
           await createH17(data);
-          showSuccessAlert(messages.IDS_MSG_SUCCESS);
+          showSuccessAlert(messages.SUCCESS_ALERT);
         } catch (error: any) {
           showErrorAlert(error.response.data.message);
         }
@@ -898,7 +898,7 @@ const inhaDataSend = async (wbcInfoAfter: any, rbcInfoAfter: any, barcodeNo: any
     const response = await axios.post(`${apiBaseUrl}/cbc/executePostCurl`, body);
     const res = response.data[0];
     if (res?.returnCode === '0') {
-      showSuccessAlert(messages.IDS_MSG_SUCCESS);
+      showSuccessAlert(messages.SUCCESS_ALERT);
     } else {
       showSuccessAlert('return code : ' + res?.returnCode);
     }
@@ -990,7 +990,7 @@ const lisFileUrlCreate = async (data: any) => {
         const updatedRunningInfo = { ...result.data, ...updatedItem };
 
         await resRunningItem(updatedRunningInfo, true);
-        showSuccessAlert(messages.IDS_MSG_SUCCESS);
+        showSuccessAlert(messages.SUCCESS_ALERT);
 
         // 알림이 없을 경우 다음 페이지로 이동
         if (!showAlert.value) {
@@ -1019,7 +1019,7 @@ const sendLisMessage = async (data: any) => {
     let apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.131:3002';
     const result = await axios.post(`${apiBaseUrl}/cbc/executePostCurl`, body);
     if (result.data.errorCode === 'E000') {
-      showSuccessAlert(messages.IDS_MSG_SUCCESS);
+      showSuccessAlert(messages.SUCCESS_ALERT);
     } else {
       showErrorAlert(result.data.errorMessage);
     }

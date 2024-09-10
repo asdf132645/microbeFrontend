@@ -1,4 +1,3 @@
-export const realUrl = 'http://emr012.cmcnu.or.kr/cmcnu/.live'
 export const business_id = 'li'
 // 병원 코드
 export const instcd = '012'

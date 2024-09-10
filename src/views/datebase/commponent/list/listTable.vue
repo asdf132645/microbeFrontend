@@ -1,8 +1,8 @@
 <template>
-  <div class="loaderBackground" v-if="loadingDelay">
-    <div class="loader"></div>
-    <p class="loadingText">Loading...</p>
-  </div>
+<!--  <div class="loaderBackground" v-if="loadingDelay">-->
+<!--    <div class="loader"></div>-->
+<!--    <p class="loadingText">Loading...</p>-->
+<!--  </div>-->
   <table class='defaultTable mt2 dbDataTable' ref="scrollableDiv">
     <colgroup>
       <col width="3%"/>
@@ -34,7 +34,7 @@
       <th>Patient ID</th>
       <th>Patient Name</th>
       <th>Analyzed Date</th>
-      <th>Tact Time(S)</th>
+      <th>Tact Time(sec)</th>
       <th>Submit</th>
       <th>Submit Date</th>
       <th>Edit</th>

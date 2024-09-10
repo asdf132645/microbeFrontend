@@ -1,7 +1,7 @@
 <template>
   <div class="settingImagePrint">
     <button class="imagePrintBtn mb2" type="button" @click="toggleAllChecks">{{ allChecked ? 'Uncheck All' : 'Check All' }}</button>
-    <label v-for="item in imagePrintAndWbcArr" :key="item.id">
+    <label v-for="item in imagePrintArr" :key="item.id">
       <div>{{ item.fullNm }}</div>
       <div><input type="checkbox" :value="item.classId" v-model="selectedItems" /></div>
     </label>
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { imagePrintAndBm, imagePrintAndWbc, settingName } from "@/common/defines/constFile/settings";
+import { defaultImagePrint, settingName } from "@/common/defines/constFile/settings";
 import { ApiResponse } from "@/common/api/httpClient";
 import {
   createImagePrintApi,
@@ -47,7 +47,7 @@ import Confirm from "@/components/commonUi/Confirm.vue";
 
 const store = useStore();
 const router = useRouter();
-const imagePrintAndWbcArr = ref<any[]>([]);
+const imagePrintArr = ref<any[]>([]);
 const selectedItems = ref<string[]>([]);
 const saveHttpType = ref('');
 const showAlert = ref(false);
@@ -66,11 +66,11 @@ onMounted(async () => {
 });
 
 watch(() => selectedItems.value, async (newItem) => {
-  imagePrintAndWbcArr.value.forEach((item) => {
+  imagePrintArr.value.forEach((item) => {
     item.checked = newItem.includes(item.classId);
   });
 
-  await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(imagePrintAndWbcArr.value) });
+  await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(imagePrintArr.value) });
   if (settingType.value !== settingName.imagePrint) {
     await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.imagePrint });
   }
@@ -89,14 +89,14 @@ const saveImagePrint = async () => {
   try {
     let result: ApiResponse<void>;
 
-    imagePrintAndWbcArr.value.forEach((item) => {
+    imagePrintArr.value.forEach((item) => {
       item.checked = selectedItems.value.includes(item.classId);
     });
 
     if (saveHttpType.value === 'post') {
-      result = await createImagePrintApi({ imagePrintItems: imagePrintAndWbcArr.value });
+      result = await createImagePrintApi({ imagePrintItems: imagePrintArr.value });
     } else {
-      const updateResult = await updateImagePrintApi({ imagePrintItems: imagePrintAndWbcArr.value });
+      const updateResult = await updateImagePrintApi({ imagePrintItems: imagePrintArr.value });
 
       if (updateResult.data) {
         showSuccessAlert(messages.UPDATE_SUCCESSFULLY);
@@ -130,12 +130,12 @@ const getImagePrintData = async () => {
 
       if (!data || (data instanceof Array && data.length === 0)) {
         saveHttpType.value = 'post';
-        imagePrintAndWbcArr.value = window.PROJECT_TYPE ==='bm'? imagePrintAndBm : imagePrintAndWbc;
+        imagePrintArr.value = defaultImagePrint;
       } else {
         saveHttpType.value = 'put';
-        imagePrintAndWbcArr.value = data;
+        imagePrintArr.value = data;
         selectedItems.value = data.filter((item) => item.checked).map((item) => item.classId);
-        allChecked.value = selectedItems.value.length === imagePrintAndWbcArr.value.length ? true : false;
+        allChecked.value = selectedItems.value.length === imagePrintArr.value.length ? true : false;
       }
 
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -165,7 +165,7 @@ const hideAlert = () => {
 const toggleAllChecks = () => {
   allChecked.value = !allChecked.value;
   if (allChecked.value) {
-    selectedItems.value = imagePrintAndWbcArr.value.map(item => item.classId);
+    selectedItems.value = imagePrintArr.value.map(item => item.classId);
   } else {
     selectedItems.value = [];
   }

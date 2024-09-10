@@ -31,14 +31,13 @@
 
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
-import {defaultCbcList, defaultCbcList_0011, settingName} from "@/common/defines/constFile/settings";
+import {defaultCbcList, settingName} from "@/common/defines/constFile/settings";
 import { ApiResponse } from "@/common/api/httpClient";
 import { createCbcCodeRbcApi, getCbcCodeRbcApi, updateCbcCodeRbcApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {cbcCodeItem} from "@/common/api/service/setting/dto/lisCodeDto";
 import {messages} from '@/common/defines/constFile/constantMessageText';
 import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
-import {hospitalSiteCd} from "@/common/siteCd/siteCd";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
@@ -120,13 +119,7 @@ const getImagePrintData = async () => {
 
       if (!data || (data instanceof Array && data.length === 0)) {
         saveHttpType.value = 'post';
-
-        const hospitalName = hospitalSiteCd.filter(hospitalObj => hospitalObj.siteCd === siteCd.value)[0].hospitalNm;
-        if (hospitalName === '인하대병원') {
-          cbcCodeArr.value = defaultCbcList_0011;
-        } else {
-          cbcCodeArr.value = defaultCbcList;
-        }
+        cbcCodeArr.value = defaultCbcList;
 
       } else {
         saveHttpType.value = 'put';

@@ -74,69 +74,17 @@ export const apiConstants = {
                 requiresToken: false,
             }
         },
-        rbcDegree: {
-            rbcDegreeAdd: {
-                endpoint: 'rbcDegree/rbcDegreeAdd',
-                requiresToken: false,
-            },
-            rbcDegree: {
-                endpoint: 'rbcDegree',
-                requiresToken: false,
-            }
-        },
-        wbcCustomClass: {
+        gramRange: {
             create: {
-                endpoint: 'wbcCustomClass/create',
+                endpoint: 'gramRange/create',
                 requiresToken: false,
             },
             update: {
-                endpoint: 'wbcCustomClass/update',
+                endpoint: 'gramRange/update',
                 requiresToken: false,
             },
             get:{
-                endpoint: 'wbcCustomClass/get',
-                requiresToken: false,
-            }
-        },
-        wbcHotKeys: {
-            create: {
-                endpoint: 'wbcHotKeys/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'wbcHotKeys/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'wbcHotKeys/get',
-                requiresToken: false,
-            }
-        },
-        bfHotKeys: {
-            create: {
-                endpoint: 'bfHotKeys/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'bfHotKeys/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'bfHotKeys/get',
-                requiresToken: false,
-            }
-        },
-        normalRange: {
-            create: {
-                endpoint: 'normalRange/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'normalRange/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'normalRange/get',
+                endpoint: 'gramRange/get',
                 requiresToken: false,
             }
         },
@@ -151,34 +99,6 @@ export const apiConstants = {
             },
             get:{
                 endpoint: 'imagePrint/get',
-                requiresToken: false,
-            }
-        },
-        lisCode: {
-            create: {
-                endpoint: 'lisCode/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'lisCode/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'lisCode/get',
-                requiresToken: false,
-            }
-        },
-        lisCodeRbc: {
-            create: {
-                endpoint: 'lisCodeRbc/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'lisCodeRbc/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'lisCodeRbc/get',
                 requiresToken: false,
             }
         },
@@ -207,34 +127,6 @@ export const apiConstants = {
             },
             get:{
                 endpoint: 'filePathSet/get',
-                requiresToken: false,
-            }
-        },
-        runCount: {
-            create: {
-                endpoint: 'runCount/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'runCount/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'runCount/get',
-                requiresToken: false,
-            }
-        },
-        minCount: {
-            create: {
-                endpoint: 'minCount/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'minCount/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'minCount/get',
                 requiresToken: false,
             }
         },
@@ -297,20 +189,6 @@ export const apiConstants = {
         folders: {
             get:{
                 endpoint:'folders',
-                requiresToken: false,
-            }
-        },
-        classOrder: {
-            create: {
-                endpoint: 'classOrders/create',
-                requiresToken: false,
-            },
-            update: {
-                endpoint: 'classOrders/update',
-                requiresToken: false,
-            },
-            get:{
-                endpoint: 'classOrders/get',
                 requiresToken: false,
             }
         },
