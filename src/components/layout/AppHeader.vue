@@ -21,7 +21,7 @@
         </router-link>
 
         <router-link to="/dataBase"
-                     :class='{ "leftActive": isActive("/dataBase") || isActive("/databaseDetail") || isActive("/databaseRbc") || isActive("/report") || isActive("/databaseWhole") }'>
+                     :class='{ "leftActive": isActive("/dataBase") || isActive("/imagesComponent?pageType=LP") || isActive("/imagesComponent?pageType=HP") || isActive("/databaseRbc") || isActive("/report") || isActive("/databaseWhole") }'>
           <font-awesome-icon :icon="['fas', 'server']"
                              style="font-size: 1rem;"
           />
@@ -367,7 +367,7 @@ const hideAlert = () => {
 };
 
 const isActive = (path: string) => {
-  return route.path === path;
+  return route.fullPath === path;
 };
 
 const logout = () => {

@@ -6,10 +6,8 @@ import loginView from '@/views/login/index.vue';
 import setting from '@/views/setting/index.vue'
 import Database from '@/views/datebase/index.vue';
 import DatabaseRbc from '@/views/datebase/commponent/detail/rbc/listDetailRbc.vue';
-import DatabaseWbc from '@/views/datebase/commponent/detail/wbc/listDetailWbc.vue';
 import Report from '@/views/datebase/commponent/detail/report/report.vue';
-import databaseDetail from '@/views/datebase/commponent/detail/classInfo/listDetail.vue';
-import DatabaseWhole from '@/views/datebase/commponent/detail/databaseWhole/index.vue';
+import imagesComponent from '@/views/datebase/commponent/detail/classInfo/imagesComponent.vue';
 
 import {useStore} from "vuex";
 import {computed} from "vue";
@@ -48,14 +46,9 @@ const router = createRouter({
             component: Database,
         },
         {
-            path: '/databaseDetail',
-            name: 'databaseDetail',
-            component: databaseDetail,
-        },
-        {
-            path: '/databaseWhole',
-            name: 'databaseWhole',
-            component: DatabaseWhole,
+            path: '/imagesComponent',
+            name: 'imagesComponent',
+            component: imagesComponent,
         },
         {
             path: '/databaseRbc',

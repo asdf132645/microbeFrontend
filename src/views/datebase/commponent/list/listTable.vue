@@ -517,7 +517,7 @@ const rowDbClick = async (item) => {
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: item.id});
   await store.dispatch('commonModule/setCommonInfo', {clonedRbcInfo: item.rbcInfo.rbcClass});
   await getIpAddress(item);
-  await router.push('/databaseDetail');
+  await router.push('/imagesComponent?pageType=LP');
 
 }
 

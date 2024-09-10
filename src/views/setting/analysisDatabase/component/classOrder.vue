@@ -1,5 +1,5 @@
 <template>
-  <div class="wbcClassScroll">
+  <div class="moClassScroll">
     <h1 class="classTitle">Class</h1>
     <div
         v-for="(item, idx) in wbcInfoChangeVal"

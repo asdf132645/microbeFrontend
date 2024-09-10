@@ -2,28 +2,18 @@
   <div class="wbcMenu">
     <ul>
 
-      <template v-if="['bm', 'pb'].includes(projectType)">
-        <li
-            :class="{ onRight: isActive(projectType === 'bm' ? '/databaseWhole' : '/databaseRbc') }"
-            @click="pageGo(projectType === 'bm' ? '/databaseWhole' : '/databaseRbc')"
-            v-if="projectType !== 'pb' || (testType === '04' && projectType === 'pb')"
-        >
-          <p class="menuIco">
-            <font-awesome-icon :icon="['fas', 'virus']"/>
-          </p>
-          <p>{{ projectType === 'bm' ? 'WHOLE' : 'RBC' }}</p>
-        </li>
-        <li :class='{ "onRight": isActive("/databaseDetail") }' @click="pageGo('/databaseDetail')">
+      <template v-if="true">
+        <li :class='{ "onRight": isActive("/imagesComponent?pageType=LP") }' @click="pageGo('/imagesComponent?pageType=LP')">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'disease']"/>
           </p>
-          <p>{{ projectType === 'bm' ? 'BM CELL' : 'WBC' }}</p>
+          <p>LP Image</p>
         </li>
-        <li v-if="!isLoading" :class='{ "onRight": isActive("/report") }' @click="pageGo('/report')">
+        <li v-if="!isLoading" :class='{ "onRight": isActive("/imagesComponent?pageType=HP") }' @click="pageGo('/imagesComponent?pageType=HP')">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'clipboard']"/>
           </p>
-          <p>REPORT</p>
+          <p>HP Image</p>
         </li>
       </template>
 
@@ -286,7 +276,7 @@ const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
 
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(selectItemsNewVal.id)});
   if ((projectType.value === 'pb' && selectItems.value?.testType === '01' && isActive("/databaseRbc")) || (!keepPage.value || keepPage.value === "false")) {
-    pageGo('/databaseDetail');
+    pageGo('/imagesComponent');
   }
   emits('refreshClass', selectItemsNewVal);
   pageMoveDeleteStop.value = true;
@@ -294,7 +284,8 @@ const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
 };
 
 const isActive = (path: string) => {
-  return route.path === path;
+  console.log(route)
+  return route.fullPath === path;
 };
 
 const lisCbcClick = () => {
