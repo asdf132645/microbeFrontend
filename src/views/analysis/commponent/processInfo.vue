@@ -43,8 +43,6 @@ const siteCd = computed(() => store.state.commonModule.siteCd);
 // processInfoItem 초기화
 const processInfoItem = ref<any>({});
 const prevOilCount = ref<string | null>(null);
-const instance = getCurrentInstance();
-const projectBm = ref(false);
 const currentCardCount = ref('');
 const currentCardName = ref('');
 
@@ -62,7 +60,6 @@ watch([embeddedStatusJobCmd.value], async (newVal) => {
 
 onMounted(() => {
   prevOilCount.value = embeddedStatusJobCmd.value[0]?.sysInfo.oilCount;
-  projectBm.value = window.PROJECT_TYPE === 'bm';
 });
 
 watch(

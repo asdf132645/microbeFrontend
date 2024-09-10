@@ -1,5 +1,4 @@
 export const checkPbNormalCell = (wbcInfo: any, norMalRange: any) => {
-    // const norMalRange = this.$store.getters.getWbcNormalRange;
     let totalCount = 0;
     let neutrophilCount = 0;
     const resultObj: any = {

@@ -1,18 +1,10 @@
 import { settingName } from "@/common/defines/constFile/settings";
 import {
     putCellImgApi,
-    putOrderClassApi,
-    putRbcDegreeApi,
-    updateBfHotKeysApi,
     updateCbcCodeRbcApi,
     updateFilePathSetApi,
     updateImagePrintApi,
-    updateLisCodeRbcApi,
-    updateLisCodeWbcApi, updateMinCountApi,
-    updateNormalRangeApi,
-    updateRunInfoApi,
-    updateWbcCustomClassApi,
-    updateWbcHotKeysApi
+    updateGramRangeApi,
 } from "@/common/api/service/setting/settingApi";
 import store from "@/store/index";
 
@@ -42,8 +34,6 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
                     sessionStorage.setItem('edgeShotType', String(data?.edgeShotType));
                     sessionStorage.setItem('iaRootPath', data?.iaRootPath);
                     sessionStorage.setItem('keepPage', String(data?.keepPage));
-                    const keepPageType = window.PROJECT_TYPE === 'pb' ? 'keepPage': 'bmKeepPage';
-                    sessionStorage.setItem(keepPageType, String(data?.keepPage));
                     await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
                 }
             } catch (e) {
@@ -51,74 +41,9 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             }
             break;
 
-        case settingName.rbcDegree:
+        case settingName.gramRange:
             try {
-                const rbcDegreeList: any = [];
-                settingUpdatingData.forEach((category: any) => {
-                    category.classInfo.forEach((classItem: any) => {
-                        rbcDegreeList.push({
-                            categoryId: category.categoryId,
-                            categoryNm: category.categoryNm,
-                            classId: classItem.classId,
-                            classNm: classItem.classNm,
-                            degree1: classItem.degree1,
-                            degree2: classItem.degree2,
-                            degree3: classItem.degree3,
-                        });
-                    });
-                });
-                await putRbcDegreeApi(rbcDegreeList);
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.wbcRunningCount:
-            try {
-                await updateRunInfoApi({ wbcRunCountItems: settingUpdatingData });
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.wbcCustomClass:
-            try {
-                await updateWbcCustomClassApi({ classArr: settingUpdatingData });
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.wbcHotKeys:
-            try {
-                await updateWbcHotKeysApi({ wbcHotKeysItems: settingUpdatingData });
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.bfHotKeys:
-            try {
-                await updateBfHotKeysApi({ bfHotKeysItems: settingUpdatingData });
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.normalRange:
-            try {
-                await updateNormalRangeApi({ normalRangeItems: settingUpdatingData });
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-
-        case settingName.classOrder:
-            for (const index in settingUpdatingData) {
-                settingUpdatingData[index].orderIdx = index;
-            }
-            try {
-                await putOrderClassApi(settingUpdatingData);
+                await updateGramRangeApi({ gramRangeItems: settingUpdatingData });
             } catch (e) {
                 console.log(e);
             }
@@ -130,12 +55,6 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             } catch (e) {
                 console.log(e);
             }
-            break;
-
-        case settingName.lisCode:
-            await updateLisCodeWbcApi({ lisCodeItems: settingUpdatingData.lisCodeWbcArr });
-            await updateLisCodeRbcApi({ lisCodeItems: settingUpdatingData.lisCodeRbcArr });
-            await updateMinCountApi({ minCountItems: settingUpdatingData.minCountArr });
             break;
 
         case settingName.cbcCode:

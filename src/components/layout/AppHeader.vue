@@ -470,7 +470,7 @@ const onReset = () => {
     payload: settings
   });
 
-  showSuccessAlert(messages.IDS_MSG_SUCCESS);
+  showSuccessAlert(messages.SUCCESS_ALERT);
 }
 
 const getPercent = () => {

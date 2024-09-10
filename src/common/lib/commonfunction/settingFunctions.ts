@@ -1,34 +1,17 @@
-import {reactive, ref} from 'vue';
+import { ref } from 'vue';
 import {
     getCellImgApi,
     createCellImgApi,
-    createOrderClassApi,
-    getOrderClassApi,
-    createNormalRangeApi,
-    getNormalRangeApi,
-    createRbcDegreeApi,
-    getRbcDegreeApi,
+    createGramRangeApi,
+    getGramRangeApi,
     getCbcCodeRbcApi,
     createCbcCodeRbcApi,
-    createLisCodeWbcApi,
-    createLisCodeRbcApi,
-    getLisCodeWbcApi, getLisCodeRbcApi
 } from '@/common/api/service/setting/settingApi';
-import {
-    defaultCbcList,
-    defaultRbcDegree,
-    lisCodeRbcOption,
-    lisCodeWbcOption,
-    normalRange,
-    rbcClassList
-} from "@/common/defines/constFile/settings";
+import { defaultCbcList, defaultGramRange } from "@/common/defines/constFile/settings";
 
-const rbcClassListArr = reactive<any>({value: []}); // reactive로 변경
-
-const projectType = window.PROJECT_TYPE === 'bm';
 const defaultCellImgData = {
-    testTypeCd: projectType ? '02' : '01',
-    diffCellAnalyzingCount: projectType ? '500' : '100',
+    testTypeCd: '01',
+    diffCellAnalyzingCount: '20',
     diffWbcPositionMargin: '0',
     diffRbcPositionMargin: '0',
     diffPltPositionMargin: '0',
@@ -36,7 +19,7 @@ const defaultCellImgData = {
     stitchCount: '1',
     edgeShotType: '0',
     bfCellAnalyzingCount: '100',
-    iaRootPath: projectType ? 'D:\\BMIA_proc' : 'D:\\PBIA_proc',
+    iaRootPath: 'D:\\MOIA_proc',
     isNsNbIntegration: false,
     isAlarm: false,
     alarmCount: '5',
@@ -56,18 +39,6 @@ const defaultCellImgData = {
  * createRequest: create 요청 함수
  * */
 const settingsConstant = ref<any>({
-    'lisCodeWbc': {
-        'sendingForm': 'lisCodeItems',
-        'defaultItem': lisCodeWbcOption,
-        'getRequest': getLisCodeWbcApi,
-        'createRequest': createLisCodeWbcApi,
-    },
-    'lisCodeRbc': {
-        'sendingForm': 'lisCodeItems',
-        'defaultItem': lisCodeRbcOption,
-        'getRequest': getLisCodeRbcApi,
-        'createRequest': createLisCodeRbcApi,
-    },
     'cbcCode': {
         'sendingForm': 'cbcCodeItems',
         'defaultItem': defaultCbcList,
@@ -78,31 +49,19 @@ const settingsConstant = ref<any>({
         'getRequest': getCellImgApi,
         'createRequest': createCellImgApi,
     },
-    'normalRange': {
-        'sendingForm': 'normalRangeItems',
-        'defaultItem': normalRange,
-        'getRequest': getNormalRangeApi,
-        'createRequest': createNormalRangeApi,
-    },
-    'orderClass': {
-        'getRequest': getOrderClassApi,
-        'createRequest': createOrderClassApi,
-    },
-    'rbcDegree': {
-        'getRequest': getRbcDegreeApi,
-        'createRequest': createRbcDegreeApi,
+    'gramRange': {
+        'sendingForm': 'gramRangeItems',
+        'defaultItem': defaultGramRange,
+        'getRequest': getGramRangeApi,
+        'createRequest': createGramRangeApi,
     },
 })
 
 /** 로그인 시 Setting 값 설정 함수 */
 export const initializeAllSettings = async () => {
     await firstGetSettings('cellImage');
-    await firstGetSettings('orderClass');
-    await firstGetSettings('rbcDegree');
-    await firstGetSettings('lisCodeWbc')
-    await firstGetSettings('lisCodeRbc')
     await firstGetSettings('cbcCode')
-    await firstGetSettings('normalRange')
+    await firstGetSettings('gramRange')
 }
 
 const firstGetSettings = async (initializeType: string) => {
@@ -156,24 +115,6 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
                 autoBackUpStartDate: null,
             };
             return cellImgSet;
-        case 'rbcDegree':
-            await combindDegree();
-            const rbcDegreeList: any = [];
-
-            rbcClassListArr.value.forEach((category: any) => {
-                category.classInfo.forEach((classItem: any) => {
-                    rbcDegreeList.push({
-                        categoryId: category.categoryId,
-                        categoryNm: category.categoryNm,
-                        classId: classItem.classId,
-                        classNm: classItem.classNm,
-                        degree1: classItem.degree1,
-                        degree2: classItem.degree2,
-                        degree3: classItem.degree3,
-                    });
-                });
-            });
-            return rbcDegreeList;
 
         default:
             return null;
@@ -195,26 +136,4 @@ const afterResponse = (initializeType: string) => {
         default:
             break;
     }
-}
-
-const combindDegree = async () => {
-    rbcClassListArr.value = rbcClassList.rbcClassList.map((category: any) => {
-        return {
-            ...category,
-            classInfo: category.classInfo.map((classItem: any) => {
-                const defaultDegree = defaultRbcDegree.find(
-                    (defaultItem) =>
-                        defaultItem.categoryId === category.categoryId &&
-                        defaultItem.classId === classItem.classId
-                );
-
-                return {
-                    ...classItem,
-                    degree1: defaultDegree?.degree1 || 0,
-                    degree2: defaultDegree?.degree2 || 0,
-                    degree3: defaultDegree?.degree3 || 0,
-                };
-            }),
-        };
-    });
 }

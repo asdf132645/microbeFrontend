@@ -96,7 +96,6 @@ let totalElapsedTimeCount = ref(0);
 let elapsedTimeCount = ref(0);
 const isBlinking = ref(false);
 let interval: any = ref(null);
-const isBm = ref(false);
 const fixEqStatCd = ref(false);
 const microbeVersion = ref<any>('100a');
 const iCasExist = ref<any>('0');
@@ -234,7 +233,6 @@ onMounted(() => {
     item.slotState = '0';
   });
 
-  isBm.value = window.PROJECT_TYPE === 'bm';
 });
 
 

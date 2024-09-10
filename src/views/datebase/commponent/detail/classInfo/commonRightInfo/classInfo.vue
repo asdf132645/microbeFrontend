@@ -149,7 +149,7 @@ const barcodeCopy = async () => {
   textarea.select();
   document.execCommand('copy');
   document.body.removeChild(textarea);
-  showSuccessAlert(messages.IDS_MSG_SUCCESS);
+  showSuccessAlert(messages.SUCCESS_ALERT);
 }
 
 const commitConfirmed = () => {

@@ -43,7 +43,6 @@ export interface CommonState {
     resetRbcArr: boolean;
     selectedSampleId: string;
     classInfoArr: any[];
-    rbcReDataCheck: boolean;
     appAlertOpen: boolean;
     dataBasePageReset: boolean;
     resetAnalyzing: boolean;
@@ -109,7 +108,6 @@ interface CommonModule {
         setResetRbcArr: (state: CommonState, value: boolean) => void;
         setSelectedSampleId: (state: CommonState, value: string) => void;
         setClassInfoArr: (state: CommonState, value: any[]) => void;
-        setRbcReDataCheck: (state: CommonState, value: boolean) => void;
         setAppAlertOpen: (state: CommonState, value: boolean) => void;
         setDataBasePageReset: (state: CommonState, value: boolean) => void;
         setResetAnalyzing: (state: CommonState, value: boolean) => void;
@@ -176,7 +174,6 @@ export const commonModule: CommonModule = {
         resetRbcArr: false,
         selectedSampleId: '',
         classInfoArr:[],
-        rbcReDataCheck: false,
         appAlertOpen: false,
         dataBasePageReset: false,
         resetAnalyzing: false,
@@ -327,9 +324,6 @@ export const commonModule: CommonModule = {
         // classInfoArr
         setClassInfoArr(state: CommonState, value: any[]): void {
             state.classInfoArr = value;
-        },
-        setRbcReDataCheck(state: CommonState, value: boolean): void {
-            state.rbcReDataCheck = value;
         },
         setAppAlertOpen(state: CommonState, value: boolean): void {
             state.appAlertOpen = value;
@@ -514,9 +508,6 @@ export const commonModule: CommonModule = {
             }
             if(payload.hasOwnProperty('classInfoArr')) {
                 commit('setClassInfoArr', payload.classInfoArr)
-            }
-            if (payload.hasOwnProperty('rbcReDataCheck')){
-                commit('setRbcReDataCheck', payload.rbcReDataCheck)
             }
             if(payload.hasOwnProperty('appAlertOpen')){
                 commit('setAppAlertOpen', payload.appAlertOpen);

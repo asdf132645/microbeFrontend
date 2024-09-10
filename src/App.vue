@@ -3,7 +3,7 @@
   <div>
     <AppHeader
         v-if="router.currentRoute.value.path !== '/user/login' && router.currentRoute.value.path !== '/user/join'"/>
-    <main class="content" :class="{ bmComponent: projectBm }">
+    <main class="content">
       <router-view/>
       <Analysis @classAppUpdateLast="classAppUpdateLast"
                 @rbcAppUpdate="rbcAppUpdate"
@@ -44,10 +44,7 @@ import {useStore} from "vuex";
 import {sysInfoStore, runningInfoStore} from '@/common/lib/storeSetData/common';
 import {tcpReq} from '@/common/tcpRequest/tcpReq';
 import {messages} from '@/common/defines/constFile/constantMessageText';
-import {
-  getCellImgApi,
-  getNormalRangeApi,
-} from "@/common/api/service/setting/settingApi";
+import { getCellImgApi, getGramRangeApi } from "@/common/api/service/setting/settingApi";
 import {checkPbNormalCell} from "@/common/lib/utils/changeData";
 import {ApiResponse} from "@/common/api/httpClient";
 import {createRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
@@ -55,11 +52,9 @@ import Alert from "@/components/commonUi/Alert.vue";
 import {useRouter} from "vue-router";
 import {createDeviceInfoApi, getDeviceInfoApi, getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import EventBus from "@/eventBus/eventBus";
-import {basicBmClassList, basicWbcArr} from "@/common/defines/constFile/classArr";
+import { basicWbcArr } from "@/common/defines/constFile/classArr";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
-import {formatDate} from "@/common/lib/utils/dateUtils";
-import {inhaPercentChange} from "@/common/lib/commonfunction/classFicationPercent";
 import axios from "axios";
 
 const showAlert = ref(false);
@@ -87,7 +82,6 @@ const runningArr: any = ref<any>([]);
 const classArr = ref<any>([]);
 const rbcArr = ref<any>([]);
 const viewerCheckApp = ref('');
-const projectBm = ref(false);
 const parsedDataProps = ref<any>({});
 const startStatus = ref(false);
 const microbeVersion = ref<any>('100a');
@@ -231,9 +225,6 @@ const leave = async (event: any) => {
   }
 };
 
-onBeforeMount(() => {
-  projectBm.value = window.PROJECT_TYPE === 'bm';
-})
 const isIpMatching = (url: any, ip: any) => {
   // URL에서 IP 주소 추출
   const urlPattern = /http:\/\/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+):/;
@@ -261,7 +252,7 @@ onMounted(async () => {
 
   if (!commonDataGet.value.isRunningState) {
     if (userId.value && userId.value !== '') {
-      await getNormalRange();
+      await getGramRange();
     }
     if (!commonDataGet.value.firstLoading && ipMatches.value && window.FORCE_VIEWER === 'main') {
       countingInterStartval = setInterval(async () => {
@@ -319,11 +310,6 @@ async function socketData(data: any) {
 
     // 시스템정보 스토어에 담기
     switch (parseDataWarp.jobCmd) {
-      case 'RBC_RE_CLASSIFICATION':
-        await store.dispatch('commonModule/setCommonInfo', {rbcReDataClass: true});
-        await store.dispatch('commonModule/setCommonInfo', {rbcReData: true});
-        await store.dispatch('commonModule/setCommonInfo', {rbcReDataCheck: false});
-        break;
       case 'SYSINFO':
         const res = await sysInfoStore(parseDataWarp);
         if (res !== null) {
@@ -403,7 +389,7 @@ async function socketData(data: any) {
         break;
       case 'ERROR_CLEAR':
         console.log('err')
-        await showSuccessAlert(messages.IDS_MSG_FAILED);
+        await showSuccessAlert(messages.FAILED_ALERT);
         break;
       case 'SEARCH_CARD_COUNT':
         break;
@@ -529,8 +515,8 @@ async function socketData(data: any) {
         }
         let wbcInfoAfter: any = [];
         let wbcInfoNewVal: any = [];
-        const getDefaultWbcInfo = () => !projectBm.value ? { wbcInfo: [basicWbcArr] } : { wbcInfo: [basicBmClassList] };
-        const getDefaultWbcInfoAfter = () => !projectBm.value ? [basicWbcArr] : [basicBmClassList];
+        const getDefaultWbcInfo = () => { wbcInfo: [basicWbcArr] };
+        const getDefaultWbcInfoAfter = () => [basicWbcArr];
         const updateWbcInfo = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfo() : newWbcInfo;
         const updateWbcInfoAfter = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfoAfter() : newWbcInfo?.wbcInfo[0];
 
@@ -574,13 +560,6 @@ async function socketData(data: any) {
           bf_lowPowerPath: completeSlot.bf_lowPowerPath,
           wbcInfo: wbcInfoNewVal,
           wbcInfoAfter: wbcInfoAfter,
-          rbcInfo: !projectBm.value ? {
-            pltCount: completeSlot.pltCount,
-            malariaCount: completeSlot.malariaCount,
-            maxRbcCount: completeSlot.maxRbcCount,
-            rbcClass: rbcArrElements[0].rbcInfo,
-          } : [],
-          rbcInfoAfter: !projectBm.value ? rbcArrElements[0].rbcInfo : [],
           bminfo: completeSlot.bminfo,
           cassetId: completeSlot.cassetId,
           isNormal: completeSlot.isNormal,
@@ -589,7 +568,6 @@ async function socketData(data: any) {
           submitUserId: '',
           isNsNbIntegration: isNsNbIntegrationLocal.value || '',
           wbcMemo: '',
-          rbcMemo: '',
         }
 
         await saveRunningInfo(newObj, slotId, lastCompleteIndex);
@@ -607,7 +585,6 @@ async function socketData(data: any) {
             wbcTotal += Number(wbcItem.count);
           }
         });
-        // console.log('wbcTotal : ' + wbcTotal);
 
         let maxItem: any = null;
         let percentTotal = 0;
@@ -616,8 +593,6 @@ async function socketData(data: any) {
         wbcInfo.forEach((wbcItem: any, index: any) => {
           let percent = Number(((Number(wbcItem.count) / wbcTotal) * 100).toFixed(0));
           let percentN2 = Number(((Number(wbcItem.count) / wbcTotal) * 100).toFixed(2));
-
-          // console.log(percentN2);
 
           // 특정 조건에 따라 퍼센트 조정
           if ((wbcItem.title === 'BL' || ['LA', 'IM', 'MB', 'AM'].includes(wbcItem.title)) &&
@@ -628,7 +603,6 @@ async function socketData(data: any) {
           }
 
           wbcItem.percent = percent;
-          // console.log(wbcItem.title + ':' + wbcItem.percent);
 
           // 제외할 타이틀이 아닌 경우 percentTotal 및 maxItem 갱신
           if (!excludedTitles.includes(wbcItem.title)) {
@@ -638,15 +612,9 @@ async function socketData(data: any) {
             }
           }
 
-          // console.log('maxItem : ' + (maxItem ? maxItem.title : 'null'));
-          // console.log(percentTotal);
-
           // 마지막 항목일 때 백분율 오차 보정
           if (maxItem !== null && (index + 1) === wbcInfo.length) {
-            // console.log(Number(maxItem.percent));
-            // console.log(100 - percentTotal);
             maxItem.percent = Number(maxItem.percent) + (100 - percentTotal);
-            // console.log(maxItem.percent);
           }
         });
 
@@ -676,7 +644,6 @@ async function socketData(data: any) {
     async function saveRunningInfo(runningInfo: any, slotId: any, last: any) {
       try {
         let result: ApiResponse<void>;
-        console.log('저장 전 runingInfoDtoItems', runningInfo);
         result = await createRunningApi({userId: Number(userId.value), runingInfoDtoItems: runningInfo});
 
         if (result) {
@@ -744,7 +711,6 @@ const runInfoPostWebSocket = async () => {
 
 const emitSocketData = async (payload: any) => {
   await store.dispatch('commonModule/setCommonInfo', {reqArr: payload});
-  await store.dispatch('commonModule/setCommonInfo', {rbcReDataCheck: true});
 };
 
 const sendSettingInfo = () => {
@@ -762,9 +728,9 @@ const sendSettingInfo = () => {
   store.dispatch('commonModule/setCommonInfo', {reqArr: req});
 }
 
-const getNormalRange = async () => {
+const getGramRange = async () => {
   try {
-    const result = await getNormalRangeApi();
+    const result = await getGramRangeApi();
     if (result) {
       if (result?.data) {
         const data = result.data;
@@ -807,8 +773,6 @@ const cellImgGet = async () => {
         sessionStorage.setItem('wbcPositionMargin', data?.diffWbcPositionMargin);
         sessionStorage.setItem('rbcPositionMargin', data?.diffRbcPositionMargin);
         sessionStorage.setItem('pltPositionMargin', data?.diffPltPositionMargin);
-        const keepPageType = window.PROJECT_TYPE === 'pb' ? 'keepPage' : 'bmKeepPage';
-        sessionStorage.setItem(keepPageType, String(data?.keepPage));
         sessionStorage.setItem('edgeShotType', String(data?.edgeShotType));
         sessionStorage.setItem('keepPage', String(data?.keepPage));
       }

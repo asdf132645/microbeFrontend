@@ -6,8 +6,6 @@
   </div>
   <div class="contentRight" v-show="props.isClass">
     <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild" />
-<!--    <rbcclassification @rbcUpdate="rbcUpdate" :parsedData="props.parsedData" v-if="!bmIsBoolen" class="contentRightChild"/>-->
-<!--    <wbcclassification @classInfoUpdate="classInfoUpdate" :parsedData="props.parsedData" :bmIsBoolen="bmIsBoolen" class="contentRightChild"/>-->
     <RealTimeProcess class="contentRightChild realtime"/>
     <div class="contentBottom">
       <FoundingCells :parsedData="props.parsedData" :pb100aCassette="pb100aCassette"/>
@@ -30,7 +28,6 @@ import RealTimeProcess from "@/views/analysis/commponent/realTimeProcess.vue";
 const emits = defineEmits();
 
 const store = useStore();
-const bmIsBoolen = ref(false);
 const props = defineProps(['parsedData','isClass', 'startStatus', 'pb100aCassette']);
 const initValData = ref(false);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
@@ -39,8 +36,6 @@ onBeforeMount(async () => {
   if (viewerCheck.value === 'viewer') {
     router.push('/database')
   }
-
-  bmIsBoolen.value = window.PROJECT_TYPE === 'bm' ? true : false;
 });
 
 

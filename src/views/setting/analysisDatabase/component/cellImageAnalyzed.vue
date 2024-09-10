@@ -13,222 +13,129 @@
     <div class="loaderForLogin"></div>
     <p class="loadingTextLogin">Loading...</p>
   </div>
-    <div class="settingCellImgAnalyzedContainer">
-        <table class="settingTable">
-        <tbody>
-        <tr v-if="viewerCheck !== 'viewer'">
-          <th>Analysis Type</th>
-          <td colspan="2">
-            <select v-model='testTypeCd'>
-              <option v-for="type in testTypeArr" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <!--Common analysis values-->
 
-        <tr v-if="viewerCheck !== 'viewer'">
-          <!-- WBC diff analysis values -->
-          <th rowspan="1" v-if="projectType === 'pb'">WBC Diff Analysis Values</th>
+  <div class="settingCellImgAnalyzedContainer">
+      <table class="settingTable">
+      <tbody>
+      <tr v-if="viewerCheck !== 'viewer'">
+        <th>Low Power Capture Count</th>
+        <td colspan="3">
+          <select v-model='lowPowerCaptureCount'>
+            <option v-for="type in lowPowerCaptureCountList" :key="type.value" :value="type.value">{{ type.text }}</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th :style="viewerCheck === 'viewer' && 'width: 214px;'">
+          IA Root Path
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_IA_ROOT_PATH_KO" />
+        </th>
+        <td colspan="2">
+          <select v-model='iaRootPath'>
+            <option v-for="type in drive" :key="type" :value="type">{{ type }}</option>
+          </select>
+        </td>
+      </tr>
+      <tr v-if="viewerCheck !== 'viewer'">
+        <th>
+          Alarm Timer (sec)
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_ALARM_TIME_KO" />
+        </th>
+        <td>
+          <font-awesome-icon
+              :icon="isAlarm ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
+              class="iconSize"
+              @click="toggleAlarm"
+          />
+        </td>
+        <td>
+          <input type="text" v-model='alarmCount' class="alarmInput" @input="filterNumbersOnly($event)">
+        </td>
+      </tr>
+      <tr v-if="viewerCheck !== 'viewer'">
+        <th>
+          Keep Page
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_KEEP_PAGE_KO" />
+        </th>
+        <td>
+          <font-awesome-icon
+              :icon="keepPage ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
+              class="iconSize"
+              @click="toggleKeepPage"
+          />
+        </td>
+      </tr>
+      </tbody>
+    </table>
 
-          <!-- BM diff analysis values -->
-          <th v-if="projectType === 'bm'">BM Diff Analysis Values</th>
-          <th>Cell Analyzing Count</th>
-          <td>
+    <table class="settingTable">
+      <colgroup>
+        <col width="90">
+        <col width="10">
+      </colgroup>
+      <tbody>
+      <tr>
+        <th>
+          Download Save Path
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_DOWNLOAD_SAVE_PATH_KO" />
+        </th>
 
-            <select v-model='diffCellAnalyzingCount'>
-              <option v-for="type in analysisVal" :key="type.value" :value="type.value">{{ type.text }}</option>
+        <td>
+          <div class="downloadSavePathContainer">
+            <select v-model='downloadRootPath' class="downloadPath">
+              <option v-for="type in backupDrive" :key="type" :value="type">{{ type }}</option>
             </select>
-          </td>
-        </tr>
-        <!--      PBS analysis values-->
-        <tr v-if="projectType === 'pb' && viewerCheck !== 'viewer'">
-          <th :rowspan="projectType === 'pb' && testTypeCd === '04' ? 3 : 2">PBS Analysis Values</th>
-          <th>
-            Cell Analyzing Count
-          </th>
-          <td>
-            <select v-model='pbsCellAnalyzingCount'>
-              <option v-for="type in AnalysisList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <tr v-if="viewerCheck !== 'viewer'">
-          <th v-if="projectType === 'bm'"></th>
-          <th>Stitch Count</th>
-          <td>
-            <select v-model='stitchCount'>
-              <option v-for="type in stitchCountList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <tr v-show="projectType === 'pb' && testTypeCd === '04' && viewerCheck !== 'viewer'">
-          <th>Edge Shot Type</th>
-          <td>
-            <select v-model='edgeShotType'>
-              <option v-for="type in edgeShotTypeList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <!--      BF analysis values-->
-        <tr v-if="projectType === 'pb' && viewerCheck !== 'viewer'">
-          <th>BF Analysis Values</th>
-          <th>Cell Analyzing Count</th>
-          <td>
-            <select v-model='bfCellAnalyzingCount'>
-              <option v-for="type in AnalysisList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-
-        <tr v-if="projectType === 'pb' && viewerCheck !== 'viewer'">
-          <th rowspan="3">Common</th>
-          <th>Wbc Position Margin</th>
-          <td>
-            <select v-model='wbcPositionMargin'>
-              <option v-for="type in WbcPositionMarginList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <tr v-if="projectType === 'pb' && viewerCheck !== 'viewer'">
-          <th>Rbc Position Margin</th>
-          <td>
-            <select v-model='rbcPositionMargin'>
-              <option v-for="type in PositionMarginList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <tr v-if="projectType === 'pb' && viewerCheck !== 'viewer'">
-          <th>Plt Position Margin</th>
-          <td>
-            <select v-model='pltPositionMargin'>
-              <option v-for="type in PositionMarginList" :key="type.value" :value="type.value">{{ type.text }}</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <th :style="viewerCheck === 'viewer' && 'width: 214px;'">
-            IA Root Path
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_IA_ROOT_PATH_KO" />
-          </th>
-          <td colspan="2">
-            <select v-model='iaRootPath'>
+            <font-awesome-icon :icon="['fas', 'folder-open']" @click="openSourceDrive" class="openDriveIcon" />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th title="Download data from start to end date">
+          Download
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_DOWNLOAD_KO" />
+        </th>
+        <td>
+          <div class="backupDatePickers">
+            <Datepicker v-model="backupStartDate"></Datepicker>
+            <Datepicker v-model="backupEndDate"></Datepicker>
+            <button class="backupBtn" @click="createBackup">Download</button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          Upload
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_UPLOAD_KO" />
+        </th>
+        <td colspan="2">
+          <div class="settingUploadContainer">
+            <select v-model='uploadRootPath' class="uploadSavePath">
               <option v-for="type in drive" :key="type" :value="type">{{ type }}</option>
             </select>
-          </td>
-        </tr>
-        <tr v-if="viewerCheck !== 'viewer'">
-          <th>
-            NS/NB Integration
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_NS_NB_INTEGRATION_KO" />
-          </th>
-          <td>
-            <font-awesome-icon
-                :icon="isNsNbIntegration ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
-                class="iconSize"
-                @click="toggleNsNbIntegration"
-            />
-          </td>
-        </tr>
-        <tr v-if="viewerCheck !== 'viewer'">
-          <th>
-            Alarm Timer (sec)
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_ALARM_TIME_KO" />
-          </th>
-          <td>
-            <font-awesome-icon
-                :icon="isAlarm ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
-                class="iconSize"
-                @click="toggleAlarm"
-            />
-          </td>
-          <td>
-            <input type="text" v-model='alarmCount' class="alarmInput" @input="filterNumbersOnly($event)">
-          </td>
-        </tr>
-        <tr v-if="viewerCheck !== 'viewer'">
-          <th>
-            Keep Page
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_KEEP_PAGE_KO" />
-          </th>
-          <td>
-            <font-awesome-icon
-                :icon="keepPage ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
-                class="iconSize"
-                @click="toggleKeepPage"
-            />
-          </td>
-        </tr>
-        </tbody>
-      </table>
-
-      <table class="settingTable auto">
-        <colgroup>
-          <col width="90">
-          <col width="10">
-        </colgroup>
-        <tbody>
-        <tr>
-          <th>
-            Download Save Path
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_DOWNLOAD_SAVE_PATH_KO" />
-          </th>
-
-          <td>
-            <div class="downloadSavePathContainer">
-              <select v-model='downloadRootPath' class="downloadPath">
-                <option v-for="type in backupDrive" :key="type" :value="type">{{ type }}</option>
-              </select>
-              <font-awesome-icon :icon="['fas', 'folder-open']" @click="openSourceDrive" class="openDriveIcon" />
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th title="Download data from start to end date">
-            Download
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_DOWNLOAD_KO" />
-          </th>
-          <td>
-            <div class="backupDatePickers">
-              <Datepicker v-model="backupStartDate"></Datepicker>
-              <Datepicker v-model="backupEndDate"></Datepicker>
-              <button class="backupBtn" @click="createBackup">Download</button>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>
-            Upload
-            <font-awesome-icon :icon="['fas', 'circle-info']" :title="messages.SETTING_INFO_UPLOAD_KO" />
-          </th>
-          <td colspan="2">
-            <div class="settingUploadContainer">
-              <select v-model='uploadRootPath' class="uploadSavePath">
-                <option v-for="type in drive" :key="type" :value="type">{{ type }}</option>
-              </select>
 
 <!--              <input type="file" ref="uploadFileInput" @change="handleUploadFileChange" style="display: none;" accept=".sql" />-->
-              <button class="uploadBtn" @click="handleSelectUploadFile">Upload</button>
-            </div>
-          </td>
-        </tr>
-        <!--      나중에 기능 추가 할 부분 자동 백업-->
-        <!--      <tr>-->
-        <!--        <th>Auto Backup</th>-->
-        <!--        <td>-->
-        <!--          <div class="autoDateBox">-->
-        <!--            <select v-model='autoBackUpMonth'>-->
-        <!--              <option v-for="month in autoDate" :key="month.value" :value="month.value">-->
-        <!--                {{ month.value }}-->
-        <!--              </option>-->
-        <!--            </select>-->
-        <!--            <span>Month</span>-->
-        <!--          </div>-->
-        <!--        </td>-->
-        <!--      </tr>-->
-        </tbody>
-      </table>
-      <button class="saveBtn mb2" type="button" @click='cellImgSet()'>Save</button>
-    </div>
+            <button class="uploadBtn" @click="handleSelectUploadFile">Upload</button>
+          </div>
+        </td>
+      </tr>
+      <!--      나중에 기능 추가 할 부분 자동 백업-->
+      <!--      <tr>-->
+      <!--        <th>Auto Backup</th>-->
+      <!--        <td>-->
+      <!--          <div class="autoDateBox">-->
+      <!--            <select v-model='autoBackUpMonth'>-->
+      <!--              <option v-for="month in autoDate" :key="month.value" :value="month.value">-->
+      <!--                {{ month.value }}-->
+      <!--              </option>-->
+      <!--            </select>-->
+      <!--            <span>Month</span>-->
+      <!--          </div>-->
+      <!--        </td>-->
+      <!--      </tr>-->
+      </tbody>
+    </table>
+    <button class="saveBtn mb2" type="button" @click='cellImgSet()'>Save</button>
+  </div>
 
 
   <!-- Upload 확인 모달 -->
@@ -327,16 +234,10 @@ import { createCellImgApi, getCellImgApi, getDrivesApi, putCellImgApi } from "@/
 import Datepicker from 'vue3-datepicker';
 
 import { computed, nextTick, onMounted, ref, watch, getCurrentInstance } from "vue";
-import {
-  AnalysisList,
-  PositionMarginList, stitchCountList,
-  testTypeList,
-  WbcPositionMarginList,
-  testBmTypeList, bmAnalysisList, settingName, edgeShotTypeList
-} from "@/common/defines/constFile/settings";
+import { AnalysisList, testTypeList, settingName, lowPowerCaptureCountList } from "@/common/defines/constFile/settings";
 import Alert from "@/components/commonUi/Alert.vue";
-import {useStore} from "vuex";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import { useStore } from "vuex";
+import { messages } from "@/common/defines/constFile/constantMessageText";
 import moment from "moment";
 import {
   backUpDateApi,
@@ -361,18 +262,11 @@ const showUploadModal = ref(false);
 const alertMessage = ref('');
 const analysisVal = ref<any>([]);
 const testTypeCd = ref('01');
-const diffCellAnalyzingCount = ref('100');
-const wbcPositionMargin = ref('0');
-const rbcPositionMargin = ref('0');
-const pltPositionMargin = ref('0');
-const pbsCellAnalyzingCount = ref('100');
+const lowPowerCaptureCount = ref(20);
 const stitchCount = ref('1');
-const edgeShotType = ref('0');
-const bfCellAnalyzingCount = ref('100');
-const iaRootPath = ref(window.PROJECT_TYPE === 'bm' ? 'D:\\BMIA_proc' : 'D:\\PBIA_proc');
-const downloadRootPath = ref(window.PROJECT_TYPE === 'bm' ? 'D:\\UIMD_BM_backup' : 'D:\\UIMD_PB_backup');
-const uploadRootPath = ref(window.PROJECT_TYPE === 'bm' ? 'D:\\BMIA_proc' : 'D:\\PBIA_proc');
-const isNsNbIntegration = ref(false);
+const iaRootPath = ref('D:\\MOIA_proc');
+const downloadRootPath = ref('D:\\UIMD_MO_backup');
+const uploadRootPath = ref('D:\\MOIA_proc');
 const isAlarm = ref(false);
 const alarmCount = ref('5');
 const keepPage = ref(false);
@@ -399,7 +293,6 @@ const drive = ref<any>([]);
 const backupDrive = ref<any>([]);
 const cellimgId = ref('');
 
-const projectType = ref('pb');
 const testTypeArr = ref<any>([]);
 const uploadSlotIdObj = ref({duplicated: [], nonDuplicated: []});
 const possibleUploadCount = computed(() => uploadSlotIdObj.value?.nonDuplicated && uploadSlotIdObj.value?.nonDuplicated.length);
@@ -428,31 +321,20 @@ const selectedUploadFile = ref('');
 
 onMounted(async () => {
   await nextTick();
-  testTypeCd.value = window.PROJECT_TYPE === 'bm' ? '02' : '01';
-  projectType.value = window.PROJECT_TYPE === 'bm' ? 'bm' : 'pb';
-  testTypeArr.value = window.PROJECT_TYPE === 'bm' ? testBmTypeList : testTypeList;
-  analysisVal.value = window.PROJECT_TYPE === 'bm' ? bmAnalysisList : AnalysisList;
+  testTypeCd.value = '01';
+  testTypeArr.value = testTypeList;
+  analysisVal.value = AnalysisList;
   await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cellImageAnalyzed });
 
   await cellImgGet();
   await driveGet();
 });
 
-watch([testTypeCd, diffCellAnalyzingCount, diffCellAnalyzingCount, wbcPositionMargin, rbcPositionMargin,
-  pltPositionMargin, pbsCellAnalyzingCount, edgeShotType, stitchCount, bfCellAnalyzingCount, iaRootPath, isNsNbIntegration, isAlarm, alarmCount, keepPage], async () => {
+watch([testTypeCd, iaRootPath, isAlarm, alarmCount, keepPage], async () => {
   const cellAfterSettingObj = {
     id: cellimgId.value,
-    analysisType: testTypeCd.value,
-    diffCellAnalyzingCount: diffCellAnalyzingCount.value,
-    diffWbcPositionMargin: wbcPositionMargin.value,
-    diffRbcPositionMargin: rbcPositionMargin.value,
-    diffPltPositionMargin: pltPositionMargin.value,
-    pbsCellAnalyzingCount: pbsCellAnalyzingCount.value,
     stitchCount: stitchCount.value,
-    edgeShotType: edgeShotType.value,
-    bfCellAnalyzingCount: bfCellAnalyzingCount.value,
     iaRootPath: iaRootPath.value,
-    isNsNbIntegration: isNsNbIntegration.value,
     isAlarm: isAlarm.value,
     alarmCount: alarmCount.value,
     keepPage: keepPage.value,
@@ -483,9 +365,8 @@ const driveGet = async () => {
         const data = result.data;
         const saveData = JSON.parse(JSON.stringify(data));
         const backUpData = JSON.parse(JSON.stringify(data));
-
-        const savePlace = window.PROJECT_TYPE === 'bm' ? 'BMIA_proc' : 'PBIA_proc';
-        const backupPlace = window.PROJECT_TYPE === 'bm' ? 'UIMD_BM_backup' : 'UIMD_PB_backup';
+        const savePlace = 'MOIA_proc';
+        const backupPlace = 'UIMD_MO_backup';
         for (const dataKey in data) {
           saveData[dataKey] = saveData[dataKey] + `\\${savePlace}`;
           backUpData[dataKey] = backUpData[dataKey] + `\\${backupPlace}`;
@@ -520,37 +401,17 @@ const cellImgGet = async () => {
 
         cellimgId.value = String(data.id);
         testTypeCd.value = data.analysisType;
-        diffCellAnalyzingCount.value = data.diffCellAnalyzingCount;
-        wbcPositionMargin.value = data.diffWbcPositionMargin;
-        rbcPositionMargin.value = data.diffRbcPositionMargin;
-        pltPositionMargin.value = data.diffPltPositionMargin;
-        pbsCellAnalyzingCount.value = data.pbsCellAnalyzingCount;
-        stitchCount.value = data.stitchCount;
-        bfCellAnalyzingCount.value = data.bfCellAnalyzingCount;
-        edgeShotType.value = String(data?.edgeShotType);
         iaRootPath.value = data.iaRootPath;
-        downloadRootPath.value = data.backupPath || (window.PROJECT_TYPE === 'bm' ? 'D:\\UIMD_BM_backup' : 'D:\\UIMD_PB_backup');
-        isNsNbIntegration.value = data.isNsNbIntegration;
+        downloadRootPath.value = data.backupPath || 'D:\\UIMD_MO_backup';
         isAlarm.value = data.isAlarm;
         alarmCount.value = data.alarmCount;
         keepPage.value = data.keepPage;
         backupStartDate.value = moment(data.backupStartDate).local().toDate();
         backupEndDate.value = moment(data.backupEndDate).local().toDate();
-        autoBackUpMonth.value = data?.autoBackUpMonth;
 
         const cellBeforeSettingObj = {
           id: cellimgId.value,
-          analysisType: data?.analysisType,
-          diffCellAnalyzingCount: data?.diffCellAnalyzingCount,
-          diffWbcPositionMargin: data?.diffWbcPositionMargin,
-          diffRbcPositionMargin: data?.diffRbcPositionMargin,
-          diffPltPositionMargin: data?.diffPltPositionMargin,
-          pbsCellAnalyzingCount: data?.pbsCellAnalyzingCount,
-          stitchCount: data?.stitchCount,
-          edgeShotType: data?.edgeShotType,
-          bfCellAnalyzingCount: data?.bfCellAnalyzingCount,
           iaRootPath: data?.iaRootPath,
-          isNsNbIntegration: data?.isNsNbIntegration,
           isAlarm: data?.isAlarm,
           alarmCount: data?.alarmCount,
           keepPage: data?.keepPage,
@@ -570,16 +431,7 @@ const cellImgGet = async () => {
 const cellImgSet = async () => {
   const cellImgSet = {
     analysisType: testTypeCd.value,
-    diffCellAnalyzingCount: diffCellAnalyzingCount.value,
-    diffWbcPositionMargin: wbcPositionMargin.value,
-    diffRbcPositionMargin: rbcPositionMargin.value,
-    diffPltPositionMargin: pltPositionMargin.value,
-    pbsCellAnalyzingCount: pbsCellAnalyzingCount.value,
-    edgeShotType: edgeShotType.value,
-    stitchCount: stitchCount.value,
-    bfCellAnalyzingCount: bfCellAnalyzingCount.value,
     iaRootPath: iaRootPath.value,
-    isNsNbIntegration: isNsNbIntegration.value,
     isAlarm: isAlarm.value,
     alarmCount: alarmCount.value,
     keepPage: keepPage.value,
@@ -603,19 +455,9 @@ const cellImgSet = async () => {
       const text = saveHttpType.value === 'post' ? messages.settingSaveSuccess : messages.UPDATE_SUCCESSFULLY;
       showSuccessAlert(text);
       const data = result?.data;
-      await store.dispatch('commonModule/setCommonInfo', { isNsNbIntegration: data?.isNsNbIntegration ? 'Y' : 'N' });
-      await store.dispatch('dataBaseSetDataModule/setDataBaseSetData', {
-        isNsNbIntegration: data?.isNsNbIntegration ? 'Y' : 'N'
-      });
       // 공통으로 사용되는 부분 세션스토리지 저장 새로고침시에도 가지고 있어야하는부분
-      sessionStorage.setItem('isNsNbIntegration', data.isNsNbIntegration ? 'Y' : 'N');
-      sessionStorage.setItem('wbcPositionMargin', data?.diffWbcPositionMargin);
-      sessionStorage.setItem('rbcPositionMargin', data?.diffRbcPositionMargin);
-      sessionStorage.setItem('pltPositionMargin', data?.diffPltPositionMargin);
-      sessionStorage.setItem('edgeShotType', String(data?.edgeShotType));
       sessionStorage.setItem('iaRootPath', data?.iaRootPath);
-      const keepPageType = projectType.value === 'pb' ? 'keepPage': 'bmKeepPage'
-      sessionStorage.setItem(keepPageType, String(data?.keepPage));
+      sessionStorage.setItem('keepPage', String(data?.keepPage));
       await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
     }
 
@@ -625,10 +467,6 @@ const cellImgSet = async () => {
     console.log(e);
   }
 }
-
-const toggleNsNbIntegration = () => {
-  isNsNbIntegration.value = !isNsNbIntegration.value;
-};
 
 const toggleAlarm = () => {
   isAlarm.value = !isAlarm.value;
@@ -652,7 +490,6 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
       destinationUploadPath: uploadRootPath.value,
       originUploadPath: downloadRootPath.value,
       dayQuery,
-      projectType: projectType.value,
       uploadType
     }
     downloadUploadType.value = uploadType;
@@ -789,7 +626,6 @@ const downloadDtoObj = (downloadType: 'move' | 'copy') => {
     endDate: sendingDownloadEndDate, // 백업 종료일
     originDownloadPath: `${iaRootPath.value}`, //이미지가 있는 경로 옮겨져야 하는 폴더 위치
     destinationDownloadPath: downloadRootPath.value, // 백업 경로
-    projectType: projectType.value,
     dayQuery,
     downloadType
   }
@@ -817,7 +653,6 @@ const createBackup = async () => {
     endDate: sendingDownloadEndDate, // 백업 종료일
     originDownloadPath: `${iaRootPath.value}`, //이미지가 있는 경로 옮겨져야 하는 폴더 위치
     destinationDownloadPath: downloadRootPath.value, // 백업 경로
-    projectType: projectType.value,
   };
   try {
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: true });
@@ -879,7 +714,6 @@ const handleUploadSelectFile = async () => {
       fileName: selectedUploadFile.value,
       destinationUploadPath: uploadRootPath.value,
       originUploadPath: downloadRootPath.value,
-      projectType: projectType.value
     }
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: true });
     downloadUploadStopWebSocket(true);

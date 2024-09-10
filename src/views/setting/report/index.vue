@@ -3,7 +3,6 @@
     <div class="settingTabSubButtons">
       <button @click="selectTab('ImagePrint')" :class="{ 'active': activeTab === 'ImagePrint' }">Image Print</button>
       <div v-if="!projectBm">
-        <button @click="selectTab('LisCode')" :class="{ 'active': activeTab === 'LisCode' }">LIS Code</button>
         <button @click="selectTab('CbcCode')" :class="{ 'active': activeTab === 'CbcCode' }">CBC Code</button>
         <button @click="selectTab('filePathSet')" :class="{ 'active': activeTab === 'filePathSet' }">LIS(CBC) Hot Key & File Path</button>
       </div>
@@ -36,7 +35,6 @@
 
 <script setup lang="ts">
 import ImagePrint from "@/views/setting/report/component/ImagePrint.vue";
-import LisCode from "@/views/setting/report/component/lisCode.vue";
 import cbcCode from "@/views/setting/report/component/cbcCode.vue";
 import FilePathSet from '@/views/setting/report/component/filePathSet.vue';
 import { computed, ref, onBeforeMount } from "vue";
@@ -78,8 +76,6 @@ const selectedTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'ImagePrint':
       return ImagePrint;
-    case 'LisCode':
-      return LisCode;
     case 'CbcCode':
       return cbcCode;
     case 'filePathSet':

@@ -48,25 +48,20 @@ import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
 import {useStore} from "vuex";
 import {
   wbcCountOptions,
-  stitchCountOptions,
-  bmCountOptions
 } from '@/common/defines/constFile/analysis';
-import {messages} from '@/common/defines/constFile/constantMessageText';
-import {tcpReq} from '@/common/tcpRequest/tcpReq';
-import {getCellImgApi, getRunInfoApi} from "@/common/api/service/setting/settingApi";
+import { messages } from '@/common/defines/constFile/constantMessageText';
+import { tcpReq } from '@/common/tcpRequest/tcpReq';
+import { getCellImgApi } from "@/common/api/service/setting/settingApi";
 import EventBus from "@/eventBus/eventBus";
 import Alert from "@/components/commonUi/Alert.vue";
-import {testBmTypeList, testTypeList, wbcRunningCount} from "@/common/defines/constFile/settings";
+import { testTypeList } from "@/common/defines/constFile/settings";
 import Confirm from "@/components/commonUi/Confirm.vue";
-import router from "@/router";
 import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
-import {getDateTimeStr} from "@/common/lib/utils/dateUtils";
 
 
 const store = useStore();
 const embeddedStatusJobCmd = computed(() => store.state.embeddedStatusModule);
 const userModuleDataGet = computed(() => store.state.userModule);
-const projectType = ref('pb');
 const countType = ref<any>([]);
 
 const runInfo = computed(() => store.state.commonModule);
@@ -109,16 +104,12 @@ onMounted(async () => {
 });
 
 const initDataExecute = async () => {
-  projectType.value = window.PROJECT_TYPE === 'bm' ? 'bm' : 'pb';
-  testTypeArr.value = window.PROJECT_TYPE === 'bm' ? testBmTypeList : testTypeList;
-
-  countType.value = window.PROJECT_TYPE === 'bm' ? bmCountOptions : wbcCountOptions
-  // userId.value = getStoredUser.id;
+  testTypeArr.value = testTypeList;
+  countType.value = wbcCountOptions;
 
   await nextTick();
   await cellImgGet();
   await getDeviceInfo();
-  await setWbcRunningCount();
   await initData();
   if (isRunningState.value) {
     btnStatus.value = 'isRunning';
@@ -192,19 +183,6 @@ const emitSocketData = async (type: string, payload: any) => {
   EventBus.publish('childEmitSocketData', payload);
 };
 
-// const sendSearchCardCount = () => {
-//   const reqDttm = getDateTimeStr(); // 현재 날짜와 시간을 가져오는 함수
-//   const req = {
-//     jobCmd: 'SEARCH_CARD_COUNT',
-//     reqUserId: userId.value,
-//     reqDttm: reqDttm,
-//     testType: analysisType.value,
-//   }
-//   tcpReq().embedStatus.searchCardCount.reqUserId = userId.value;
-//   tcpReq().embedStatus.searchCardCount.testType = analysisType.value;
-//   EventBus.publish('childEmitSocketData', req);
-// }
-
 const toggleStartStop = (action: 'start' | 'stop') => {
   if (action === 'start') {
     if (isPause.value) { // 일시정지인 상태일 경우 임베디드에게 상태값을 알려준다.
@@ -239,33 +217,6 @@ const toggleStartStop = (action: 'start' | 'stop') => {
       pltPositionMargin: pltPositionMargin || '0',
       edgeShotType:  edgeShotType || '0',
     });
-    if (window.PROJECT_TYPE === 'bm') {
-      startAction = {
-        "jobCmd": "START",
-        "reqUserId": userId.value,
-        "reqDttm": tcpReq().embedStatus.startAction.reqDttm,
-        "orderInfo": [{
-          "orderId": "1",
-          "cassetNo": "",
-          "slotNo": "1",
-          "bmNo": "1",
-          "patientId": "",
-          "patientNm": "",
-          "age": "1",
-          "gender": "01",
-          "testType": '02',
-          "stainType": "01",
-          "userInputStainType": "",
-          "analysisType": analysisType.value,
-          "bmSamplingSide": "01",
-          "cellCount": wbcCount.value,
-          "department": "s",
-          "stitchCount": stitchCount.value,
-        }],
-        "runningMode": "00",
-        "positionMargin": "0"
-      }
-    }
 
     if (isInit.value === 'Y') { // 초기화 여부 체크 초기화가 되어있는 상태이면 실행
       // 웹소켓으로 백엔드에 전송
@@ -354,19 +305,15 @@ const cellImgGet = async () => {
         const data = result.data;
         analysisType.value = data.analysisType;
         await store.dispatch('commonModule/setCommonInfo', { analysisType: analysisType.value });
-        if (window.PROJECT_TYPE === 'bm') {
-          wbcCount.value = data.diffCellAnalyzingCount;
-        } else {
-          switch (analysisType.value) {
-            case '01':
-              wbcCount.value = data.diffCellAnalyzingCount;
-              break;
-            case '04':
-              wbcCount.value = data.pbsCellAnalyzingCount;
-              break;
-            default:
-              wbcCount.value = data.bfCellAnalyzingCount;
-          }
+        switch (analysisType.value) {
+          case '01':
+            wbcCount.value = data.diffCellAnalyzingCount;
+            break;
+          case '04':
+            wbcCount.value = data.pbsCellAnalyzingCount;
+            break;
+          default:
+            wbcCount.value = data.bfCellAnalyzingCount;
         }
 
         stitchCount.value = data.stitchCount
@@ -375,28 +322,6 @@ const cellImgGet = async () => {
 
   } catch (e) {
 
-    console.log(e);
-  }
-}
-
-const setWbcRunningCount = async () => {
-  // 0011 - 인하대인 경우 -> WbcRunningCount로 분류
-  if (window.PROJECT_TYPE !== 'pb' || siteCd.value !== '0011') return;
-
-  try {
-    const runCountResult = await getRunInfoApi();
-
-    if (runCountResult && runCountResult.data) {
-      const runCountData = runCountResult.data;
-
-      if (runCountData && runCountData?.length > 0) {
-        const filteredRunCountData: any = runCountData.filter(data => data.min <= wbcCount.value && wbcCount.value <= data.max)[0];
-        if (filteredRunCountData.wbcTargetCount) {
-          filteredWbcCount.value = filteredRunCountData.wbcTargetCount;
-        }
-      }
-    }
-  } catch (e) {
     console.log(e);
   }
 }

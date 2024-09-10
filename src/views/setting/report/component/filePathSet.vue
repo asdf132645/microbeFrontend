@@ -2,16 +2,6 @@
   <div class="alignDiv" style="text-align: center">
     <ul>
       <li>
-        <p class="mb2">LIS Hot Key</p>
-        <input type="text" :value="filePathSetArr[0] ? filePathSetArr[0].lisHotKey : ''"
-               @input="updateHotKey($event, 0)">
-      </li>
-      <li>
-        <p class="mb2 mt2">LIS File Path</p>
-        <input type="text" :value="filePathSetArr[0] ? filePathSetArr[0].lisFilePath : ''"
-               @input="updateFilePath($event, 0)">
-      </li>
-      <li>
         <p class="mb2 mt2">CBC File Path</p>
         <input type="text" :value="filePathSetArr[0] ? filePathSetArr[0].cbcFilePath : ''"
                @input="updateCbcFilePath($event, 0)">
@@ -140,14 +130,6 @@ const getFilePathSetData = async () => {
   } catch (e) {
     console.error(e);
   }
-};
-
-const updateHotKey = (event: any, index: number) => {
-  filePathSetArr.value[index].lisHotKey = event.target.value;
-};
-
-const updateFilePath = (event: any, index: number) => {
-  filePathSetArr.value[index].lisFilePath = event.target.value;
 };
 
 const updateCbcFilePath = (event: any, index: number) => {

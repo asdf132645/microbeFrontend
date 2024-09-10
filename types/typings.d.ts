@@ -2,7 +2,7 @@
 declare global {
     interface Window {
         APP_API_BASE_URL: string;
-        PROJECT_TYPE: 'pb' | 'bm';
+        PROJECT_TYPE: 'mo';
         MAIN_API: string;
         PROJECT_VERSION: string;
         AI_VERSION: string;
