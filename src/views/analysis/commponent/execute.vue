@@ -13,8 +13,8 @@
     </div>
 
     <div class="stopDiv">
-      <select v-model="wbcCount" :disabled="isRunningState">
-        <option v-for="option in countType" :key="option.value" :value="option.value">{{ option.text }}</option>
+      <select v-model="lpCaptureCount" :disabled="isRunningState">
+        <option v-for="option in lpCaptureCountType" :key="option.value" :value="option.value">{{ option.text }}</option>
       </select>
       <div class="initBtn" @click="sendInit" :class="{'isInitDisabled': isInit === 'Y'}">
         <font-awesome-icon :icon="['fas', 'rotate-right']" style="font-size: 0.9rem;"
@@ -46,15 +46,12 @@
 import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
 
 import {useStore} from "vuex";
-import {
-  wbcCountOptions,
-} from '@/common/defines/constFile/analysis';
+import { lpCaptureOptions } from '@/common/defines/constFile/analysis';
 import { messages } from '@/common/defines/constFile/constantMessageText';
 import { tcpReq } from '@/common/tcpRequest/tcpReq';
 import { getCellImgApi } from "@/common/api/service/setting/settingApi";
 import EventBus from "@/eventBus/eventBus";
 import Alert from "@/components/commonUi/Alert.vue";
-import { testTypeList } from "@/common/defines/constFile/settings";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
 
@@ -62,7 +59,6 @@ import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
 const store = useStore();
 const embeddedStatusJobCmd = computed(() => store.state.embeddedStatusModule);
 const userModuleDataGet = computed(() => store.state.userModule);
-const countType = ref<any>([]);
 
 const runInfo = computed(() => store.state.commonModule);
 const executeState = computed(() => store.state.executeModule);
@@ -73,9 +69,6 @@ const isRecoveryRun = ref(embeddedStatusJobCmd.value?.isRecoveryRun);
 const isInit = ref(embeddedStatusJobCmd.value?.isInit);
 const userId = ref('');
 const analysisType = ref();
-const wbcCount = ref();
-const stitchCount = ref();
-const bfSelectFiles = ref([]);
 const commonDataGet = computed(() => store.state.commonModule);
 const showStopBtn = ref(false);
 const btnStatus = ref('');
@@ -88,8 +81,8 @@ const showConfirm = ref(false);
 const confirmType = ref('');
 const confirmMessage = ref('');
 const siteCd = ref('');
-const filteredWbcCount = ref<any>();
-const isInitializing = ref(false);
+const lpCaptureCount = ref('20');
+const lpCaptureCountType = ref<any>([]);
 
 watch(userModuleDataGet.value, async (newUserId, oldUserId) => {
   if (newUserId.id === '') {
@@ -104,8 +97,7 @@ onMounted(async () => {
 });
 
 const initDataExecute = async () => {
-  testTypeArr.value = testTypeList;
-  countType.value = wbcCountOptions;
+  lpCaptureCountType.value = lpCaptureOptions;
 
   await nextTick();
   await cellImgGet();
@@ -135,9 +127,8 @@ watch([runInfo.value], async (newVals) => {
   await nextTick();
   const [newRunInfo] = newVals;
 
-  const {isRunningState: newIsRunningState, bfSelectFiles: newBfSelectFiles} = newRunInfo || {};
+  const {isRunningState: newIsRunningState } = newRunInfo || {};
   isRunningState.value = newIsRunningState;
-  bfSelectFiles.value = newBfSelectFiles;
 
   if (isRunningState.value) {
     btnStatus.value = 'isRunning';
@@ -187,7 +178,6 @@ const toggleStartStop = (action: 'start' | 'stop') => {
   if (action === 'start') {
     if (isPause.value) { // 일시정지인 상태일 경우 임베디드에게 상태값을 알려준다.
 
-      tcpReq().embedStatus.restart.bfSelectFiles = bfSelectFiles.value;
       tcpReq().embedStatus.restart.reqUserId = userId.value;
       emitSocketData('SEND_DATA', tcpReq().embedStatus.restart);
       return;
@@ -201,21 +191,12 @@ const toggleStartStop = (action: 'start' | 'stop') => {
       showConfirm.value = true;
       return;
     }
-    const rbcPositionMargin = sessionStorage.getItem('rbcPositionMargin');
-    const wbcPositionMargin = sessionStorage.getItem('wbcPositionMargin');
-    const pltPositionMargin = sessionStorage.getItem('pltPositionMargin');
-    const edgeShotType = sessionStorage.getItem('edgeShotType') || '0';
 
     let startAction = tcpReq().embedStatus.startAction;
     Object.assign(startAction, {
       testType: analysisType.value,
-      wbcCount: filteredWbcCount.value || wbcCount.value,
-      stitchCount: stitchCount.value,
+      LPCount: lpCaptureCount.value,
       reqUserId: userId.value,
-      rbcPositionMargin: rbcPositionMargin || '0',
-      wbcPositionMargin: wbcPositionMargin || '0',
-      pltPositionMargin: pltPositionMargin || '0',
-      edgeShotType:  edgeShotType || '0',
     });
 
     if (isInit.value === 'Y') { // 초기화 여부 체크 초기화가 되어있는 상태이면 실행
@@ -303,20 +284,8 @@ const cellImgGet = async () => {
     if (result) {
       if (result?.data) {
         const data = result.data;
-        analysisType.value = data.analysisType;
         await store.dispatch('commonModule/setCommonInfo', { analysisType: analysisType.value });
-        switch (analysisType.value) {
-          case '01':
-            wbcCount.value = data.diffCellAnalyzingCount;
-            break;
-          case '04':
-            wbcCount.value = data.pbsCellAnalyzingCount;
-            break;
-          default:
-            wbcCount.value = data.bfCellAnalyzingCount;
-        }
-
-        stitchCount.value = data.stitchCount
+        lpCaptureCount.value = data.LPCaptureCount;
       }
     }
 

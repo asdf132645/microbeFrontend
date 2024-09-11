@@ -1,8 +1,8 @@
-
-
-export interface CreateGramRange {
+export interface GramRangeRequest {
     gramRangeItems: GramRangeItems[];
 }
+
+export type GramRangeResponse = GramRangeItems;
 
 export interface GramRangeItems {
     classId: string;
@@ -15,8 +15,4 @@ export interface GramRangeItems {
     abbreviation: string;
     fullNm: string;
     uint: string;
-}
-
-export interface GramRangeUpdateDto {
-    gramRangeItems: GramRangeItems[];
 }

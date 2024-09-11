@@ -1,8 +1,3 @@
-export const testTypeList = [
-    {value: '01', text: 'WBC Diff(Standard)'},
-    {value: '04', text: 'PBS(Premium)'},
-];
-
 export const lowPowerCaptureCountList = [
     { value: '10', text: '10' },
     { value: '20', text: '20' },
@@ -10,18 +5,6 @@ export const lowPowerCaptureCountList = [
     { value: '40', text: '40' },
     { value: '50', text: '50' },
 ]
-
-export const AnalysisList = [
-    {value: '100', text: '100'},
-    {value: '150', text: '150'},
-    {value: '200', text: '200'},
-    {value: '250', text: '250'},
-    {value: '300', text: '300'},
-    {value: '350', text: '350'},
-    {value: '400', text: '400'},
-    {value: '450', text: '450'},
-    {value: '500', text: '500'}
-];
 
 export const defaultCbcList = [
     {cd: '01', classCd: 'diff', fullNm: 'WBC Diff. Count', isSelected: true},

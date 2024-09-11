@@ -5,7 +5,7 @@
     <div class="topClintInfo">
       <ul>
         <li>
-          {{ projectType === 'bm' ? getBmTestTypeText(selectItems?.testType) : getTestTypeText(selectItems?.testType) }}
+          {{ getTestTypeText(selectItems?.testType) }}
         </li>
         <li>{{ selectItems?.barcodeNo }}</li>
         <li>{{ selectItems?.patientId || 'patientId No Data' }}</li>

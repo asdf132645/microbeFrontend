@@ -16,12 +16,7 @@ export const tcpReq:any = () => {
                 jobCmd: 'START',
                 reqUserId: '',
                 testType: '01',
-                wbcCount: '',
-                stitchCount: '',
-                runningMode: '00',
-                positionMargin:  '0',
-                wbcPositionMargin: '0',
-                pltPositionMargin: '0',
+                LPCount: '10',
                 reqDttm: reqDttm,
             },
             init: {

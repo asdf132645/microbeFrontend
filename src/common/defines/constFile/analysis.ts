@@ -10,6 +10,14 @@ export const wbcCountOptions = [
     {value: '500', text: '500 WBC'}
 ];
 
+export const lpCaptureOptions = [
+    { value: '10', text: '10 LP Capture' },
+    { value: '20', text: '20 LP Capture' },
+    { value: '30', text: '30 LP Capture' },
+    { value: '40', text: '40 LP Capture' },
+    { value: '50', text: '50 LP Capture' },
+]
+
 export const slideCard = {
     input: [
         {slotNo: 1, slotState: '0'},

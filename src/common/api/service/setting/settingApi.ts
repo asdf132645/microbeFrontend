@@ -4,14 +4,14 @@ import {
     CellImgAnalyzedRequest,
     CellImgAnalyzedResponse,
 } from '@/common/api/service/setting/dto/cellImgAnalyzedDto'
-import {CreateGramRange, GramRangeUpdateDto} from "@/common/api/service/setting/dto/gramRangeDto";
+import { GramRangeRequest, GramRangeResponse } from "@/common/api/service/setting/dto/gramRangeDto";
 import { CreateImagePrintDto, ImagePrintItem, UpdateImagePrintsDto } from "@/common/api/service/setting/dto/imagePrintDto";
 import { CreateCbcCodeRbcDto, cbcCodeItem, UpdateCbcCodeRbcDto } from "@/common/api/service/setting/dto/lisCodeDto";
 import {CreateFilePathDto, FilePathItem, UpdateFilePathsDto} from "@/common/api/service/setting/dto/filePathSetDto";
 
 const httpClient = useHttpClient();
 
-export const createCellImgApi = async (request: any): Promise<ApiResponse<void>> => {
+export const createCellImgApi = async (request: any): Promise<ApiResponse<CellImgAnalyzedRequest | undefined>> => {
     return httpClient.httpPost(apiConstants.settings.cellImgAnalyzedPost.cellImgAdd, request);
 };
 
@@ -23,15 +23,17 @@ export const putCellImgApi = async (request: any, id: string): Promise<ApiRespon
     return httpClient.httpPut(apiConstants.settings.cellImgAnalyzedPost.cellImgPut, request, id);
 };
 
-export const createGramRangeApi = async (request: CreateGramRange): Promise<ApiResponse<void>> => {
+
+
+export const createGramRangeApi = async (request: GramRangeRequest): Promise<ApiResponse<void>> => {
     return httpClient.httpPost(apiConstants.settings.gramRange.create, request);
 };
 
-export const updateGramRangeApi = async (request: GramRangeUpdateDto): Promise<ApiResponse<GramRangeUpdateDto | undefined>> => {
+export const updateGramRangeApi = async (request: GramRangeRequest): Promise<ApiResponse<GramRangeResponse | undefined>> => {
     return httpClient.httpPut(apiConstants.settings.gramRange.update, request);
 };
 
-export const getGramRangeApi = async (): Promise<ApiResponse<CreateGramRange | undefined>> => {
+export const getGramRangeApi = async (): Promise<ApiResponse<GramRangeResponse | undefined>> => {
     return httpClient.httpGet(apiConstants.settings.gramRange.get);
 };
 

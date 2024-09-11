@@ -234,7 +234,7 @@ import { createCellImgApi, getCellImgApi, getDrivesApi, putCellImgApi } from "@/
 import Datepicker from 'vue3-datepicker';
 
 import { computed, nextTick, onMounted, ref, watch, getCurrentInstance } from "vue";
-import { AnalysisList, testTypeList, settingName, lowPowerCaptureCountList } from "@/common/defines/constFile/settings";
+import { settingName, lowPowerCaptureCountList } from "@/common/defines/constFile/settings";
 import Alert from "@/components/commonUi/Alert.vue";
 import { useStore } from "vuex";
 import { messages } from "@/common/defines/constFile/constantMessageText";
@@ -248,7 +248,7 @@ import {
   checkPossibleUploadFileApi
 } from "@/common/api/service/backup/wbcApi";
 import Confirm from "@/components/commonUi/Confirm.vue";
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 import ConfirmThreeBtn from "@/components/commonUi/ConfirmThreeBtn.vue";
 
 
@@ -260,10 +260,7 @@ const alertType = ref('');
 const showUploadModal = ref(false);
 
 const alertMessage = ref('');
-const analysisVal = ref<any>([]);
-const testTypeCd = ref('01');
-const lowPowerCaptureCount = ref(20);
-const stitchCount = ref('1');
+const lowPowerCaptureCount = ref('20');
 const iaRootPath = ref('D:\\MOIA_proc');
 const downloadRootPath = ref('D:\\UIMD_MO_backup');
 const uploadRootPath = ref('D:\\MOIA_proc');
@@ -289,11 +286,10 @@ const autoDate = ref([
 ]);
 const autoBackUpMonth = ref('Not selected');
 const saveHttpType = ref('');
-const drive = ref<any>([]);
+const drive = ref<string[]>([]);
 const backupDrive = ref<any>([]);
 const cellimgId = ref('');
 
-const testTypeArr = ref<any>([]);
 const uploadSlotIdObj = ref({duplicated: [], nonDuplicated: []});
 const possibleUploadCount = computed(() => uploadSlotIdObj.value?.nonDuplicated && uploadSlotIdObj.value?.nonDuplicated.length);
 const impossibleUploadCount = computed(() => uploadSlotIdObj.value?.duplicated && uploadSlotIdObj.value?.duplicated.length);
@@ -321,19 +317,15 @@ const selectedUploadFile = ref('');
 
 onMounted(async () => {
   await nextTick();
-  testTypeCd.value = '01';
-  testTypeArr.value = testTypeList;
-  analysisVal.value = AnalysisList;
   await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cellImageAnalyzed });
-
   await cellImgGet();
   await driveGet();
 });
 
-watch([testTypeCd, iaRootPath, isAlarm, alarmCount, keepPage], async () => {
+watch([lowPowerCaptureCount, iaRootPath, isAlarm, alarmCount, keepPage], async () => {
   const cellAfterSettingObj = {
     id: cellimgId.value,
-    stitchCount: stitchCount.value,
+    LPCaptureCount: lowPowerCaptureCount.value,
     iaRootPath: iaRootPath.value,
     isAlarm: isAlarm.value,
     alarmCount: alarmCount.value,
@@ -359,6 +351,7 @@ const filterNumbersOnly = (event: Event) => {
 const driveGet = async () => {
   try {
     const result = await getDrivesApi();
+    console.log('제발', result);
     if (result) {
       if (!result?.data) {
       } else {
@@ -400,8 +393,8 @@ const cellImgGet = async () => {
         const data = result.data;
 
         cellimgId.value = String(data.id);
-        testTypeCd.value = data.analysisType;
         iaRootPath.value = data.iaRootPath;
+        lowPowerCaptureCount.value = data.LPCaptureCount;
         downloadRootPath.value = data.backupPath || 'D:\\UIMD_MO_backup';
         isAlarm.value = data.isAlarm;
         alarmCount.value = data.alarmCount;
@@ -411,6 +404,7 @@ const cellImgGet = async () => {
 
         const cellBeforeSettingObj = {
           id: cellimgId.value,
+          LPCaptureCount: data?.LPCaptureCount,
           iaRootPath: data?.iaRootPath,
           isAlarm: data?.isAlarm,
           alarmCount: data?.alarmCount,
@@ -430,7 +424,7 @@ const cellImgGet = async () => {
 
 const cellImgSet = async () => {
   const cellImgSet = {
-    analysisType: testTypeCd.value,
+    LPCaptureCount: lowPowerCaptureCount.value,
     iaRootPath: iaRootPath.value,
     isAlarm: isAlarm.value,
     alarmCount: alarmCount.value,
@@ -439,7 +433,7 @@ const cellImgSet = async () => {
     backupStartDate: moment(backupStartDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0],
     backupEndDate: moment(backupEndDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0],
     autoBackUpMonth: autoBackUpMonth.value,
-    autoBackUpStartDate: autoBackUpMonth.value !== 'Not selected' ? moment(new Date()).local().toDate().toISOString().split('T')[0]:null,
+    autoBackUpStartDate: autoBackUpMonth.value !== 'Not selected' ? moment(new Date()).local().toDate().toISOString().split('T')[0] : null,
   }
 
   try {
@@ -482,8 +476,8 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
   try {
     isLoadingProgressBar.value = true;
     const day = localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate , page, searchText, nrCount, testType, wbcInfo, wbcTotal}  = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const {startDate, endDate , page, searchText }  = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText;
 
     const uploadDto = {
       fileName: selectedUploadFile.value,
@@ -617,8 +611,8 @@ const downloadDtoObj = (downloadType: 'move' | 'copy') => {
   downloadUploadType.value = downloadType;
   showDownloadConfirm.value = false;
   const day = localStorage.getItem('lastSearchParams') || '';
-  const {startDate, endDate , page, searchText, nrCount, testType, wbcInfo, wbcTotal}  = JSON.parse(day);
-  const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+  const {startDate, endDate , page, searchText }  = JSON.parse(day);
+  const dayQuery = startDate + endDate + page + searchText;
   const sendingDownloadStartDate = moment(backupStartDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0];
   const sendingDownloadEndDate = moment(backupEndDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0];
   const downloadDto = {
