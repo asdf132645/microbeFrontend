@@ -6,7 +6,7 @@
   </div>
   <div class="contentRight" v-show="props.isClass">
     <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild" />
-    <RealTimeProcess class="contentRightChild realtime"/>
+    <RealTimeProcess  class="contentRightChild realtime"/>
     <div class="contentBottom">
       <FoundingCells :parsedData="props.parsedData" :pb100aCassette="pb100aCassette"/>
     </div>

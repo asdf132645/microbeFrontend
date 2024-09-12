@@ -1021,7 +1021,7 @@ p.loadingText {
 #tiling-viewer_img_list {
     position: relative;
     width: 100%;
-    height: 80vh;
+    height: 65vh;
 }
 
 .rbc-container {
@@ -2095,8 +2095,27 @@ ul.wbcImgWrap > li {
 
 .databaseWbcLeft {
     display: inline-block;
-    width: 70%;
     vertical-align: top;
+    width: 70%;
+}
+
+.databaseMoRight {
+    display: inline-block;
+    vertical-align: top;
+    width: 70%;
+    background-color: var(--main-bg-2-color);
+}
+
+.classImageSliderContainer {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+}
+
+.classImageSliderContainer > img {
+    width: 112px;
+    height: 112px;
+    cursor: pointer;
 }
 
 ul.cellImgBox {
@@ -2112,8 +2131,36 @@ ul.cellImgBox {
     color: #b00505;
 }
 .moClassScroll {
-    max-height: 63vh;
+    max-height: 60vh;
+    width: 100%;
+    height: 100%;
     overflow-x: auto;
+    background-color: var(--main-bg-2-color);
+}
+
+.classInfoDetailContainer {
+    max-height: 60vh;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    background-color: var(--main-bg-2-color);
+}
+
+.classInfoDetailTop {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    background-color: var(--main-bg-5-color);
+}
+
+.classInfoDetailTop > h3:nth-child(1) {
+    text-align: center;
+    width: 40%;
+}
+
+.classInfoDetailTop > h3:nth-child(2) {
+    text-align: center;
+    width: 60%;
 }
 
 ul.cellImgBox input {

@@ -520,26 +520,8 @@ async function socketData(data: any) {
         const updateWbcInfo = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfo() : newWbcInfo;
         const updateWbcInfoAfter = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfoAfter() : newWbcInfo?.wbcInfo[0];
 
-        if (siteCd.value === '0011') {
-          // 인하대 WBC 정보를 저장
-          if(completeSlot.testType !== '04'){
-            newWbcInfo.wbcInfo[0] = await inhaDataChangeSave(completeSlot, matchedWbcInfo?.wbcInfo);
-          }
-
-          // WBC 정보 업데이트
-          wbcInfoNewVal = updateWbcInfo();
-          wbcInfoAfter = updateWbcInfoAfter();
-          // 바코드 번호가 다를 경우 이벤트 버스에 저장
-          if (barcodeNum.value !== completeSlot.barcodeNo) {
-            EventBus.publish('appVueSlideDataSaveLisSave', newWbcInfo.wbcInfo[0], rbcArrElements[0].rbcInfo, completeSlot.barcodeNo);
-            barcodeNum.value = completeSlot?.barcodeNo;
-          }
-        } else {
-          // 기본 WBC 정보로 업데이트
-          wbcInfoNewVal = updateWbcInfo();
-          wbcInfoAfter = updateWbcInfoAfter();
-        }
-
+        wbcInfoNewVal = updateWbcInfo();
+        wbcInfoAfter = updateWbcInfoAfter();
 
         const newObj = {
           slotNo: completeSlot.slotNo,
@@ -573,55 +555,6 @@ async function socketData(data: any) {
         await saveRunningInfo(newObj, slotId, lastCompleteIndex);
       }
     }
-
-    async function inhaDataChangeSave(runningInfoData: any, wbcInfo: any) {
-      if (runningInfoData.testType !== '04') {
-        const excludedTitles = ['NR', 'AR', 'GP', 'PA', 'MC', 'MA'];
-
-        // wbcTotal 계산
-        let wbcTotal = 0;
-        wbcInfo.forEach((wbcItem: any) => {
-          if (Number(wbcItem.count) > 0 && !excludedTitles.includes(wbcItem.title)) {
-            wbcTotal += Number(wbcItem.count);
-          }
-        });
-
-        let maxItem: any = null;
-        let percentTotal = 0;
-
-        // 퍼센트 계산 및 maxItem 결정
-        wbcInfo.forEach((wbcItem: any, index: any) => {
-          let percent = Number(((Number(wbcItem.count) / wbcTotal) * 100).toFixed(0));
-          let percentN2 = Number(((Number(wbcItem.count) / wbcTotal) * 100).toFixed(2));
-
-          // 특정 조건에 따라 퍼센트 조정
-          if ((wbcItem.title === 'BL' || ['LA', 'IM', 'MB', 'AM'].includes(wbcItem.title)) &&
-              Number(wbcItem.count) > 0 &&
-              percentN2 >= 0 &&
-              percentN2 <= 1) {
-            percent = 1;
-          }
-
-          wbcItem.percent = percent;
-
-          // 제외할 타이틀이 아닌 경우 percentTotal 및 maxItem 갱신
-          if (!excludedTitles.includes(wbcItem.title)) {
-            percentTotal += Number(wbcItem.percent);
-            if (maxItem === null || Number(maxItem.count) < Number(wbcItem.count)) {
-              maxItem = wbcItem;
-            }
-          }
-
-          // 마지막 항목일 때 백분율 오차 보정
-          if (maxItem !== null && (index + 1) === wbcInfo.length) {
-            maxItem.percent = Number(maxItem.percent) + (100 - percentTotal);
-          }
-        });
-
-        return wbcInfo;
-      }
-    }
-
 
     async function saveDeviceInfo(deviceInfo: any) {
       try {
@@ -764,16 +697,6 @@ const cellImgGet = async () => {
         const data = result.data;
         sessionStorage.setItem('iaRootPath', data?.iaRootPath);
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
-        await store.dispatch('dataBaseSetDataModule/setDataBaseSetData', {
-          isNsNbIntegration: data?.isNsNbIntegration ? 'Y' : 'N'
-        });
-        isNsNbIntegrationLocal.value = data?.isNsNbIntegration ? 'Y' : 'N';
-        await store.dispatch('commonModule/setCommonInfo', {isNsNbIntegration: data?.isNsNbIntegration ? 'Y' : 'N'});
-        sessionStorage.setItem('isNsNbIntegration', data?.isNsNbIntegration ? 'Y' : 'N');
-        sessionStorage.setItem('wbcPositionMargin', data?.diffWbcPositionMargin);
-        sessionStorage.setItem('rbcPositionMargin', data?.diffRbcPositionMargin);
-        sessionStorage.setItem('pltPositionMargin', data?.diffPltPositionMargin);
-        sessionStorage.setItem('edgeShotType', String(data?.edgeShotType));
         sessionStorage.setItem('keepPage', String(data?.keepPage));
       }
     }

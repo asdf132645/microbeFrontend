@@ -34,14 +34,9 @@
 </template>
 
 <script setup>
-import {ref, defineProps, onMounted, watch, computed, onBeforeMount} from 'vue';
+import { ref, defineProps, onMounted, watch, computed } from 'vue';
 import {barcodeImgDir} from "@/common/defines/constFile/settings";
-import moment from "moment/moment";
 import {useStore} from "vuex";
-import {getOrderClassApi} from "@/common/api/service/setting/settingApi";
-import {basicBmClassList, basicWbcArr} from "@/store/modules/analysis/wbcclassification";
-import {hospitalSiteCd} from "@/common/siteCd/siteCd";
-import { inhaPercentChange, seoulStMaryPercentChange } from "@/common/lib/commonfunction/classFicationPercent";
 
 const store = useStore();
 const props = defineProps(['selectedItem']);
@@ -52,16 +47,8 @@ const pilePath = ref('');
 const barCodeImageShowError = ref(false);
 const wbcTotal = ref(0);
 const nonWbcTitles = ['NR', 'GP', 'PA', 'AR', 'MA', 'SM', 'OT'];
-const projectType = ref('');
-const orderClass = ref({});
-const wbcInfoAfter = ref({});
-
-onBeforeMount(() => {
-  projectType.value = window.PROJECT_TYPE;
-})
 
 onMounted(async () => {
-  await getClassOrder();
   barCodeImageShowError.value = false;
   // iaRootPath가 존재하면 getImageUrl 함수 호출
   if (iaRootPath.value) {
@@ -71,77 +58,12 @@ onMounted(async () => {
 
 watch(() => props.selectedItem, (newSelectedItem) => {
   barCodeImageShowError.value = false;
-  setWbcTotalAndPercent();
-  sortClassOrder();
+  // setWbcTotalAndPercent();
 
   if (iaRootPath.value) {
     pilePath.value = getImageUrl('barcode_image.jpg', newSelectedItem);
   }
 });
-
-const integrationFindNe = (wbcInfoAfter) => {
-  let returnText = '';
-  const neFindItem = wbcInfoAfter.find((el) => {
-    return el.title === 'NE'
-  });
-
-  if(neFindItem){
-    returnText = 'Y' ;
-  }else{
-    returnText = 'N';
-  }
-  return returnText;
-}
-
-const sortClassOrder = async () => {
-  if (!orderClass.value || orderClass.value.length === 0 || !Array.isArray(orderClass.value)) {
-    wbcInfoAfter.value = props.selectedItem.wbcInfoAfter;
-    return;
-  }
-  const oArr = orderClass.value.sort((a, b) => Number(a.orderIdx) - Number(b.orderIdx));
-  const sortArr = orderClass.value.length !== 0 ? oArr : projectType.value === 'bm' ? basicBmClassList : basicWbcArr;
-  const sortedWbcInfoData = sortWbcInfo(props.selectedItem.wbcInfoAfter, sortArr);
-  wbcInfoAfter.value = sortedWbcInfoData;
-
-  const isSeoulStMaryHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '서울성모병원')?.siteCd === siteCd.value;
-  const isInhaHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '인하대병원')?.siteCd === siteCd.value;
-  if (isInhaHospitalSiteCd) {
-    wbcInfoAfter.value = await inhaPercentChange(props.selectedItem, props.selectedItem.wbcInfoAfter);
-  } else if (isSeoulStMaryHospitalSiteCd) {
-    wbcInfoAfter.value = seoulStMaryPercentChange(wbcInfoAfter.value, wbcInfoAfter.value);
-  }
-
-}
-
-const sortWbcInfo = (wbcInfo, basicWbcArr) => {
-  let newSortArr = wbcInfo.slice(); // 기존 배열 복사
-
-  return newSortArr.sort((a, b) => {
-    const nameA = basicWbcArr.findIndex((item) => (item.title || item.abbreviation) === (a.title || a.abbreviation));
-    const nameB = basicWbcArr.findIndex((item) => (item.title || item.abbreviation) === (b.title || b.abbreviation));
-
-    // 이름이 없는 경우는 배열 맨 뒤로 배치
-    if (nameA === -1) return 1;
-    if (nameB === -1) return -1;
-
-    return nameA - nameB;
-  });
-};
-
-const getClassOrder = async () => {
-  try {
-    const result = await getOrderClassApi();
-    if (result) {
-      if (result?.data.length === 0) {
-        orderClass.value = [];
-      } else {
-        orderClass.value = result.data.sort((a, b) => Number(a.orderIdx) - Number(b.orderIdx));
-      }
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
 
 const setWbcTotalAndPercent = () => {
   wbcTotal.value = props.selectedItem.wbcInfoAfter.reduce((acc, item) => {
@@ -149,22 +71,10 @@ const setWbcTotalAndPercent = () => {
     return acc
   }, 0)
   for (const item of props.selectedItem.wbcInfoAfter) {
-    if (window.PROJECT_TYPE === 'bm') {
-      if (item.title !== 'OT') {
-        const percentage = ((Number(item.count) / Number(wbcTotal.value)) * 100).toFixed(1);  // 소수점 0인경우 정수 표현
-        item.percent = (Number(percentage) === Math.floor(Number(percentage))) ? Math.floor(Number(percentage)).toString() : percentage;
-      }
-    } else {
-
-      // 인하대일 경우 Percent 로직이 다르므로 계산 X
-      const isInhaHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '인하대병원')?.siteCd === siteCd.value;
-      if (isInhaHospitalSiteCd) return;
-
-      const targetArray = getStringArrayBySiteCd(siteCd.value, props.selectedItem?.testType);
-      if (!targetArray.includes(item.title)) {
-        const percentage = ((Number(item.count) / Number(wbcTotal.value)) * 100).toFixed(1); // 소수점 0인경우 정수 표현
-        item.percent = (Number(percentage) === Math.floor(Number(percentage))) ? Math.floor(Number(percentage)).toString() : percentage;
-      }
+    const targetArray = getStringArrayBySiteCd(siteCd.value, props.selectedItem?.testType);
+    if (!targetArray.includes(item.title)) {
+      const percentage = ((Number(item.count) / Number(wbcTotal.value)) * 100).toFixed(1); // 소수점 0인경우 정수 표현
+      item.percent = (Number(percentage) === Math.floor(Number(percentage))) ? Math.floor(Number(percentage)).toString() : percentage;
     }
   }
 }

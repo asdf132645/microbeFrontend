@@ -63,7 +63,7 @@
         <td @click="handleCheckboxChange(item)">
           <input type="checkbox" v-model="item.checked" :checked="item.checked"/>
         </td>
-        <td> {{ projectType !== 'bm' ? getTestTypeText(item?.testType) : getBmTestTypeText(item?.testType) }}</td>
+        <td> {{ getTestTypeText(item?.testType) }}</td>
         <td>{{ item?.cassetId }}</td>
 
         <td>
@@ -169,7 +169,7 @@
 </template>
 
 <script setup>
-import {getBarcodeDetailImageUrl, getBmTestTypeText, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
+import {getBarcodeDetailImageUrl, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
 import {
   ref,
   onMounted,
@@ -187,7 +187,6 @@ import {deleteRunningApi, updatePcIpStateApi, updateRunningApi} from "@/common/a
 import {useStore} from "vuex";
 import {messages} from "@/common/defines/constFile/constantMessageText";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
-import {getRbcDegreeApi} from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import moment from "moment";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
@@ -218,7 +217,6 @@ const contextMenu = ref({
   x: 0,
   y: 0
 });
-const rbcDegreeStandard = ref([]);
 const storedUser = sessionStorage.getItem('user');
 const getStoredUser = JSON.parse(storedUser || '{}');
 const userId = ref('');
@@ -247,7 +245,6 @@ onMounted(async () => {
   try {
 
     userId.value = getStoredUser.id;
-    await getRbcDegreeData();
   } catch (e) {
     console.log(e);
   }
@@ -483,8 +480,8 @@ const getIpAddress = async (item) => {
     const result = await getDeviceIpApi();
     const ipAddress = result.data;
     const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const {startDate, endDate, page, searchText, testType } = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `oldPcIp=${ipAddress}&newEntityId=${item.id}&newPcIp=${ipAddress}&dayQuery=${dayQuery}`
 
     await updatePcIpStateApi(req).then(response => {
@@ -514,24 +511,10 @@ const rowDbClick = async (item) => {
     return;
   }
 
-  await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: item.id});
-  await store.dispatch('commonModule/setCommonInfo', {clonedRbcInfo: item.rbcInfo.rbcClass});
+  await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: item.id });
   await getIpAddress(item);
-  await router.push('/imagesComponent?pageType=LP');
-
+  await router.push(`/imagesComponent?id=${item.id}&pageType=LP`);
 }
-
-
-const getRbcDegreeData = async () => {
-  try {
-    const result = await getRbcDegreeApi();
-    const data = result.data;
-    rbcDegreeStandard.value = data
-  } catch (e) {
-    // console.log(e);
-  }
-};
-
 
 const closeLayer = (val) => {
   visible.value = val;
@@ -582,7 +565,7 @@ const editData = async (item) => {
   openLayer();
   itemObj.value = JSON.parse(JSON.stringify(item));
   itemObj.value.submitState = ['', 'Ready', 'checkFirst'].includes(itemObj.value.submitState) ? '' : itemObj.value.submitState;
-  itemObj.value.testType = projectType.value !== 'bm' ? getTestTypeText(item?.testType) : getBmTestTypeText(item?.testType);
+  itemObj.value.testType = getTestTypeText(item?.testType);
   const path = item?.img_drive_root_path !== '' && item?.img_drive_root_path ? item?.img_drive_root_path : pbiaRootDir.value;
   barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, item.slotId, barcodeImgDir.barcodeDirName);
 

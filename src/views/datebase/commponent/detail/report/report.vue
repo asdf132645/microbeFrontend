@@ -45,10 +45,7 @@
             </tr>
             <tr>
               <th>Ordered Classification</th>
-              <td>{{
-                  projectBm ? getBmTestTypeText(selectItems?.testType) : getTestTypeText(selectItems?.testType)
-                }}
-              </td>
+              <td>{{ getTestTypeText(selectItems?.testType) }}</td>
             </tr>
             <tr>
               <th>Name</th>
@@ -225,30 +222,25 @@
   </div>
   <div ref="printContent">
     <Print v-if="printOnOff" @printClose="printClose"/>
-<!--    <Print v-if="printOnOff" :printOnOff="printOnOff" :selectItemWbc="selectItems.wbcInfo.wbcInfo[0]"-->
-<!--           @printClose="printClose"/>-->
   </div>
 </template>
 
 <script setup lang="ts">
 
 
-import WbcClass from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfo.vue";
-import {computed, getCurrentInstance, onBeforeMount, onMounted, onUnmounted, ref, watch} from "vue";
-import {getBmTestTypeText, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
-import {defaultBmClassList, defaultWbcClassList, WbcInfo} from "@/store/modules/analysis/wbcclassification";
+import WbcClass from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
+import { computed, getCurrentInstance, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
+import { defaultWbcClassList, WbcInfo } from "@/store/modules/analysis/wbcclassification";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
 import router from "@/router";
 import RbcClass from "@/views/datebase/commponent/detail/rbc/rbcClass.vue";
 import {useStore} from "vuex";
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
-import {getOrderClassApi, getRbcDegreeApi} from "@/common/api/service/setting/settingApi";
 import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
-import {hospitalSiteCd} from "@/common/siteCd/siteCd";
-import {inhaPercentChange, seoulStMaryPercentChange} from "@/common/lib/commonfunction/classFicationPercent";
 
 const getCategoryName = (category: WbcInfo) => category?.name;
 const store = useStore();
@@ -283,10 +275,6 @@ const pltCount = ref(0);
 const rbcDegreeStandard = ref<any>([]);
 const isCommitChanged = ref(false);
 
-onBeforeMount(() => {
-  projectBm.value = window.PROJECT_TYPE === 'bm';
-})
-
 const handleClickOutside = (event: MouseEvent) => {
   if (printContent.value && !printContent.value.contains(event.target as Node) && printOnOff.value) {
     printClose();
@@ -297,12 +285,10 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(async () => {
   await getDetailRunningInfo();
   isLoading.value = false;
-  await getOrderClass();
   await initData();
 
-  if (!projectBm.value) {
+  if (false) {
     await rbcTotalAndReCount();
-    await getRbcDegreeData();
     await reDegree();
     await calcShapeOthersCount();
   }
@@ -322,18 +308,6 @@ const getDetailRunningInfo = async () => {
   } catch (e) {
     console.log(e);
   }
-}
-
-const percentChangeBySiteCd = () => {
-  const isSeoulStMaryHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '서울성모병원')?.siteCd === siteCd.value;
-  const isInhaHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '인하대병원')?.siteCd === siteCd.value;
-  if (isSeoulStMaryHospitalSiteCd) {
-    console.log(12);
-    wbcInfo.value =  seoulStMaryPercentChange(selectItems.value?.wbcInfoAfter, wbcInfo.value);
-  } else if (isInhaHospitalSiteCd) {
-    wbcInfo.value = inhaPercentChange(selectItems.value, wbcInfo.value);
-  }
-  console.log('wbcInfo', wbcInfo.value);
 }
 
 const calcShapeOthersCount = async () => {
@@ -494,7 +468,6 @@ const percentageChange = (count: any): any => {
 
 // WbC Classification 쪽에서 Order Class 바꿀 시 Print 영역에도 바로 적용시키기 위한 코드
 const classOrderChanged = async () => {
-  await getOrderClass();
   await initData();
 
 }
@@ -529,10 +502,9 @@ const getStringArrayBySiteCd = (siteCd: string, testType: string): string[] => {
 
 const refreshClass = async (data: any) => {
   await getDetailRunningInfo();
-  await getOrderClass();
   await initData();
 
-  if (!projectBm.value) {
+  if (false) {
     await rbcTotalAndReCount();
   }
 }
@@ -541,7 +513,7 @@ const printClose = () => {
   printOnOff.value = false;
 }
 
-const wbcClassTileChange = (): string => !projectBm.value ? 'WBC Classification' : 'BM Classification';
+const wbcClassTileChange = (): string => 'WBC Classification';
 
 const printStart = (event: MouseEvent) => {
   event.stopPropagation(); // 이벤트 전파를 막아 handleClickOutside 실행 방지
@@ -552,24 +524,9 @@ const pageGo = (path: string) => {
   router.push(path)
 }
 
-const getOrderClass = async () => {
-  try {
-    const result = await getOrderClassApi();
-    if (result) {
-      if (result?.data.length === 0) {
-        orderClass.value = [];
-      } else {
-        orderClass.value = result.data.sort((a: any, b: any) => Number(a.orderIdx) - Number(b.orderIdx));
-      }
-    }
-  } catch (e) {
-    console.log(e)
-  }
-}
-
 async function initData(data?: any) {
   if (selectItems.value?.wbcInfoAfter && selectItems.value?.wbcInfoAfter.length !== 0) {
-    let wbcArrs = orderClass.value.length !== 0 ? orderClass.value : window.PROJECT_TYPE === 'bm' ? defaultBmClassList : defaultWbcClassList;
+    let wbcArrs = orderClass.value.length !== 0 ? orderClass.value : defaultWbcClassList;
     const sortedWbcInfo = sortWbcInfo(selectItems.value?.wbcInfoAfter, wbcArrs);
     nonWbcClassList.value = sortedWbcInfo.filter((item: any) => nonWbcTitleArr.includes(item.title));
 
@@ -581,13 +538,11 @@ async function initData(data?: any) {
       // wbcInfo.value = sortedWbcInfo;
     }
   } else {
-    let wbcArrs = orderClass.value.length !== 0 ? orderClass.value : window.PROJECT_TYPE === 'bm' ? defaultBmClassList : defaultWbcClassList;
+    let wbcArrs = orderClass.value.length !== 0 ? orderClass.value : defaultWbcClassList;
     const sortedWbcInfo = sortWbcInfo(selectItems.value?.wbcInfo.wbcInfo[0], wbcArrs);
     nonWbcClassList.value = sortedWbcInfo.filter((item: any) => nonWbcTitleArr.includes(item.title));
     wbcInfo.value = sortedWbcInfo;
   }
-
-  await percentChangeBySiteCd();
 
   rbcInfo.value = selectItems.value?.rbcInfoAfter && selectItems.value?.rbcInfoAfter.length !== 0 ? selectItems.value?.rbcInfoAfter : selectItems.value?.rbcInfo.rbcClass;
 }
@@ -737,16 +692,6 @@ const reDegree = async () => {
     });
   });
 }
-
-const getRbcDegreeData = async () => {
-  try {
-    const result = await getRbcDegreeApi();
-    const data = result.data;
-    rbcDegreeStandard.value = data;
-  } catch (e) {
-    console.log(e);
-  }
-};
 
 const submitStateChanged = (changedSubmitState: string) => {
   if (changedSubmitState) {

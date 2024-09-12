@@ -1,9 +1,4 @@
 <template>
-  <div class="loaderBackgroundForLogin" v-if="isPrintingExcel">
-    <div class="loaderForLogin"></div>
-    <p class="loadingTextLogin">Loading...</p>
-  </div>
-
   <div>
     <h3 class="titleH3">
 <!--      Classification List-->
@@ -92,7 +87,7 @@
     </div>
     <div class='listBox'>
       <ListInfo :dbData="dbGetData" :selectedItem="selectedItem"/>
-      <ListWbcImg :dbData="dbGetData" :selectedItem="selectedItem"/>
+      <ListMoImg :dbData="dbGetData" :selectedItem="selectedItem"/>
     </div>
   </div>
   <Alert
@@ -108,23 +103,15 @@
 
 import ListTable from "@/views/datebase/commponent/list/listTable.vue";
 import ListInfo from "@/views/datebase/commponent/list/listInfo.vue";
-import ListWbcImg from "@/views/datebase/commponent/list/listWbcImg.vue";
-import {
-  computed,
-  getCurrentInstance,
-  onBeforeMount,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-} from "vue";
+import ListMoImg from "@/views/datebase/commponent/list/ListMoImg.vue";
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref } from "vue";
 import { getRunningApi, removePageAllDataApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import moment from "moment/moment";
 import Datepicker from "vue3-datepicker";
 import {formatDate} from "@/common/lib/utils/dateUtils";
-import ListBmImg from "@/views/datebase/commponent/list/listBmImg.vue";
 import Alert from "@/components/commonUi/Alert.vue";
-import {useStore} from "vuex";
-import {useRouter} from "vue-router";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 
 const store = useStore();
@@ -161,7 +148,6 @@ const loadingDelayParents = ref(false);
 const selectedItemIdFalse = ref(false);
 const notStartLoading = ref(false);
 const barcodeInput = ref<HTMLInputElement | null>(null);
-const isPrintingExcel = ref(false);
 
 const inputTimeout = ref<any>(null);
 const bufferDelay = 100; // 입력 완료 감지 지연 시간 (ms)
@@ -371,7 +357,6 @@ const getDbData = async (type: string, pageNum?: number) => {
     barcodeNo: searchType.value === 'barcodeNo' ? searchText.value : undefined,
     patientId: searchType.value === 'patientId' ? searchText.value : undefined,
     patientNm: searchType.value === 'patientNm' ? searchText.value : undefined,
-    nrCount: nrCount.value,
   };
   if (prevDataPage.value === '') {
     prevDataPage.value = requestData.page;

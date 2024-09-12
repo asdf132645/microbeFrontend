@@ -1,15 +1,3 @@
-export const wbcCountOptions = [
-    {value: '100', text: '100 WBC'},
-    {value: '150', text: '150 WBC'},
-    {value: '200', text: '200 WBC'},
-    {value: '250', text: '250 WBC'},
-    {value: '300', text: '300 WBC'},
-    {value: '350', text: '350 WBC'},
-    {value: '400', text: '400 WBC'},
-    {value: '450', text: '450 WBC'},
-    {value: '500', text: '500 WBC'}
-];
-
 export const lpCaptureOptions = [
     { value: '10', text: '10 LP Capture' },
     { value: '20', text: '20 LP Capture' },
@@ -75,3 +63,64 @@ export const slideCard100a = {
         {slotNo: 10, slotState: '0'},
     ]
 };
+
+export const basicMoClassList = [
+    {
+        'id': 0,
+        'name': '',
+        'classInfo': [
+            {
+                'classId': 'WBC',
+                'count': 10,
+            },
+            {
+                'classId': 'EPCell',
+                'count': 10,
+            },
+            {
+                'classId': 'Yeast',
+                'count': 10,
+            },
+            {
+                'classId': 'GPC',
+                'count': 10,
+            },
+            {
+                'classId': 'GPB',
+                'count': 10,
+            },
+            {
+                'classId': 'GNDC',
+                'count': 10,
+            },
+            {
+                'classId': 'GNB',
+                'count': 10,
+            },
+            {
+                'classId': 'GNCB',
+                'count': 10,
+            },
+            {
+                'classId': 'GPC Clusters',
+                'count': 10,
+            },
+            {
+                'classId': 'GPC Pairs',
+                'count': 10,
+            },
+            {
+                'classId': 'GPC Chains',
+                'count': 10,
+            },
+            {
+                'classId': 'GPB Small',
+                'count': 10,
+            },
+            {
+                'classId': 'GPB Large',
+                'count': 10,
+            },
+        ]
+    }
+]

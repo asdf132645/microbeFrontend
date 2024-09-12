@@ -17,14 +17,12 @@
     </div>
     <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
     <div :class="'databaseWbcRight shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
-      <ClassInfo v-if="!isLoading" :wbcInfo="wbcInfo" :selectItems="selectItems" :classCompareShow="classCompareShow"
-                 type='listTable'
-                 @nextPage="nextPage"
-                 @scrollEvent="scrollToElement"/>
+      <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage"/>
     </div>
 
-    <div :class="'databaseWbcLeft' + (cbcLayer ? ' cbcLayer' : '')">
 
+    <div :class="'databaseMoRight' + (cbcLayer ? ' cbcLayer' : '')">
+      <ClassImageInfo :selectItems="selectItems" />
     </div>
   </div>
 
@@ -40,57 +38,54 @@
 </template>
 
 <script setup lang="ts">
-import {computed, getCurrentInstance, onBeforeMount, onMounted, ref, watch} from "vue";
-import {classInfoDetailApi} from "@/common/api/service/runningInfo/runningInfoApi";
-import {useStore} from "vuex";
-
-import {getBmTestTypeText, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
-
+import { computed, getCurrentInstance, onMounted, ref, watch } from "vue";
+import { classInfoDetailApi } from "@/common/api/service/runningInfo/runningInfoApi";
+import { useStore } from "vuex";
+import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
-import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfo.vue";
+import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
 import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
-const wbcInfo = ref<any>(null);
+import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
+import { LocationQueryValue, useRoute } from "vue-router";
 
-const selectItems = ref<any>(null);
+
 const store = useStore();
+const route = useRoute();
+const wbcInfo = ref<any>(null);
+const selectItems = ref<any>(null);
+const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
+
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const iaRootPath = ref<any>(store.state.commonModule.iaRootPath);
-const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const instance = getCurrentInstance();
-const projectType = ref<any>('bm');
-
-
 const isNext = ref(false);
-const classCompareShow = ref(false);
-const isLoading = ref(true);
-const $imageGalleryRef = ref<any>(null);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
 
-
-onBeforeMount(async () => {
-  isLoading.value = false;
-  projectType.value = window.PROJECT_TYPE;
-})
-
 onMounted(async () => {
+  currentSampleId.value = route.query.id;
   await getDetailRunningInfo();
   wbcInfo.value = [];
-
 });
+
+watch(() => route.query.id, async (newId, oldId) => {
+  if (newId !== oldId) {
+    currentSampleId.value = newId;
+    await getDetailRunningInfo();
+  }
+})
 
 const getDetailRunningInfo = async () => {
   try {
-    const result = await classInfoDetailApi(String(selectedSampleId.value));
+    const result = await classInfoDetailApi(currentSampleId.value);
+    console.log('result', result);
     selectItems.value = result.data;
-
-    const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
-    iaRootPath.value = path;
+    iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
 
   } catch (e) {
     console.log(e);
@@ -108,12 +103,6 @@ const isNextFalse = () => {
 watch(userModuleDataGet.value, (newUserId, oldUserId) => {
   userId.value = newUserId.id;
 });
-
-const scrollToElement = (itemId: number) => {
-  if ($imageGalleryRef.value) {
-    $imageGalleryRef.value.scrollToElement(itemId);
-  }
-};
 
 async function updateOriginalDb(notWbcAfterSave?: string) {
 //

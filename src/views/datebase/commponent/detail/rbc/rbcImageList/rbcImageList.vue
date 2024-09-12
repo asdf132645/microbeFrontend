@@ -1,22 +1,8 @@
 <template>
   <div class="rbc-container imgList">
     <div class="btn-container_img_list">
-      <div>
-        <button
-            @click="toggleViewer('lowMag')"
-            class="tab-btn_img_list"
-            :class="{ 'active': activeTab === 'lowMag', 'inactive': activeTab !== 'lowMag'}"
-        >Low magnification
-        </button>
-        <button
-            @click="toggleViewer('malaria')"
-            class="tab-btn_img_list"
-            :class="{ 'active': activeTab === 'malaria', 'inactive': activeTab !== 'malaria' }"
-        >Malaria
-        </button>
-      </div>
       <div class='btn-imgsetbox_img_list' ref="imgSetWrap">
-        <button class="darkButton" @click="imgSetOpen" v-show="activeTab !== 'malaria'">IMG Setting</button>
+        <button class="darkButton" @click="imgSetOpen" >IMG Setting</button>
         <div class="imgSet_img_list" v-show="imgSet_img_list">
           <div>
             <font-awesome-icon :icon="['fas', 'sun']"/>
@@ -108,8 +94,7 @@
       </div>
     </div>
     <div class="tiling-viewer_img_list-box_img_list">
-      <Malaria v-if="activeTab === 'malaria'" :selectItems="selectItems"/>
-      <div v-else-if="activeTab !== 'malaria' && tileExist"
+      <div v-if="tileExist"
            ref="tilingViewerLayer"
            id="tiling-viewer_img_list" style="width: 100%;"
            @contextmenu.prevent="rbcClassRightClick"></div>
@@ -133,9 +118,6 @@
                 <span>{{ classInfo?.classNm }}</span>
               </li>
 
-              <li v-if="classInfo.classNm === 'Basophilic Stippling'" @click="moveRbcClassEvent('05', '03', 'Malaria')">
-                <span>Malaria</span>
-              </li>
 
             </template>
           </ul>
@@ -162,6 +144,14 @@
       @hide="hideAlert"
       @update:hideAlert="hideAlert"
   />
+  <Confirm
+      v-if="showConfirm"
+      :is-visible="showConfirm"
+      :type="confirmType"
+      :message="confirmMessage"
+      @hide="hideConfirm"
+      @okConfirm="handleOkConfirm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -169,7 +159,6 @@ import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} fro
 import OpenSeadragon from 'openseadragon';
 import {rulers} from '@/common/defines/constFile/rbc';
 import {dirName} from "@/common/defines/constFile/settings";
-import Malaria from './Malaria.vue';
 import {readDziFile, readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {useStore} from "vuex";
 import pako from 'pako';
@@ -179,7 +168,6 @@ const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
 const props = defineProps(['rbcInfo', 'selectItems', 'type', 'classInfoArr', 'isBefore']);
-const activeTab = ref('lowMag');
 
 let viewer: any = ref<any>(null);
 const imgSet_img_list = ref(false);
@@ -491,7 +479,6 @@ watch(() => props.selectItems, async (newItem) => {
       viewer.value.destroy(); // 기존 뷰어 인스턴스 파괴
     }
 
-    activeTab.value = 'lowMag';
     await initElement();
   }
 
@@ -951,20 +938,7 @@ const extractSubStringBeforeFiles = (str: string) => {
 
 // Low magnification and Malaria tab
 const toggleViewer = (viewerType: string) => {
-  switch (viewerType) {
-    case 'lowMag':
-      activeTab.value = 'lowMag';
-      break;
-    case 'malaria':
-      activeTab.value = 'malaria';
-      imgSet_img_list.value = false;
-      break;
-  }
-
-  if (activeTab.value !== 'malaria') {
-    initElement();
-    emits('notCanvasClick', false);
-  }
+  emits('notCanvasClick', false);
 };
 
 

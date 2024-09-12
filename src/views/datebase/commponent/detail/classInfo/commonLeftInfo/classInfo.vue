@@ -36,8 +36,43 @@
       </li>
     </ul>
   </div>
-  <div class="moClassScroll">
-<!--    -->
+  <div class="classInfoDetailContainer">
+    <div class="classInfoDetailTop">
+      <h3>Category</h3>
+      <h3>Grade</h3>
+    </div>
+
+    <div v-if="currentAnalysisType === 'Blood'">
+      <h3 style="height: 40px; margin-left: 320px; margin-top: 30px;">Exist</h3>
+      <div v-for="bloodType in bloodTypeList" :key="bloodType" style="width: 100%; display: flex; margin-bottom: 14px;">
+        <p style="width: 340px; margin-left: 40px;">{{ bloodType }}</p>
+        <input type="checkbox" />
+      </div>
+    </div>
+
+    <div v-else-if="currentAnalysisType === 'Urine'">
+      <div style="display: flex; justify-content: space-around; margin-left: 150px;">
+        <div v-for="urineType in fourGrades" :key="urineType" style="width: 100%; display: flex; margin-bottom: 14px;">
+          <h3>{{ urineType }}</h3>
+        </div>
+      </div>
+
+
+      <div v-for="bloodType in urineTypeList" :key="bloodType" style="width: 100%; display: flex; margin-bottom: 14px;">
+        <p style="width: 340px; margin-left: 40px;">{{ bloodType }}</p>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+
+    </div>
+
+    <div v-else-if="currentAnalysisType === 'Sputum'">
+
+    </div>
+
+
   </div>
   <Alert
       v-if="showAlert"
@@ -58,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, defineProps, nextTick, onBeforeMount, onMounted, ref, watch} from 'vue';
+import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import {getBarcodeDetailImageUrl} from "@/common/lib/utils/conversionDataUtils";
 import {barcodeImgDir} from "@/common/defines/constFile/settings";
 
@@ -70,16 +105,16 @@ import {useStore} from "vuex";
 import {messages} from "@/common/defines/constFile/constantMessageText";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
+import moment from 'moment';
 
-
-const props = defineProps(['wbcInfo', 'selectItems', 'type', 'isCommitChanged', 'classCompareShow']);
+const props = defineProps(['selectItems', 'type', 'isCommitChanged']);
 const store = useStore();
 const userModuleDataGet = computed(() => store.state.userModule);
 const emits = defineEmits();
-import moment from 'moment';
+
 
 const selectItems = ref(props.selectItems);
-const pbiaRootDir = computed(() => store.state.commonModule.iaRootPath);
+const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const userId = ref('');
 const wbcMemo = ref('');
@@ -93,16 +128,19 @@ const alertMessage = ref('');
 const showConfirm = ref(false);
 const confirmType = ref('');
 const confirmMessage = ref('');
-const projectBm = ref(false);
 const okMessageType = ref('');
 const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
+const analysisType = ref(['Blood', 'Urine', 'Sputum']);
+const bloodTypeList = ref(['GPC Clusters', 'GPC Pairs', 'GPC Chains', 'GNB', 'GPB Small', 'GPB Large', 'GNDC', 'GNCB', 'Yeast']);
+const currentAnalysisType = ref('Urine');
+const urineTypeList = ref(['WBC', 'GPC', 'GNB', 'GPB']);
+const fourGrades = ['Rare', 'Few', 'Moderate', 'Many'];
 
-onBeforeMount(async () => {
-  projectBm.value = window.PROJECT_TYPE === 'bm';
+onMounted(() => {
+  testBarcodeImage();
 })
-
 
 watch(() => props.isCommitChanged, () => {
   selectItems.value.submitState = 'Submit';
@@ -115,9 +153,13 @@ watch(userModuleDataGet.value, (newUserId) => {
 watch(() => props.selectItems, async (newItem) => {
   await nextTick();
   if (Object.keys(newItem).length !== 0) {
+    setTestType(newItem.cassetId);
+
     wbcMemo.value = props.selectItems?.wbcMemo;
-    const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : pbiaRootDir.value;
-    barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
+
+    /** TODO 바코드 이미지 */
+    // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
+
     await store.dispatch('commonModule/setCommonInfo', {testType: props.selectItems.testType});
     if (props.selectItems?.submitState === "" || !props.selectItems?.submitState) {
       const result: any = detailRunningApi(String(props.selectItems?.id));
@@ -130,6 +172,27 @@ watch(() => props.selectItems, async (newItem) => {
     barCodeImageShowError.value = false;
   }
 });
+
+const testBarcodeImage = () => {
+  const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
+  const iaRootPath = 'D:\\MOIA_proc';
+  barcodeImg.value = `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + '/20240906153702_02_MO-0036/' + barcodeImgDir.barcodeDirName + '/'}&imageName=barcode_image.jpg`;
+}
+
+const testAfterBarcodeImage = (imgDriveRootPath: string) => {
+  const path = imgDriveRootPath !== '' && imgDriveRootPath ? imgDriveRootPath : iaRootPath.value;
+  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
+}
+
+const setTestType = (cassetId: string) => {
+  if (cassetId.includes('B')) {
+    currentAnalysisType.value = 'Blood';
+  } else if (cassetId.includes('U')) {
+    currentAnalysisType.value = 'Urine';
+  } else if (cassetId.includes('S')) {
+    currentAnalysisType.value = 'Sputum';
+  }
+}
 
 const lisModalOpen = () => {
   showConfirm.value = true;

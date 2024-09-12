@@ -3,13 +3,13 @@
     <ul>
 
       <template v-if="true">
-        <li :class='{ "onRight": isActive("/imagesComponent?pageType=LP") }' @click="pageGo('/imagesComponent?pageType=LP')">
+        <li :class='{ "onRight": isActive(`/imagesComponent?id=${currentSampleId}&pageType=LP`) }' @click="pageGo(`/imagesComponent?id=${currentSampleId}&pageType=LP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'disease']"/>
           </p>
           <p>LP Image</p>
         </li>
-        <li v-if="!isLoading" :class='{ "onRight": isActive("/imagesComponent?pageType=HP") }' @click="pageGo('/imagesComponent?pageType=HP')">
+        <li v-if="!isLoading" :class='{ "onRight": isActive(`/imagesComponent?id=${currentSampleId}&pageType=HP`) }' @click="pageGo(`/imagesComponent?id=${currentSampleId}&pageType=HP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'clipboard']"/>
           </p>
@@ -18,7 +18,7 @@
       </template>
 
     </ul>
-    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }' v-if="projectType !== 'bm'">
+    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }'>
       <font-awesome-icon :icon="['fas', 'desktop']"/>
       <p>LIS-CBC</p>
     </div>
@@ -55,7 +55,6 @@ import {
 } from "vue";
 import router from "@/router";
 
-import {ApiResponse} from "@/common/api/httpClient";
 import {
   classInfoMenuDetailSelectQueryApi,
   clearPcIpState,
@@ -64,30 +63,29 @@ import {
   updatePcIpStateApi
 } from "@/common/api/service/runningInfo/runningInfoApi";
 import {useStore} from "vuex";
-import {useRoute} from "vue-router";
-import {getOrderClassApi} from "@/common/api/service/setting/settingApi";
-import {defaultBmClassList, defaultWbcClassList} from "@/store/modules/analysis/wbcclassification";
+import {LocationQueryValue, useRoute} from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 
+const instance = getCurrentInstance();
+const store = useStore();
+const route = useRoute();
 const emits = defineEmits();
+const props = defineProps(['isNext']);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const projectType = ref<any>('bm');
 const selectItems = ref<any>(null);
 const resData = ref<any>([]);
 const wbcInfo = ref<any>([]);
-const instance = getCurrentInstance();
-const store = useStore();
+const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
 const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId);
-const route = useRoute();
-const orderClass = ref<any>([]);
+
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const isButtonDisabled = ref(false);
 let timeoutId: number | undefined = undefined;
 const pageMoveDeleteStop = ref(false);
-const props = defineProps(['isNext']);
+
 const ipAddress = ref<any>('');
 const isLoading = ref(true);
 const keepPage = ref('');
@@ -96,21 +94,14 @@ const testType = computed(() => store.state.commonModule.testType);
 const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFirstNum);
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
 
-watch(props.isNext, (newVal) => {
-  if (newVal) {
-    moveWbc('down')
-  }
-});
-
 onBeforeMount(async () => {
-  projectType.value = window.PROJECT_TYPE;
   await getDetailRunningInfo();
   isLoading.value = false;
-  const keepPageType = projectType.value === 'bm' ? 'bmKeepPage' : 'keepPage';
-  keepPage.value = JSON.parse(JSON.stringify(sessionStorage.getItem(keepPageType)));
+  keepPage.value = JSON.parse(JSON.stringify(sessionStorage.getItem('keepPage')));
 })
 
 onMounted(async () => {
+  currentSampleId.value = route.query.id;
   pageMoveDeleteStop.value = true;
   const ip = await getDeviceIpApi();
   ipAddress.value = ip.data;
@@ -122,6 +113,12 @@ onUnmounted(async () => {
   }
   await store.dispatch('commonModule/setCommonInfo', {cbcLayer: false});
 })
+
+watch(props.isNext, (newVal) => {
+  if (newVal) {
+    moveWbc('down')
+  }
+});
 
 const getDetailRunningInfo = async () => {
   try {
@@ -158,8 +155,8 @@ const deleteConnectionStatus = async () => {
 const upDownBlockAccess = async (selectItems: any) => {
   try {
             const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const { startDate, endDate, page, searchText, testType } = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `oldPcIp=${ipAddress.value}&newEntityId=${resData.value?.id}&newPcIp=${ipAddress.value}&dayQuery=${dayQuery}`
     await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(resData.value?.id)});
 
@@ -173,20 +170,6 @@ const upDownBlockAccess = async (selectItems: any) => {
   }
 }
 
-const getOrderClass = async () => {
-  try {
-    const result = await getOrderClassApi();
-    if (result) {
-      if (result?.data.length === 0) {
-        orderClass.value = [];
-      } else {
-        orderClass.value = result.data.sort((a: any, b: any) => Number(a.orderIdx) - Number(b.orderIdx));
-      }
-    }
-  } catch (e) {
-    console.log(e)
-  }
-}
 const delayedEmit = (type: string, payload: string, delay: number) => {
   if (socketTimeoutId !== undefined) {
     clearTimeout(socketTimeoutId); // 이전 타이머 클리어
@@ -243,7 +226,6 @@ const moveWbc = async (direction: any) => {
     clearTimeout(timeoutId);
   }
   isButtonDisabled.value = true; // 버튼 비활성화
-  await getOrderClass(); // 클래스 정보를 업데이트
   await processNextDbIndex(direction, selectItems.value?.id);
 
   timeoutId = window.setTimeout(() => {
@@ -275,7 +257,7 @@ const handleDataResponse = async (dbId: any, res: any) => {
 const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
 
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(selectItemsNewVal.id)});
-  if ((projectType.value === 'pb' && selectItems.value?.testType === '01' && isActive("/databaseRbc")) || (!keepPage.value || keepPage.value === "false")) {
+  if ((selectItems.value?.testType === '01' && isActive("/databaseRbc")) || (!keepPage.value || keepPage.value === "false")) {
     pageGo('/imagesComponent');
   }
   emits('refreshClass', selectItemsNewVal);
@@ -284,7 +266,6 @@ const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
 };
 
 const isActive = (path: string) => {
-  console.log(route)
   return route.fullPath === path;
 };
 

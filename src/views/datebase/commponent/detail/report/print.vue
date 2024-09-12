@@ -8,8 +8,7 @@
     </button>
     <div ref="printContent" style="margin-top: 20px;">
       <div>
-        <h3 style="margin: 10px 0; font-size: 1.2rem; font-weight: 600; text-align: center;">Analysis Report from UIMD
-          {{ projectType === 'bm' ? 'BM' : 'PB' }} system</h3>
+        <h3 style="margin: 10px 0; font-size: 1.2rem; font-weight: 600; text-align: center;">Analysis Report from UIMD MO system</h3>
       </div>
       <div style="display: flex; flex-direction: column; justify-content: space-between;">
         <table style="width: 100%; font-size: 0.8rem;">
@@ -36,10 +35,7 @@
           </tr>
           <tr style="padding-bottom: 5px;">
             <th style="text-align: left;">Ordered Classification</th>
-            <td style="text-align: left; padding: 5px 0;">{{
-                projectType === 'pb' ? getTestTypeText(selectItems?.testType) : getBmTestTypeText(selectItems?.testType)
-              }}
-            </td>
+            <td style="text-align: left; padding: 5px 0;">{{ getTestTypeText(selectItems?.testType) }}</td>
           </tr>
           <tr style="padding-bottom: 5px;">
             <th style="text-align: left; padding: 5px 0;">Name</th>
@@ -178,17 +174,6 @@
               <td style="text-align: left; padding: 5px 0;">{{ selectItems?.wbcInfo?.totalCount }}</td>
               <td style="text-align: left; padding: 5px 0;">100.00%</td>
             </tr>
-
-
-            <th style="text-align: left; padding-top: 30px; font-weight: bold;" v-if="projectType !== 'bm'">non-Wbc</th>
-
-              <template v-for="item in filteredWbcInfo(wbcInfo, 'nonWbc')" :key="item.id">
-                <tr style="padding-top: 5px; padding-bottom: 15px;" v-if="projectType !== 'bm'">
-                  <td style="text-align: left; padding: 5px 0; width: 30%;">{{ item.name }}</td>
-                  <td style="text-align: left; padding: 5px 0; width: 45%;">{{ item.count }}</td>
-                  <td style="text-align: left; padding: 5px 0; width: 25%;">-</td>
-                </tr>
-              </template>
             <tr style="padding-bottom: 5px;">
               <th style="text-align: left; padding: 15px 0;">Comment</th>
               <td v-show="selectItems?.wbcMemo" colspan="2" style="text-align: left; padding: 5px 0;">
@@ -233,18 +218,16 @@
 
 
 <script setup lang="ts">
-import {computed, defineEmits, onMounted, ref, watchEffect} from "vue";
-import {getTestTypeText, getBmTestTypeText} from "@/common/lib/utils/conversionDataUtils";
-import {getImagePrintApi, getOrderClassApi} from "@/common/api/service/setting/settingApi";
+import { computed, defineEmits, onMounted, ref } from "vue";
+import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
+import { getImagePrintApi } from "@/common/api/service/setting/settingApi";
 import {useStore} from "vuex";
 import pako from 'pako';
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
-import {basicBmClassList, basicWbcArr} from "@/store/modules/analysis/wbcclassification";
+import { basicWbcArr } from "@/store/modules/analysis/wbcclassification";
 import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {disableScroll, enableScroll} from "@/common/lib/utils/scrollBlock";
-import {hospitalSiteCd} from "@/common/siteCd/siteCd";
-import {inhaPercentChange, seoulStMaryPercentChange} from "@/common/lib/commonfunction/classFicationPercent";
 
 const projectType = window.PROJECT_TYPE;
 const store = useStore();
@@ -493,7 +476,7 @@ function getImageUrl(imageName: any, id: string, title: string): string {
 
   const path = selectItems.value.img_drive_root_path !== '' && selectItems.value.img_drive_root_path ? selectItems.value.img_drive_root_path : iaRootPath.value;
   const slotId = selectItems.value.slotId || "";
-  const folderPath = projectType === 'bm' ? `${path}/${slotId}/04_BM_Classification/${id}_${title}` : `${path}/${slotId}/01_WBC_Classification/${id}_${title}`;
+  const folderPath = `${path}/${slotId}/01_WBC_Classification/${id}_${title}`;
   return `${apiBaseUrl}/images/print?folder=${folderPath}&imageName=${imageName}`;
 }
 
@@ -558,10 +541,9 @@ const getImagePrintData = async () => {
 
       // wbcClassification Order 적용
       const oArr = orderClass.value.sort((a: any, b: any) => Number(a.orderIdx) - Number(b.orderIdx));
-      const sortArr = orderClass.value.length !== 0 ? oArr : projectType === 'bm' ? basicBmClassList : basicWbcArr;
+      const sortArr = orderClass.value.length !== 0 ? oArr : basicWbcArr;
       const sortedWbcInfoData = await sortWbcInfo(wbcInfo.value, sortArr);
       wbcInfo.value = sortedWbcInfoData;
-      percentChangeBySiteCd(siteCd.value, wbcInfo.value);
     }
   } catch (e) {
     console.error(e);
@@ -585,18 +567,6 @@ const sortWbcInfo = (wbcInfo: any, basicWbcArr: any) => {
   // 정렬된 배열을 wbcInfo에 할당
   return wbcInfo.splice(0, wbcInfo.length, ...newSortArr);
 };
-
-const percentChangeBySiteCd = async (siteCd: string, wbcInfo: any) => {
-  const isSeoulStMaryHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '서울성모병원')?.siteCd === siteCd;
-  const isInhaHospitalSiteCd = hospitalSiteCd.find((item) => item.hospitalNm === '인하대병원')?.siteCd === siteCd;
-  if (isSeoulStMaryHospitalSiteCd) {
-    wbcInfo.value = seoulStMaryPercentChange(wbcInfo, wbcInfo);
-  } else if (isInhaHospitalSiteCd) {
-    wbcInfo.value = await inhaPercentChange(selectItems.value, wbcInfo);
-  }
-
-  console.log('제발', wbcInfo.value);
-}
 
 const closePrint = () => {
   emit('printClose');
