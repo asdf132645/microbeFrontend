@@ -7,7 +7,7 @@
     <div class='loginContent'>
       <p class="loginTitle"><span class="loginColorSpan">U</span>IMD</p>
       <p class='loginP mt2'>Unique Idea Medical Device</p>
-      <div class="mt3 loginDiv">
+      <div class="mt30 loginDiv">
         <ul class="loginUl">
           <li>
             <input class="loginInput" type="text" v-model="idVal" placeholder="ID">

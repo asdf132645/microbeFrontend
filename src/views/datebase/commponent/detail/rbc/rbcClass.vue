@@ -2,7 +2,7 @@
   <!--  {{ jsonIsBool }}-->
   <div v-show="jsonIsBool" class="createdRbc"> Creating a new RBC classification ...</div>
   <div>
-    <div class="mt1 flexSpaceBetween">
+    <div class="mt1 flex-justify-between">
       <h3 class="wbcClassInfoLeft">RBC Classification</h3>
       <ul class="leftWbcInfo rbcClass">
         <li style="position: relative">

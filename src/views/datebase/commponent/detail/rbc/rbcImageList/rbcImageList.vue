@@ -19,7 +19,7 @@
           <div>
             <font-awesome-icon :icon="['fas', 'palette']"/>
             <span>RGB [ {{ `${imageRgb[0]} , ${imageRgb[1]}, ${imageRgb[2]}` }} ]</span>
-            <div class="alignItemsCenter">
+            <div class="flex-align-center">
               <label>R</label>
               <input
                   type="range"
@@ -29,7 +29,7 @@
                   @input="changeImageRgb"
               />
             </div>
-            <div class="alignItemsCenter">
+            <div class="flex-align-center">
               <label>G</label>
               <input
                   type="range"
@@ -39,7 +39,7 @@
                   @input="changeImageRgb"
               />
             </div>
-            <div class="alignItemsCenter">
+            <div class="flex-align-center">
               <label>B</label>
               <input
                   type="range"

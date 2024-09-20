@@ -46,7 +46,6 @@ export interface SlotInfo {
     isLowPowerScan: string;
     tactTime: string;
     lowPowerPath: string[];
-    isNsNbIntegration: string;
     seqNo: string;
     path: string;
     isHighPowerScan: string;

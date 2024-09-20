@@ -6,7 +6,7 @@ const instance = getCurrentInstance();
 const store = useStore();
 
 // appHeader page
-export const sendSettingInfoWebSocket = (isOilReset: string, oilCount: string, userId: string, isNsNbIntegration: string) => {
+export const sendSettingInfoWebSocket = (isOilReset: string, oilCount: string, userId: string) => {
     const settings = tcpReq().embedStatus.settings;
     settings.reqUserId = userId;
 
@@ -14,7 +14,6 @@ export const sendSettingInfoWebSocket = (isOilReset: string, oilCount: string, u
         oilCount,
         isOilReset,
         // uiVersion: 'uimd-pb-comm_v3',
-        isNsNbIntegration: isNsNbIntegration,
     });
     sendMessage(settings);
 }

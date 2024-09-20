@@ -16,7 +16,8 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import socketPlugin from '@/plugins/socketPlugin';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
-import { faHalfCircleUp, faHalfCircleDown } from './icons/customIcons'; // 커스텀 아이콘 불러오기
+import { faHalfCircleUp, faHalfCircleDown } from './icons/customIcons';
+import {QueryClient, VueQueryPlugin} from "@tanstack/vue-query"; // 커스텀 아이콘 불러오기
 /// <reference path="../types/webapi.d.ts" />
 
 library.add(fas);
@@ -26,11 +27,22 @@ library.add(faHalfCircleDown); // 커스텀 아이콘 추가
 
 const app = createApp(App);
 
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5,
+        }
+    }
+})
+
+
 
 // Vuex store 및 router 등록
+app.use(VueQueryPlugin, { queryClient });
 app.use(router);
 app.use(store);
 app.use(socketPlugin);
+
 
 app.component('font-awesome-icon', FontAwesomeIcon);
 

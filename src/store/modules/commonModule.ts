@@ -1,5 +1,6 @@
 // commonModule.ts
 import {Commit} from 'vuex';
+import { BeforeAfterStatusType } from "#/database/image";
 
 export interface CommonState {
     startEmbedded: boolean;
@@ -47,7 +48,6 @@ export interface CommonState {
     dataBasePageReset: boolean;
     resetAnalyzing: boolean;
     testType: string;
-    isNsNbIntegration: string;
     analysisType: string;
     beforeSettingFormattedString: string;
     afterSettingFormattedString: string;
@@ -59,6 +59,7 @@ export interface CommonState {
     enteringRouterPath: string;
     settingType: string;
     isDownloadOrUploading: boolean;
+    databaseDetailBeforeAfterStatus: BeforeAfterStatusType;
 }
 
 interface CommonModule {
@@ -112,7 +113,6 @@ interface CommonModule {
         setDataBasePageReset: (state: CommonState, value: boolean) => void;
         setResetAnalyzing: (state: CommonState, value: boolean) => void;
         setTestType: (state: CommonState, value: string) => void;
-        setIsNsNbIntegration: (state: CommonState, value: string) => void;
         setAnalysisType: (state: CommonState, value: string) => void;
         setBeforeSettingFormattedString: (state: CommonState, value: string) => void;
         setAfterSettingFormattedString: (state: CommonState, value: string) => void;
@@ -124,6 +124,7 @@ interface CommonModule {
         setEnteringRouterPath: (state: CommonState, value: string) => void;
         setSettingType: (state: CommonState, value: string) => void;
         setIsDownloadOrUploading: (state: CommonState, value: boolean) => void;
+        setDatabaseDetailBeforeAfterStatus: (state: CommonState, value: BeforeAfterStatusType) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -178,7 +179,6 @@ export const commonModule: CommonModule = {
         dataBasePageReset: false,
         resetAnalyzing: false,
         testType: '',
-        isNsNbIntegration: 'N',
         analysisType: '',
         beforeSettingFormattedString: '',
         afterSettingFormattedString: '',
@@ -190,6 +190,7 @@ export const commonModule: CommonModule = {
         enteringRouterPath: '',
         settingType: '',
         isDownloadOrUploading: false,
+        databaseDetailBeforeAfterStatus: 'before',
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -337,9 +338,6 @@ export const commonModule: CommonModule = {
         setTestType(state: CommonState, value: string): void {
             state.testType = value;
         },
-        setIsNsNbIntegration(state: CommonState, value: string): void {
-            state.isNsNbIntegration = value;
-        },
         setAnalysisType(state: CommonState, value: string): void {
             state.analysisType = value;
         },
@@ -372,6 +370,9 @@ export const commonModule: CommonModule = {
         },
         setIsDownloadOrUploading(state: CommonState, value: boolean): void {
             state.isDownloadOrUploading = value;
+        },
+        setDatabaseDetailBeforeAfterStatus(state: CommonState, value: BeforeAfterStatusType): void {
+            state.databaseDetailBeforeAfterStatus = value;
         }
     },
     actions: {
@@ -521,9 +522,6 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('testType')){
                 commit('setTestType', payload.testType);
             }
-            if (payload.hasOwnProperty('isNsNbIntegration')) {
-                commit('setIsNsNbIntegration', payload.isNsNbIntegration);
-            }
             if (payload.hasOwnProperty('analysisType')) {
                 commit('setAnalysisType', payload.analysisType);
             }
@@ -556,6 +554,9 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('isDownloadOrUploading')) {
                 commit('setIsDownloadOrUploading', payload.isDownloadOrUploading);
+            }
+            if (payload.hasOwnProperty('databaseDetailBeforeAfterStatus')) {
+                commit('setDatabaseDetailBeforeAfterStatus', payload.databaseDetailBeforeAfterStatus);
             }
         },
     },

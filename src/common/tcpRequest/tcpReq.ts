@@ -78,7 +78,6 @@ export const tcpReq:any = () => {
                 isOilReset: '',
                 deviceType: '01',
                 // uiVersion: 'web',
-                isNsNbIntegration: '',
             },
             oilPrime: {
                 jobCmd: 'OIL_PRIME',

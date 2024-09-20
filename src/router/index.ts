@@ -7,7 +7,7 @@ import setting from '@/views/setting/index.vue'
 import Database from '@/views/datebase/index.vue';
 import DatabaseRbc from '@/views/datebase/commponent/detail/rbc/listDetailRbc.vue';
 import Report from '@/views/datebase/commponent/detail/report/report.vue';
-import imagesComponent from '@/views/datebase/commponent/detail/classInfo/imagesComponent.vue';
+import databaseDetail from '@/views/datebase/commponent/detail/classInfo/databaseDetail.vue';
 
 import {useStore} from "vuex";
 import {computed} from "vue";
@@ -46,9 +46,9 @@ const router = createRouter({
             component: Database,
         },
         {
-            path: '/imagesComponent',
-            name: 'imagesComponent',
-            component: imagesComponent,
+            path: '/databaseDetail/:id',
+            name: 'databaseDetail',
+            component: databaseDetail,
         },
         {
             path: '/databaseRbc',

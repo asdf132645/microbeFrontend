@@ -99,3 +99,18 @@ export function parseXMLToJSON(xml: any): any {
     return obj;
 }
 
+export const calculateSputumStatus = (moInfo: any) => {
+    const EPCellCount = Number(moInfo.find((item: any) => item.classNm === 'EP Cell').count);
+    const WBCCount = Number(moInfo.find((item: any) => item.classNm === 'WBC').count);
+    const EPCellWBCRatio = (EPCellCount / WBCCount);
+    if (EPCellCount > 25 && WBCCount < 10) return '1';
+    if (EPCellCount > 25 && (10 <= WBCCount && WBCCount <= 25)) return '2';
+    if (EPCellCount > 25 && WBCCount > 25 && EPCellWBCRatio < 10) return '3-1';
+    if (EPCellCount > 25 && WBCCount > 25 && EPCellWBCRatio >= 10) return '3-2';
+    if ((10 <= EPCellCount && EPCellCount >= 25) && WBCCount > 25 && EPCellWBCRatio < 10) return '4-1';
+    if ((10 <= EPCellCount && EPCellCount >= 25) && WBCCount > 25 && EPCellWBCRatio >= 10) return '4-2';
+    if (EPCellCount < 10 && WBCCount > 25) return '5';
+    if (EPCellCount < 10 && WBCCount < 10) return '6';
+
+    return '2';
+}

@@ -17,7 +17,7 @@
     </div>
     <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
     <div :class="'databaseWbcRight shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
-      <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage"/>
+        <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage" />
     </div>
 
 
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref, watch } from "vue";
-import { classInfoDetailApi } from "@/common/api/service/runningInfo/runningInfoApi";
+import { detailRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
 import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
@@ -48,6 +48,7 @@ import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
 import { LocationQueryValue, useRoute } from "vue-router";
+import {beforeAfterStatus} from "@/common/defines/constFile/dataBase";
 
 
 const store = useStore();
@@ -59,7 +60,7 @@ const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
-const iaRootPath = ref<any>(store.state.commonModule.iaRootPath);
+const iaRootPath = ref<string>(store.state.commonModule.iaRootPath);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const instance = getCurrentInstance();
 const isNext = ref(false);
@@ -68,12 +69,12 @@ const alertType = ref('');
 const alertMessage = ref('');
 
 onMounted(async () => {
-  currentSampleId.value = route.query.id;
+  currentSampleId.value = route.params.id;
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
 
-watch(() => route.query.id, async (newId, oldId) => {
+watch(() => route.params.id, async (newId, oldId) => {
   if (newId !== oldId) {
     currentSampleId.value = newId;
     await getDetailRunningInfo();
@@ -82,13 +83,13 @@ watch(() => route.query.id, async (newId, oldId) => {
 
 const getDetailRunningInfo = async () => {
   try {
-    const result = await classInfoDetailApi(currentSampleId.value);
-    console.log('result', result);
+    const result = await detailRunningApi(currentSampleId.value);
     selectItems.value = result.data;
-    iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
-
   } catch (e) {
+    selectItems.value = {};
     console.log(e);
+  } finally {
+    iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   }
 }
 
@@ -112,11 +113,11 @@ const hideAlert = () => {
   showAlert.value = false;
 }
 const refreshClass = async (data: any) => {
-
-  await getDetailRunningInfo();
+  // await getDetailRunningInfo();
   selectItems.value = data;
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
-
+  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: beforeAfterStatus.BEFORE })
 }
+
 </script>

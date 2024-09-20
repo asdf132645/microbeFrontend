@@ -9,7 +9,6 @@ export interface cbcCodeItem {
     cd: string;
     classCd: string;
     fullNm: string;
-    isSelected: boolean;
 }
 
 export interface UpdateCbcCodeRbcDto {

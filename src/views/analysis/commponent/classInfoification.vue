@@ -125,8 +125,6 @@ const totalCount = ref<string>("0");
 const maxWbcCount = ref<string>('');
 const emits = defineEmits();
 
-const isNsNbIntegration = sessionStorage.getItem('isNsNbIntegration');
-
 onMounted(() => {
   updateDataArray( basicBmClassList, null, true);
 });

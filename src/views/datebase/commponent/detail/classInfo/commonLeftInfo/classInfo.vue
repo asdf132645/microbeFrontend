@@ -1,7 +1,7 @@
 <template>
   <img class="mt1" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
   <div class="mt1" v-else-if="barCodeImageShowError" style="height: 209.5px;"></div>
-  <div class="mt1 mb2 flexSpaceBetween">
+  <div class="mt1 mb2 flex-justify-between">
     <h3 class="wbcClassInfoLeft">
       Micro-organism Smear total Report
     </h3>
@@ -10,10 +10,10 @@
       <li @click="barcodeCopy">
         <font-awesome-icon :icon="['fas', 'copy']"/>
       </li>
-      <li style="position: relative">
+      <li class="relative">
         <font-awesome-icon :icon="['fas', 'comment-dots']" class="memoOpenBtn" @click="memoOpen"/>
         <div v-if="memoModal" class="memoModal">
-          <textarea v-model="wbcMemo"></textarea>
+          <textarea v-model="memo"></textarea>
           <button class="memoModalBtn" @click="memoChange">OK</button>
           <button class="memoModalBtn" @click="memoCancel">CANCEL</button>
         </div>
@@ -36,44 +36,103 @@
       </li>
     </ul>
   </div>
+
+<!-- 무조건 Total 값으로 계산 -->
   <div class="classInfoDetailContainer">
     <div class="classInfoDetailTop">
       <h3>Category</h3>
       <h3>Grade</h3>
     </div>
 
-    <div v-if="currentAnalysisType === 'Blood'">
-      <h3 style="height: 40px; margin-left: 320px; margin-top: 30px;">Exist</h3>
-      <div v-for="bloodType in bloodTypeList" :key="bloodType" style="width: 100%; display: flex; margin-bottom: 14px;">
-        <p style="width: 340px; margin-left: 40px;">{{ bloodType }}</p>
-        <input type="checkbox" />
+    <div v-if="currentAnalysisType === moTestType.BLOOD">
+      <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
+        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+        <input
+            type="checkbox"
+            :checked="`${category[databaseDetailBeforeAfterStatus + 'Grade']}` === 'Exist'"
+            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+            @click="handleClickGrade"
+        />
       </div>
+
+      <div class="mt22"></div>
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
+        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+        <input
+            type="checkbox"
+            :checked="`${category[databaseDetailBeforeAfterStatus + 'Grade']}` === 'Exist'"
+            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+            @click="handleClickGrade"
+        />
+      </div>
+
     </div>
 
-    <div v-else-if="currentAnalysisType === 'Urine'">
-      <div style="display: flex; justify-content: space-around; margin-left: 150px;">
-        <div v-for="urineType in fourGrades" :key="urineType" style="width: 100%; display: flex; margin-bottom: 14px;">
-          <h3>{{ urineType }}</h3>
+    <div v-else-if="currentAnalysisType === moTestType.URINE && moInfoTotal.classInfo">
+      <div class="flex-justify-around ml150">
+        <div v-for="grade in fourGrades" :key="grade" class="w-full flex-justify-center mb14">
+          <h3>{{ grade }}</h3>
         </div>
       </div>
 
+      <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm">
+        <label style="width: 240px;">{{ category?.classNm }}</label>
+        {{ category[databaseDetailBeforeAfterStatus + 'Grade'] }}
+        <input
+            v-for="grade in fourGrades"
+            :key="grade"
+            :name="category?.classNm"
+            style="margin-top: 2px; width: 24px;"
+            type="radio"
+            :value="grade"
+            v-model="category[databaseDetailBeforeAfterStatus + 'Grade']"
+            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+            @click="handleClickGrade"
+        />
+      </div>
 
-      <div v-for="bloodType in urineTypeList" :key="bloodType" style="width: 100%; display: flex; margin-bottom: 14px;">
-        <p style="width: 340px; margin-left: 40px;">{{ bloodType }}</p>
-        <input type="checkbox" />
-        <input type="checkbox" />
-        <input type="checkbox" />
-        <input type="checkbox" />
+      <div class="mt24 flex-align-center" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm">
+        <h3>{{ category.classNm }}</h3>
+        <div class="w-full flex-column-center">
+          <label>Exist</label>
+          <input
+              :class="['mt12 flex-column-center', { 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+              type="checkbox"
+              v-model="category[databaseDetailBeforeAfterStatus + 'Grade']"
+              true-value="Exist"
+              false-value="None"
+              :checked="category[databaseDetailBeforeAfterStatus + 'Grade'] === 'Exist'"
+              @click="handleClickGrade"
+          />
+        </div>
+
       </div>
 
     </div>
 
-    <div v-else-if="currentAnalysisType === 'Sputum'">
+    <div v-else-if="currentAnalysisType === moTestType.SPUTUM">
 
     </div>
 
 
   </div>
+
+  <div class="flex-center mt24 gap12">
+    <button
+        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+        @click="changeBeforeAfterStatus(beforeAfterStatus.BEFORE)"
+    >
+      Before
+    </button>
+    <button
+        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === beforeAfterStatus.AFTER }]"
+        @click="changeBeforeAfterStatus(beforeAfterStatus.AFTER)"
+    >
+      After
+    </button>
+  </div>
+
   <Alert
       v-if="showAlert"
       :is-visible="showAlert"
@@ -93,35 +152,33 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
-import {getBarcodeDetailImageUrl} from "@/common/lib/utils/conversionDataUtils";
-import {barcodeImgDir} from "@/common/defines/constFile/settings";
+import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch, watchEffect} from 'vue';
+import {getBarcodeDetailImageUrl, getCurrentAnalysisType} from "@/common/lib/utils/conversionDataUtils";
+import { barcodeImgDir } from "@/common/defines/constFile/settings";
 
-import {
-  detailRunningApi,
-  updateRunningApi
-} from "@/common/api/service/runningInfo/runningInfoApi";
-import {useStore} from "vuex";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
+import { useStore } from "vuex";
+import { messages } from "@/common/defines/constFile/constantMessageText";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import moment from 'moment';
+import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
+import {LocationQueryValue, useRoute} from "vue-router";
+import {beforeAfterStatus, fourGrades, moCategory, moTestType, powerMode} from "@/common/defines/constFile/dataBase";
 
-const props = defineProps(['selectItems', 'type', 'isCommitChanged']);
 const store = useStore();
-const userModuleDataGet = computed(() => store.state.userModule);
+const route = useRoute();
+const props = defineProps(['selectItems', 'type', 'isCommitChanged']);
 const emits = defineEmits();
+const userModuleDataGet = computed(() => store.state.userModule);
 
 
 const selectItems = ref(props.selectItems);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
-const userId = ref('');
-const wbcMemo = ref('');
+const memo = ref('');
 const memoModal = ref(false);
-
 const toggleLock = ref(false);
-
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -132,46 +189,54 @@ const okMessageType = ref('');
 const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
-const analysisType = ref(['Blood', 'Urine', 'Sputum']);
-const bloodTypeList = ref(['GPC Clusters', 'GPC Pairs', 'GPC Chains', 'GNB', 'GPB Small', 'GPB Large', 'GNDC', 'GNCB', 'Yeast']);
-const currentAnalysisType = ref('Urine');
-const urineTypeList = ref(['WBC', 'GPC', 'GNB', 'GPB']);
-const fourGrades = ['Rare', 'Few', 'Moderate', 'Many'];
+const currentAnalysisType = ref(moTestType.URINE);
+const currentPageType = ref<LocationQueryValue | LocationQueryValue[]>(powerMode.LOW_POWER);
+const moInfoTotal = ref<any>([]);
+const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
 
 onMounted(() => {
   testBarcodeImage();
 })
 
-watch(() => props.isCommitChanged, () => {
-  selectItems.value.submitState = 'Submit';
+// watch(() => props.isCommitChanged, () => {
+//   selectItems.value?.submitState = 'Submit';
+// })
+
+watch(() => route.query.pageType, async (newPageType) => {
+  await nextTick();
+  currentPageType.value = newPageType;
+  if (selectItems.value) {
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
+    selectTotalItems(selectItems.value);
+    console.log('moInfoTotal.value', moInfoTotal.value);
+  }
 })
 
-watch(userModuleDataGet.value, (newUserId) => {
-  userId.value = newUserId.id;
-});
-
-watch(() => props.selectItems, async (newItem) => {
+watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
-  if (Object.keys(newItem).length !== 0) {
-    setTestType(newItem.cassetId);
+  selectItems.value = newSelectItems;
 
-    wbcMemo.value = props.selectItems?.wbcMemo;
-
+  if (!isObjectEmpty(newSelectItems)) {
+    currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
+    selectTotalItems(newSelectItems);
+    memo.value = selectItems.value?.moMemo;
     /** TODO 바코드 이미지 */
     // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
 
-    await store.dispatch('commonModule/setCommonInfo', {testType: props.selectItems.testType});
-    if (props.selectItems?.submitState === "" || !props.selectItems?.submitState) {
-      const result: any = detailRunningApi(String(props.selectItems?.id));
-      const updatedItem = {
-        submitState: 'checkFirst',
-      };
+    await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value?.testType});
+    if (newSelectItems?.submitState === "" || !newSelectItems?.submitState) {
+      const result: any = detailRunningApi(String(newSelectItems?.id));
+      const updatedItem = { id: newSelectItems.id ,submitState: 'checkFirst' };
       const updatedRuningInfo = {...result.data, ...updatedItem}
       await resRunningItem(updatedRuningInfo, true);
     }
     barCodeImageShowError.value = false;
   }
-});
+}, { deep: true });
+
+const selectTotalItems = (newSelectItems: any) => {
+  moInfoTotal.value = newSelectItems?.moInfo.find((item: any) => item.id === '2');
+}
 
 const testBarcodeImage = () => {
   const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
@@ -181,17 +246,7 @@ const testBarcodeImage = () => {
 
 const testAfterBarcodeImage = (imgDriveRootPath: string) => {
   const path = imgDriveRootPath !== '' && imgDriveRootPath ? imgDriveRootPath : iaRootPath.value;
-  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
-}
-
-const setTestType = (cassetId: string) => {
-  if (cassetId.includes('B')) {
-    currentAnalysisType.value = 'Blood';
-  } else if (cassetId.includes('U')) {
-    currentAnalysisType.value = 'Urine';
-  } else if (cassetId.includes('S')) {
-    currentAnalysisType.value = 'Sputum';
-  }
+  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, selectItems.value?.slotId, barcodeImgDir.barcodeDirName);
 }
 
 const lisModalOpen = () => {
@@ -227,9 +282,6 @@ const handleOkConfirm = () => {
   showConfirm.value = false;
 }
 
-
-
-
 const hideConfirm = () => {
   showConfirm.value = false;
 }
@@ -245,16 +297,14 @@ const onCommit = async () => {
   const updatedRuningInfo = {...result.data, ...updatedItem}
   await resRunningItem(updatedRuningInfo);
 
-  selectItems.value.submitState = 'Submit';
+  // selectItems.value?.submitState = 'Submit';
   emits('submitStateChanged', 'Submit');
 }
 
 
 const memoChange = async () => {
-  const enterAppliedWbcMemo = wbcMemo.value.replaceAll('\r\n', '<br>');
-  const updatedItem = {
-    wbcMemo: enterAppliedWbcMemo
-  };
+  const enterAppliedMoMemo = memo.value.replaceAll('\r\n', '<br>');
+  const updatedItem = { moMemo: enterAppliedMoMemo };
   const result: any = await detailRunningApi(String(props.selectItems?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
 
@@ -270,11 +320,18 @@ const memoCancel = () => {
   memoModal.value = false;
 }
 
+const handleClickGrade = async () => {
+  const result = await detailRunningApi(String(selectItems.value?.id));
+  const updatedItem = { moInfo: selectItems.value.moInfo };
+  const updatedRunningInfo = {...result.data, ...updatedItem}
+  await resRunningItem(updatedRunningInfo, true);
+}
+
 const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
   try {
     const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const {startDate, endDate, page, searchText, testType } = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
     const response = await updateRunningApi({
       userId: Number(userModuleDataGet.value.id),
       runingInfoDtoItems: [updatedRuningInfo],
@@ -284,8 +341,7 @@ const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
       if (!noAlert) {
         showSuccessAlert('success');
       }
-      const filteredItems = updatedRuningInfo;
-      wbcMemo.value = filteredItems.wbcMemo;
+      memo.value = updatedRuningInfo.moMemo;
     } else {
       console.error('백엔드가 디비에 저장 실패함');
     }
@@ -300,6 +356,7 @@ const showSuccessAlert = (message: string) => {
   alertMessage.value = message;
   window.scrollTo({top: 0, behavior: 'smooth'});
 };
+
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
   alertType.value = 'error';
@@ -317,4 +374,10 @@ const onImageError = () => {
 const onLoadImg = () => {
   barCodeImageShowError.value = false;
 }
+
+const changeBeforeAfterStatus = async (clickedStatus: string) => {
+  if (databaseDetailBeforeAfterStatus.value === clickedStatus) return;
+  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: clickedStatus });
+}
+
 </script>

@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import {computed, defineProps, onMounted, ref, watch} from 'vue';
 import {useStore} from "vuex";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItem']);
 const store = useStore();
@@ -60,7 +61,8 @@ function createAllImages(): void {
   if (!props.selectedItem?.wbcInfo) {
     return;
   }
-  if (Object.keys(props.selectedItem?.wbcInfo).length === 0) {
+
+  if (isObjectEmpty(props.selectedItem?.wbcInfo)) {
     return;
   }
   allImages.value = props.selectedItem?.wbcInfo?.wbcInfo[0]?.reduce((acc: any, item: any) => {

@@ -20,7 +20,6 @@ const defaultCellImgData = {
     edgeShotType: '0',
     bfCellAnalyzingCount: '100',
     iaRootPath: 'D:\\MOIA_proc',
-    isNsNbIntegration: false,
     isAlarm: false,
     alarmCount: '5',
     keepPage: false,
@@ -104,7 +103,6 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
                 edgeShotType: defaultCellImgData.edgeShotType,
                 bfCellAnalyzingCount: defaultCellImgData.bfCellAnalyzingCount,
                 iaRootPath: defaultCellImgData.iaRootPath,
-                isNsNbIntegration: defaultCellImgData.isNsNbIntegration ? 'Y' : 'N',
                 isAlarm: defaultCellImgData.isAlarm,
                 alarmCount: defaultCellImgData.alarmCount,
                 keepPage: defaultCellImgData.keepPage,
@@ -125,7 +123,6 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
 const afterResponse = (initializeType: string) => {
     switch (initializeType) {
         case 'cellImage':
-            sessionStorage.setItem('isNsNbIntegration', defaultCellImgData.isNsNbIntegration ? 'Y' : 'N');
             sessionStorage.setItem('wbcPositionMargin', String(defaultCellImgData?.diffWbcPositionMargin));
             sessionStorage.setItem('rbcPositionMargin', String(defaultCellImgData?.diffRbcPositionMargin));
             sessionStorage.setItem('pltPositionMargin', String(defaultCellImgData?.diffPltPositionMargin));

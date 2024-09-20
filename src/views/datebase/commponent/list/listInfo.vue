@@ -1,7 +1,6 @@
 <!-- ListInfo.vue -->
 <template>
-
-  <div v-if="Object.keys(selectedItem).length !== 0">
+  <div v-if="!isObjectEmpty(selectedItem)">
     <div>
       <h3 class="orderTitle hh3title">Order Information</h3>
       <div class="orderListWrapper" style="padding: 0;">
@@ -37,7 +36,7 @@
 import { ref, defineProps, onMounted, watch, computed } from 'vue';
 import {barcodeImgDir} from "@/common/defines/constFile/settings";
 import {useStore} from "vuex";
-
+import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 const store = useStore();
 const props = defineProps(['selectedItem']);
 const iaRootPath = ref(store.state.commonModule.iaRootPath);

@@ -183,7 +183,12 @@ import {
 } from 'vue';
 import router from "@/router";
 import Modal from "@/components/commonUi/modal.vue";
-import {deleteRunningApi, updatePcIpStateApi, updateRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
+import {
+  deleteRunningApi,
+  detailRunningApi,
+  updatePcIpStateApi,
+  updateRunningApi
+} from "@/common/api/service/runningInfo/runningInfoApi";
 import {useStore} from "vuex";
 import {messages} from "@/common/defines/constFile/constantMessageText";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
@@ -191,6 +196,7 @@ import Alert from "@/components/commonUi/Alert.vue";
 import moment from "moment";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {barcodeImgDir} from "@/common/defines/constFile/settings";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItemIdFalse', 'notStartLoading', 'loadingDelayParents']);
 const loadMoreRef = ref(null);
@@ -391,7 +397,7 @@ const rowRightClick = async (item, event) => {
 
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: item.id});
   rightClickItem.value = item;
-  if (Object.keys(item?.wbcInfo).length !== 0) {
+  if (!isObjectEmpty(item?.wbcInfo)) {
     const wbcInfoData = item?.wbcInfo?.wbcInfo[0];
     const sortedArray = wbcInfoData.sort((a, b) => a.id - b.id);
     selectItemWbc.value = sortedArray;
@@ -513,7 +519,11 @@ const rowDbClick = async (item) => {
 
   await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: item.id });
   await getIpAddress(item);
-  await router.push(`/imagesComponent?id=${item.id}&pageType=LP`);
+  await router.push({
+    name: 'databaseDetail',
+    params: { id: item.id },
+    query: { pageType: 'LP' }
+  });
 }
 
 const closeLayer = (val) => {
@@ -540,9 +550,10 @@ const dbDataEditSet = async () => {
     if (indexToUpdate !== -1) {
       localDbData[indexToUpdate] = {...localDbData[indexToUpdate], ...updatedRuningInfo};
     }
+
     const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const { startDate, endDate, page, searchText, testType } = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
     const response = await updateRunningApi({
       userId: Number(userModuleDataGet.value.id),
       runingInfoDtoItems: [localDbData[indexToUpdate]],

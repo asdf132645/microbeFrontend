@@ -1,10 +1,10 @@
 <template>
   <header class='header'>
     <nav>
-      <div class='appHeaderLeft' :class="{ 'bmComponent': projectBm }" v-if="!appHeaderLeftHidden">
+      <div class='appHeaderLeft bmComponent' v-if="!appHeaderLeftHidden">
         <div class="borderLine">
           <img src="@/assets/celli.png" class="headerLogo"/>
-          <p class="logoProjectTitle">{{ projectBm ? 'BM' : 'PB' }}</p>
+          <p class="logoProjectTitle">MO</p>
         </div>
         <router-link :to="noRouterPush ? '#' : '/setting'"
                      :class='{ "leftActive": isActive("/setting"), "disabledLink": noRouterPush }'>
@@ -21,7 +21,7 @@
         </router-link>
 
         <router-link to="/dataBase"
-                     :class='{ "leftActive": isActive("/dataBase") || isActive("/imagesComponent?pageType=LP") || isActive("/imagesComponent?pageType=HP") || isActive("/databaseRbc") || isActive("/report") || isActive("/databaseWhole") }'>
+                     :class='{ "leftActive": isActive("/dataBase") || isActive("/databaseDetail") || isActive("/report") }'>
           <font-awesome-icon :icon="['fas', 'server']"
                              style="font-size: 1rem;"
           />
@@ -84,12 +84,12 @@
       <div class="immersionOilContainer">
         <h5 class="modalTitle mb1">Immersion Oil count Reset</h5>
         <span class="grayText">Reset Immersion Oil count after changing Oil pack</span>
-        <div class="flexSpaceBetween alignItemsCenter mt1">
+        <div class="flex-justify-between flex-align-center mt1">
           <span>Estimated number of slides left</span>
           <span class="f18">{{ oilCount }}</span>
         </div>
 
-        <div class="flexColumnAlignEnd">
+        <div class="flex-column-align-end">
           <div ref="statusBarWrapper" class="statusBarWrapper">
             <div ref="statusBar" class="statusBar"></div>
           </div>
@@ -102,7 +102,7 @@
       <div class='mt2'>
         <h5 class="modalTitle mb1">Prime Immersion Oil</h5>
         <span class="grayText mt1">Prime oil to remove air from the oil hose</span>
-        <div class="flexColumnAlignEnd">
+        <div class="flex-column-align-end">
           <div class="statusBarWrapper">
           </div>
           <button type="button" @click='onPrime' :class="{'alertButton': true, 'blinkGripper': isBlinkingPrime}">Prime
@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import {useRoute} from 'vue-router';
+import {LocationQueryValue, useRoute} from 'vue-router';
 import {computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 import router from "@/router";
@@ -184,7 +184,6 @@ const statusBarWrapper = ref<HTMLDivElement | null>(null);
 const statusBar = ref<HTMLDivElement | null>(null);
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
-const isNsNbIntegration = ref(sessionStorage.getItem('isNsNbIntegration') || '');
 const analysisType = computed(() => store.state.commonModule.analysisType);
 const alarmCount = ref(0);
 const noRouterPush = ref(false);
@@ -194,10 +193,10 @@ let isAralrmInterver = null;
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const projectBm = ref(false);
 const clickType = ref('');
 const userSetOutUl = ref(false);
 const isStartCountUpdated = ref(false);
+const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
 
 const keydownHandler = (e: KeyboardEvent) => {
   if (e.ctrlKey && ['61', '107', '173', '109', '187', '189'].includes(String(e.which))) {
@@ -259,9 +258,8 @@ const fullScreen = () => {
 }
 
 onMounted(async () => {
-  // 현재 프로젝트가 bm인지 확인하고 클래스 부여
-  projectBm.value = window.PROJECT_TYPE === 'bm' ? true : false;
 
+  currentSampleId.value = route.params.id;
   updateDateTime(); // 초기 시간 설정
   const timerId = setInterval(updateDateTime, 1000); // 1초마다 현재 시간을 갱신
   // 컴포넌트가 해제되기 전에 타이머를 정리하여 메모리 누수를 방지
@@ -367,7 +365,7 @@ const hideAlert = () => {
 };
 
 const isActive = (path: string) => {
-  return route.fullPath === path;
+  return route.fullPath.includes(path);
 };
 
 const logout = () => {
@@ -463,7 +461,6 @@ const onReset = () => {
     isOilReset: 'Y',
     // uiVersion: 'uimd-pb-comm_v3',
     userId: '',
-    isNsNbIntegration: isNsNbIntegration.value || '',
   });
   instance?.appContext.config.globalProperties.$socket.emit('message', {
     type: 'SEND_DATA',
@@ -509,18 +506,7 @@ const cellImgGet = async () => {
     if (result) {
       if (result?.data) {
         const data = result.data;
-
-        await store.dispatch('commonModule/setCommonInfo', {isNsNbIntegration: data.isNsNbIntegration ? 'Y' : 'N'});
         alarmCount.value = data?.isAlarm ? Number(data.alarmCount) * 1000 : 5000;
-        await store.dispatch('dataBaseSetDataModule/setDataBaseSetData', {
-          isNsNbIntegration: data?.isNsNbIntegration ? 'Y' : 'N'
-        });
-        // 공통으로 사용되는 부분 세션스토리지 저장 새로고침시에도 가지고 있어야하는부분
-        sessionStorage.setItem('isNsNbIntegration', data.isNsNbIntegration ? 'Y' : 'N');
-        sessionStorage.setItem('wbcPositionMargin', data?.diffWbcPositionMargin);
-        sessionStorage.setItem('rbcPositionMargin', data?.diffRbcPositionMargin);
-        sessionStorage.setItem('pltPositionMargin', data?.diffPltPositionMargin);
-        sessionStorage.setItem('edgeShotType', String(data?.edgeShotType));
         sessionStorage.setItem('iaRootPath', data?.iaRootPath);
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
 

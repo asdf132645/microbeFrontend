@@ -112,6 +112,7 @@ import {formatDate} from "@/common/lib/utils/dateUtils";
 import Alert from "@/components/commonUi/Alert.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 
 const store = useStore();
@@ -292,7 +293,8 @@ const initDbData = async () => {
   // const lastQuery = loadLastQuery();
   const lastSearchParams = loadLastSearchParams();
   // 이전 검색 조건 적용
-  if (Object.keys(lastSearchParams).length !== 0) {
+
+  if (!isObjectEmpty(lastSearchParams)) {
     searchType.value = lastSearchParams.searchType || 'barcodeNo';
     searchText.value = lastSearchParams.searchText || '';
     startDate.value = new Date(lastSearchParams.startDate) || new Date();
@@ -410,7 +412,7 @@ const getDbData = async (type: string, pageNum?: number) => {
         }
 
         if (titleItem.value.length === 0) {
-          titleItem.value = dbGetData.value[0]?.wbcInfo?.wbcInfo[0];
+          titleItem.value = dbGetData.value[0]?.moInfo;
         }
 
         if (wbcCountOrder.value === '' || wbcCountOrder.value === 'all') {

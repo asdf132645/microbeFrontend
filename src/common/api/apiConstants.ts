@@ -1,5 +1,3 @@
-import {remainingCount} from "@/common/api/service/setting/settingApi";
-
 export const apiConstants = {
     auth: {
         refresh: {

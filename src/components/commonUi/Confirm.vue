@@ -1,11 +1,13 @@
 <template>
-  <div v-if="isVisible" class="alert" :class="typeClass">
-    <p class="mb1">
-      {{ message }}
-    </p>
-    <button class="alertButton" @click="okConfirm">{{ confirmText || 'OK' }}</button>
-    <button class="alertCloseButton" @click="hideConfirm">{{ closeText || 'CLOSE' }}</button>
-  </div>
+  <Teleport to="body">
+    <div v-if="isVisible" class="alert" :class="typeClass">
+      <p class="mb1">
+        {{ message }}
+      </p>
+      <button class="alertButton" @click="okConfirm">{{ confirmText || 'OK' }}</button>
+      <button class="alertCloseButton" @click="hideConfirm">{{ closeText || 'CLOSE' }}</button>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

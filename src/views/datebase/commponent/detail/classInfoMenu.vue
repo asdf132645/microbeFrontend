@@ -3,13 +3,13 @@
     <ul>
 
       <template v-if="true">
-        <li :class='{ "onRight": isActive(`/imagesComponent?id=${currentSampleId}&pageType=LP`) }' @click="pageGo(`/imagesComponent?id=${currentSampleId}&pageType=LP`)">
+        <li :class='{ "onRight": isActive("LP") }' @click="pageGo(`/databaseDetail/${currentSampleId}?pageType=LP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'disease']"/>
           </p>
           <p>LP Image</p>
         </li>
-        <li v-if="!isLoading" :class='{ "onRight": isActive(`/imagesComponent?id=${currentSampleId}&pageType=HP`) }' @click="pageGo(`/imagesComponent?id=${currentSampleId}&pageType=HP`)">
+        <li v-if="!isLoading" :class='{ "onRight": isActive("HP") }' @click="pageGo(`/databaseDetail/${currentSampleId}?pageType=HP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'clipboard']"/>
           </p>
@@ -18,10 +18,10 @@
       </template>
 
     </ul>
-    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }'>
-      <font-awesome-icon :icon="['fas', 'desktop']"/>
-      <p>LIS-CBC</p>
-    </div>
+<!--    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }'>-->
+<!--      <font-awesome-icon :icon="['fas', 'desktop']"/>-->
+<!--      <p>LIS-CBC</p>-->
+<!--    </div>-->
     <div class="wbcMenuBottom">
       <button @click="moveWbc('up')" :disabled="isButtonDisabled">
         <font-awesome-icon :icon="['fas', 'circle-up']"/>
@@ -79,7 +79,6 @@ const selectItems = ref<any>(null);
 const resData = ref<any>([]);
 const wbcInfo = ref<any>([]);
 const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
-const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId);
 
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const isButtonDisabled = ref(false);
@@ -95,13 +94,13 @@ const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFir
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
 
 onBeforeMount(async () => {
+  currentSampleId.value = route.params.id;
   await getDetailRunningInfo();
   isLoading.value = false;
   keepPage.value = JSON.parse(JSON.stringify(sessionStorage.getItem('keepPage')));
 })
 
 onMounted(async () => {
-  currentSampleId.value = route.query.id;
   pageMoveDeleteStop.value = true;
   const ip = await getDeviceIpApi();
   ipAddress.value = ip.data;
@@ -122,10 +121,9 @@ watch(props.isNext, (newVal) => {
 
 const getDetailRunningInfo = async () => {
   try {
-    const result = await classInfoMenuDetailSelectQueryApi(String(selectedSampleId.value));
+    const result = await classInfoMenuDetailSelectQueryApi(String(currentSampleId.value));
     selectItems.value = result.data;
     await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value.testType});
-
     resData.value = result.data;
   } catch (e) {
     console.log(e);
@@ -190,9 +188,9 @@ const pageGo = (path: string) => {
 
 async function pageUpDownRunnIng(id: number, step: string, type: string) {
   try {
-            const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+    const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
+    const {startDate, endDate, page, searchText, testType} = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `id=${id}&step=${step}&type=${type}&dayQuery=${dayQuery}`
     const res = await pageUpDownRunnIngApi(req);
     if (res.data !== null) {
@@ -242,23 +240,18 @@ const processNextDbIndex = async (direction: any, id: number) => {
     alertMessage.value = 'Someone else is editing.';
     return;
   }
-  await handleDataResponse(res?.id, res);
+  await handleDataResponse();
 };
 
-const handleDataResponse = async (dbId: any, res: any) => {
+const handleDataResponse = async () => {
   if (!resData.value) return;
   selectItems.value = resData.value;
-
-  const resClassInfo = resData.value?.wbcInfoAfter.length === 0 ? resData.value?.wbcInfo?.wbcInfo[0] : resData.value?.wbcInfoAfter;
-  await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(dbId)});
-  await updateUpDown(resClassInfo, resData.value);
+  await updateUpDown(resData.value);
 };
 
-const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
-
-  await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(selectItemsNewVal.id)});
-  if ((selectItems.value?.testType === '01' && isActive("/databaseRbc")) || (!keepPage.value || keepPage.value === "false")) {
-    pageGo('/imagesComponent');
+const updateUpDown = async (selectItemsNewVal: any) => {
+  if ((selectItems.value?.testType === '01' && isActive("database")) || (!keepPage.value || keepPage.value === "false")) {
+    pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType="LP"`);
   }
   emits('refreshClass', selectItemsNewVal);
   pageMoveDeleteStop.value = true;
@@ -266,7 +259,7 @@ const updateUpDown = async (selectWbc: any, selectItemsNewVal: any) => {
 };
 
 const isActive = (path: string) => {
-  return route.fullPath === path;
+  return route.fullPath.includes(path);
 };
 
 const lisCbcClick = () => {

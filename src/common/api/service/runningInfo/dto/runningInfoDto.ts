@@ -1,54 +1,78 @@
 // runing-info.interface.ts
 
-interface WbcInfo {
-    categoryId: string;
-    categoryNm: string;
-    classInfo: ClassInfo[];
-}
-
-interface RbcInfo {
-    title: string;
-    name: string;
-    count: string;
-    images: any[];
-}
-
-interface ClassInfo {
-    classId: string;
-    classNm: string;
-    degree: string;
-}
-
-interface RuningInfo {
-    id?: number;
-    state?: boolean;
-    slotNo?: string;
-    traySlot?:string;
+interface RunningInfoRequest {
+    id: number;
+    lock_status: boolean;
+    traySlot: string;
+    slotNo: string;
     barcodeNo: string;
     patientId: string;
     patientNm: string;
     gender: string;
     birthDay: string;
-    wbcCount: string;
     slotId: string;
-    orderDttm: Date;
+    orderDttm: string;
     testType: string;
-    analyzedDttm: Date;
-    stateCd: string;
+    analyzedDttm: string;
     tactTime: string;
-    maxWbcCount: string;
-    lowPowerPath: any[];
-    runningPath: any[];
-    wbcInfo: WbcInfo[];
-    rbcInfo: RbcInfo[];
-    userId: number;
+    totalMoCount: string;
     cassetId: string;
     isNormal: string;
-    submitState?:string;
-    submitOfDate?: Date;
-    submitUserId?:string;
-    isNsNbIntegration?: string;
-    img_drive_root_path?: string;
+    moInfo: MoInfo[];
+    submitState: string;
+    submitOfDate: Date;
+    submitUserId: string;
+    moMemo: string;
+    pcIp: string;
+    cbcPatientNo: string;
+    cbcPatientNm: string;
+    cbcSex: string;
+    cbcAge: string;
+    img_drive_root_path: string;
+}
+
+interface RunningInfoResponse {
+    id: number;
+    lock_status: boolean;
+    traySlot: string;
+    slotNo: string;
+    barcodeNo: string;
+    patientId: string;
+    patientNm: string;
+    gender: string;
+    birthDay: string;
+    slotId: string;
+    orderDttm: string;
+    testType: string;
+    analyzedDttm: string;
+    tactTime: string;
+    totalMoCount: string;
+    cassetId: string;
+    isNormal: string;
+    moInfo: MoInfo[];
+    submitState: string;
+    submitOfDate: Date;
+    submitUserId: string;
+    moMemo: string;
+    pcIp: string;
+    cbcPatientNo: string;
+    cbcPatientNm: string;
+    cbcSex: string;
+    cbcAge: string;
+    img_drive_root_path: string;
+}
+
+interface MoInfo {
+    id: string;
+    name?: string;
+    classInfo: ClassInfo[];
+}
+
+interface ClassInfo {
+    count: string;
+    classNm: string;
+    beforeGrade: string;
+    afterGrade: string;
 }
 
 
@@ -71,4 +95,4 @@ interface RuningInfoApiRequest {
 }
 
 
-export { RuningInfo, WbcInfo, RbcInfo, ClassInfo, RunningInfoRes, RuningInfoApiRequest };
+export { ClassInfo, RuningInfoApiRequest, RunningInfoRequest, RunningInfoResponse };

@@ -1,14 +1,16 @@
 <!-- Alert.vue -->
 <template>
-  <div v-if="isVisible" class="alert" :class="typeClass">
-    <p v-if="props.type === 'error'">
-      <font-awesome-icon :icon="['fas', 'circle-exclamation']" class="bigFont" />
-    </p>
-    <p class="mb1 alertMessage">
-      {{ message }}
-    </p>
-    <button class="alertButton" @click="hideAlert">Close</button>
-  </div>
+  <Teleport to="body">
+    <div v-if="isVisible" class="alert" :class="typeClass">
+      <p v-if="props.type === 'error'">
+        <font-awesome-icon :icon="['fas', 'circle-exclamation']" class="bigFont" />
+      </p>
+      <p class="mb1 alertMessage">
+        {{ message }}
+      </p>
+      <button class="alertButton" @click="hideAlert">Close</button>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

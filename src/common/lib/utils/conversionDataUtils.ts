@@ -1,5 +1,5 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
-import { testType } from "@/common/defines/constFile/dataBase";
+import {moTestType, testType} from "@/common/defines/constFile/dataBase";
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
 
@@ -31,4 +31,10 @@ export const getTestTypeText = (value: string) => {
 export const getBarcodeDetailImageUrl =  (imageName: string, iaRootPath: string, slotId: string, barcodeDirName: string): string => {
     const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
     return `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + "/" + slotId + "/" + barcodeDirName + "/"}&imageName=${imageName}`;
+}
+
+export const getCurrentAnalysisType = (cassetId: string) => {
+    if (cassetId.includes('B')) return moTestType.BLOOD;
+    if (cassetId.includes('U')) return moTestType.URINE;
+    return moTestType.SPUTUM;
 }

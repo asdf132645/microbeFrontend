@@ -172,14 +172,14 @@
     <div v-show="possibleUploadFileNames.length > 0" class="downloadDeleteContainer">
       <p class="downloadDeleteSemiTitle">Select upload file</p>
       <ul class="downloadDeleteWrapper">
-        <li class="userSelectText flexSpaceBetween" v-for="folderName in possibleUploadFileNames" :key="folderName">
+        <li class="userSelectText flex-justify-between" v-for="folderName in possibleUploadFileNames" :key="folderName">
           <p style="font-size: 0.8rem;">{{ folderName }}</p>
           <input style="margin: 0;" v-model="selectedUploadFile" type="radio" :value="folderName" />
         </li>
 
       </ul>
     </div>
-    <p class="mt4" v-show="possibleUploadFileNames.length === 0">No files</p>
+    <p class="mt40" v-show="possibleUploadFileNames.length === 0">No files</p>
     <div class="uploadModalBtnContainer">
       <template v-if="possibleUploadFileNames.length > 0">
         <button class="memoModalBtn" @click="handleUploadSelectFile">{{ messages.UPLOAD }}</button>
@@ -351,7 +351,6 @@ const filterNumbersOnly = (event: Event) => {
 const driveGet = async () => {
   try {
     const result = await getDrivesApi();
-    console.log('제발', result);
     if (result) {
       if (!result?.data) {
       } else {

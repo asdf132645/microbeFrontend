@@ -56,6 +56,7 @@ import { basicWbcArr } from "@/common/defines/constFile/classArr";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import axios from "axios";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -77,7 +78,6 @@ const slotIndex = computed(() => store.state.commonModule.slotIndex);
 const siteCd = computed(() => store.state.commonModule.siteCd);
 const isDownloadOrUploading = computed(() => store.state.commonModule.isDownloadOrUploading);
 
-const isNsNbIntegrationLocal = ref('N');
 const runningArr: any = ref<any>([]);
 const classArr = ref<any>([]);
 const rbcArr = ref<any>([]);
@@ -517,8 +517,9 @@ async function socketData(data: any) {
         let wbcInfoNewVal: any = [];
         const getDefaultWbcInfo = () => { wbcInfo: [basicWbcArr] };
         const getDefaultWbcInfoAfter = () => [basicWbcArr];
-        const updateWbcInfo = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfo() : newWbcInfo;
-        const updateWbcInfoAfter = () => Object.keys(newWbcInfo).length === 0 ? getDefaultWbcInfoAfter() : newWbcInfo?.wbcInfo[0];
+
+        const updateWbcInfo = () => isObjectEmpty(newWbcInfo) ? getDefaultWbcInfo() : newWbcInfo;
+        const updateWbcInfoAfter = () => isObjectEmpty(newWbcInfo) ? getDefaultWbcInfoAfter() : newWbcInfo?.wbcInfo[0];
 
         wbcInfoNewVal = updateWbcInfo();
         wbcInfoAfter = updateWbcInfoAfter();
@@ -548,7 +549,6 @@ async function socketData(data: any) {
           submitState: '',
           submitOfDate: '',
           submitUserId: '',
-          isNsNbIntegration: isNsNbIntegrationLocal.value || '',
           wbcMemo: '',
         }
 
@@ -655,8 +655,6 @@ const sendSettingInfo = () => {
     oilCount: '1000',
     isOilReset: 'N',
     deviceType: '01',
-    // uiVersion: 'uimd-pb-comm_v2.0.102',
-    isNsNbIntegration: isNsNbIntegrationLocal.value,
   };
   store.dispatch('commonModule/setCommonInfo', {reqArr: req});
 }

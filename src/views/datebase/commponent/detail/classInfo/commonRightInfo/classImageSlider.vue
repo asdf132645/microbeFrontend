@@ -13,21 +13,17 @@
 
 <script setup lang="ts">
 
-import {onMounted, ref, defineEmits, defineProps, watch} from "vue";
+import { ref, defineProps } from "vue";
 import { useStore } from "vuex";
 
 const store = useStore();
 const hiddenImages = ref<{ [key: string]: boolean }>({});
-const selectedImage = ref('');
-const emits = defineEmits();
 const props = defineProps(['allImages', 'viewer']);
 const iaRootPath = ref(store.state.commonModule.iaRootPath);
 const apiBaseUrl = window.MAIN_API_IP;
 
 const selectImage = (imageFileName: string, imageIndex: number) => {
-  props.allImages.indexOf()
   props.viewer.goToPage(imageIndex);
-    emits('selectImage', imageFileName);
 }
 
 const hideImage = (fileName: string) => {
