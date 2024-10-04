@@ -4,7 +4,7 @@
     <div class="flex-column-justify-center">
       <div class="flex-justify-center-align-start mt40">
         <div class="flex-center">
-          <span class="arrowBox">
+          <span class="arrowBox leftArrow">
           <font-awesome-icon :icon="['fas', 'arrow-left']" @click="handleImageArrow('left')" />
         </span>
 
@@ -23,7 +23,7 @@
             </div>
           </div>
 
-          <span class="arrowBox">
+          <span class="arrowBox rightArrow">
           <font-awesome-icon :icon="['fas', 'arrow-right']" @click="handleImageArrow('right')" />
         </span>
         </div>
@@ -90,7 +90,6 @@ watch(() => props.selectItems, async (newSelectItems) => {
     if (viewer.value) {
       viewer.value.destroy(); // 기존 뷰어 인스턴스 파괴
     }
-
     await initElement();
   }
 })

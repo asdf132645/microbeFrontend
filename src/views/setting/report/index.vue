@@ -1,11 +1,9 @@
 <template>
   <div>
     <div class="settingTabSubButtons">
-      <button @click="selectTab('ImagePrint')" :class="{ 'active': activeTab === 'ImagePrint' }">Image Print</button>
-      <div v-if="!projectBm">
-        <button @click="selectTab('CbcCode')" :class="{ 'active': activeTab === 'CbcCode' }">CBC Code</button>
-        <button @click="selectTab('filePathSet')" :class="{ 'active': activeTab === 'filePathSet' }">CBC File Path</button>
-      </div>
+<!--      <button @click="selectTab('ImagePrint')" :class="{ 'active': activeTab === 'ImagePrint' }">Image Print</button>-->
+      <button @click="selectTab('CbcCode')" :class="{ 'active': activeTab === 'CbcCode' }">CBC Code</button>
+      <button @click="selectTab('filePathSet')" :class="{ 'active': activeTab === 'filePathSet' }">CBC File Path</button>
     </div>
 
     <div class="tab-content">
@@ -37,7 +35,7 @@
 import ImagePrint from "@/views/setting/report/component/ImagePrint.vue";
 import cbcCode from "@/views/setting/report/component/cbcCode.vue";
 import FilePathSet from '@/views/setting/report/component/filePathSet.vue';
-import { computed, ref, onBeforeMount } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import {messages} from "@/common/defines/constFile/constantMessageText";
 import Confirm from "@/components/commonUi/Confirm.vue";
@@ -45,8 +43,7 @@ import {settingUpdate} from "@/common/lib/utils/settingSave";
 import Alert from "@/components/commonUi/Alert.vue";
 
 const store = useStore();
-const projectBm = ref(false);
-let activeTab = ref('ImagePrint');
+let activeTab = ref('CbcCode');
 const movingTab = ref('');
 const showAlert = ref(false);
 const alertType = ref('');
@@ -56,10 +53,6 @@ const confirmMessage = ref('');
 const settingType = computed(() => store.state.commonModule.settingType);
 const beforeSettingFormattedString = computed(() => store.state.commonModule.beforeSettingFormattedString);
 const afterSettingFormattedString = computed(() => store.state.commonModule.afterSettingFormattedString);
-
-onBeforeMount(() => {
-  projectBm.value = window.PROJECT_TYPE === 'bm' ? true : false;
-})
 
 const selectTab = (tabName: string) => {
   if (activeTab.value === tabName) return;
@@ -74,8 +67,8 @@ const selectTab = (tabName: string) => {
 
 const selectedTabComponent = computed(() => {
   switch (activeTab.value) {
-    case 'ImagePrint':
-      return ImagePrint;
+    // case 'ImagePrint':
+    //   return ImagePrint;
     case 'CbcCode':
       return cbcCode;
     case 'filePathSet':

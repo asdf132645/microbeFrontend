@@ -56,15 +56,7 @@
           </div>
         </template>
         <template v-if="category.classNm === 'Yeast'">
-          <label class="mt24">Exist</label>
-          <input
-              class="mt12 flex-column-center"
-              v-for="item in moInfo?.classInfo.filter((it: any) => it.classNm === 'Yeast')"
-              :key="item?.classNm"
-              type="checkbox"
-              :checked="item.beforeGrade === 'Exist'"
-              :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-          />
+          <ExistInput :moInfo="moInfo?.classInfo.filter((it: any) => it.classNm === 'Yeast')" @handleClickGrade="handleClickGrade" />
         </template>
       </div>
     </template>
@@ -182,12 +174,13 @@ import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import { calculateSputumStatus } from "@/common/lib/utils/changeData";
 import { getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
 import {useStore} from "vuex";
+import ExistInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/existInput.vue";
 
 const store = useStore();
 const route = useRoute();
 const props = defineProps(['selectItems', 'selectedImageName']);
 const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
-const selectItems = ref({});
+const selectItems = ref<any>({});
 const currentAnalysisType = ref(moTestType.BLOOD);
 const moInfo = ref<any>([]);
 const sputumStatus = ref('1');
@@ -200,15 +193,20 @@ onMounted(() => {
 
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
-  currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
-  selectItems.value = newSelectItems;
-  getMoInfo(newSelectItems);
-})
+
+  if (!isObjectEmpty(newSelectItems)) {
+    selectItems.value = newSelectItems;
+    currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
+    getMoInfo(newSelectItems);
+  }
+}, { deep: true });
 
 // LP or HP
-watch(() => route.query.pageType, (newPageType) => {
+watch(() => route.query.pageType, async (newPageType) => {
+  await nextTick();
   currentPowerType.value = newPageType;
   if (!isObjectEmpty(selectItems.value)) {
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems .value.cassetId);
     getMoInfo(selectItems.value);
   }
 })
@@ -234,6 +232,11 @@ const getMoInfo = (selectItems: any) => {
 
 const showingByPowerAndAnalysisType = (powerType: string, analysisType: string) => {
   return currentPowerType.value === powerType && currentAnalysisType.value === analysisType && moInfo.value;
+}
+
+const handleClickGrade = async (updatedMoInfo: any) => {
+  console.log('selectItems', selectItems.value);
+  console.log('updatedMoInfo, updatedMoInfo', updatedMoInfo);
 }
 
 </script>

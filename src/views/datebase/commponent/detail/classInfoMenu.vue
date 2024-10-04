@@ -251,7 +251,7 @@ const handleDataResponse = async () => {
 
 const updateUpDown = async (selectItemsNewVal: any) => {
   if ((selectItems.value?.testType === '01' && isActive("database")) || (!keepPage.value || keepPage.value === "false")) {
-    pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType="LP"`);
+    pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
   }
   emits('refreshClass', selectItemsNewVal);
   pageMoveDeleteStop.value = true;

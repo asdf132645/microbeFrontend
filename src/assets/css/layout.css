@@ -2251,6 +2251,7 @@ ul.wbcImgWrap > li {
     display: flex;
     gap: 4px;
     overflow-x: auto;
+    margin: 18px;
 }
 
 .classImageSliderContainer > img {

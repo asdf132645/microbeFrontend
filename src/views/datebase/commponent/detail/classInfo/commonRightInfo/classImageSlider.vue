@@ -23,6 +23,7 @@ const iaRootPath = ref(store.state.commonModule.iaRootPath);
 const apiBaseUrl = window.MAIN_API_IP;
 
 const selectImage = (imageFileName: string, imageIndex: number) => {
+  console.log(imageIndex);
   props.viewer.goToPage(imageIndex);
 }
 

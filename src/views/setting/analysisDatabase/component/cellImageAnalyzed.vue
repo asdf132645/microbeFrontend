@@ -1,7 +1,7 @@
 <template>
   <div class="loadingBackground" v-show="isLoadingProgressBar">
     <div class="progressContainer">
-      <p class="loadingProgressBarText">{{ successFileCount }} / {{ totalFileCount  }} files {{ loadingState }}...</p>
+      <p class="loadingProgressBarText">{{ ((successFileCount / totalFileCount) * 100).toFixed(0) }}%</p>
       <div
           class="progressBar"
           :style="{ width: (successFileCount / totalFileCount) * 100 + '%' }"
@@ -161,7 +161,7 @@
     </div>
     <div class="uploadModalBtnContainer">
       <button v-show="possibleUploadCount > 0" class="memoModalBtn" @click="uploadConfirm('copy')">{{ messages.COPY }}</button>
-<!--      <button v-show="possibleUploadCount > 0" class="memoModalBtn" @click="uploadConfirm('move')">{{ messages.MOVE }}</button>-->
+      <button v-show="possibleUploadCount > 0" class="memoModalBtn" @click="uploadConfirm('move')">{{ messages.MOVE }}</button>
       <button class="memoModalBtn" @click="uploadCancel">{{ impossibleUploadCount === 0 ? messages.CANCEL : messages.CLOSE }}</button>
     </div>
   </div>
@@ -208,17 +208,17 @@
       @hide="handleDownloadClose"
       @okConfirm="handleDownload('copy')"
   />
-<!--  <ConfirmThreeBtn-->
-<!--      v-if="showDownloadConfirm"-->
-<!--      :is-visible="showDownloadConfirm"-->
-<!--      :message="downloadConfirmMessage"-->
-<!--      :confirmText="messages.MOVE"-->
-<!--      :confirmText2="messages.COPY"-->
-<!--      :closeText="messages.CLOSE"-->
-<!--      @hide="handleDownloadClose"-->
-<!--      @okConfirm="handleDownload('move')"-->
-<!--      @okConfirm2="handleDownload('copy')"-->
-<!--  />-->
+  <ConfirmThreeBtn
+      v-if="showDownloadConfirm"
+      :is-visible="showDownloadConfirm"
+      :message="downloadConfirmMessage"
+      :confirmText="messages.MOVE"
+      :confirmText2="messages.COPY"
+      :closeText="messages.CLOSE"
+      @hide="handleDownloadClose"
+      @okConfirm="handleDownload('move')"
+      @okConfirm2="handleDownload('copy')"
+  />
 
   <Alert
       v-if="showAlert"
@@ -314,6 +314,16 @@ const loadingState = ref('');
 const showUploadSelectModal = ref(false);
 const possibleUploadFileNames = ref([]);
 const selectedUploadFile = ref('');
+
+instance?.appContext.config.globalProperties.$socket.on('downloadUploadFinished', async (downloadUploadObj: { type: 'download' | 'upload'; isFinished: boolean }) => {
+  if (downloadUploadObj?.isFinished) {
+    clearInterval(intervalId.value);
+    successFileCount.value = totalFileCount.value;
+    downloadUploadStopWebSocket(false);
+    await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false});
+    await updateFileCounts(downloadUploadObj.type);
+  }
+});
 
 onMounted(async () => {
   await nextTick();
@@ -505,13 +515,7 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
     }
   } catch (e) {
     console.log(e);
-  } finally {
-    successFileCount.value = totalFileCount.value;
-    clearInterval(intervalId.value);
-    downloadUploadStopWebSocket(false);
-    await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });
   }
-  await updateFileCounts('Upload');
 }
 
 const uploadCancel = async () => {
@@ -551,13 +555,13 @@ const handleDownloadClose = () => {
 }
 
 const handlePolling = async () => {
-  const duration = String(totalFileCount.value).length // 1초
+  const duration = String(totalFileCount.value).length
   intervalId.value = setInterval(async () => {
     successFileCount.value += 1;
     if (successFileCount.value === totalFileCount.value - 1) {
       clearInterval(intervalId.value);
     }
-  }, duration * 1500);
+  }, duration *  3000);
 }
 
 const downloadUploadStopWebSocket = (state: boolean) => {
@@ -586,17 +590,10 @@ const handleDownload = async (downloadType: 'move' | 'copy') => {
     await backUpDateApi(downloadDto);
   } catch (e) {
     console.log(e);
-  } finally {
-    clearInterval(intervalId.value);
-    successFileCount.value = totalFileCount.value;
-    downloadUploadStopWebSocket(false);
-    await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });
   }
-
-  await updateFileCounts('Download');
 }
 
-const updateFileCounts = async (downloadUploadType: 'Download' | 'Upload') => {
+const updateFileCounts = async (downloadUploadType: 'download' | 'upload') => {
   successFileCount.value = totalFileCount.value;
   setTimeout(async () => {
     totalFileCount.value = 0;

@@ -48,7 +48,7 @@ import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
 import { LocationQueryValue, useRoute } from "vue-router";
-import {beforeAfterStatus} from "@/common/defines/constFile/dataBase";
+import { beforeAfterStatus } from "@/common/defines/constFile/dataBase";
 
 
 const store = useStore();
@@ -113,7 +113,7 @@ const hideAlert = () => {
   showAlert.value = false;
 }
 const refreshClass = async (data: any) => {
-  // await getDetailRunningInfo();
+  await getDetailRunningInfo();
   selectItems.value = data;
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;

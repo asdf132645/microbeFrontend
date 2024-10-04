@@ -31,4 +31,124 @@ const store = createStore({
 
 export default store;
 
-
+const ts = [
+    {
+        "id": "0",
+        "name": "AR_PB-0036_001_000.bmp",
+        "classInfo": [
+            {
+              "count": "24",
+              "classNm": "WBC",
+              "afterGrade": "Moderate",
+              "beforeGrade": "Moderate"
+            },
+            {
+                "count": "0",
+                "classNm": "Yeast",
+                "afterGrade": "None",
+                "beforeGrade": "None"
+            }
+        ]
+    },
+    {
+        "id": "1",
+        "name": "AR_PB-0036_001_000.bmp",
+        "classInfo": [
+            {
+                "count": "10",
+                "classNm": "GPC",
+                "afterGrade": "Few",
+                "beforeGrade": "Few"
+            },
+            {
+                "count": "4",
+                "classNm": "GNB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Rare"
+            },
+            {
+                "count": "2",
+                "classNm": "GPB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Rare"
+            }
+        ]
+    },
+    {
+        "id": "0",
+        "name": "AR_PB-0036_004_000.bmp",
+        "classInfo": [
+            {
+                "count": "44",
+                "classNm": "WBC",
+                "afterGrade": "Moderate",
+                "beforeGrade": "Many"
+            },
+            {
+                "count": "1",
+                "classNm": "Yeast",
+                "afterGrade": "None",
+                "beforeGrade": "Exist"
+            }
+        ]
+    },
+    {
+        "id": "1",
+        "name": "AR_PB-0036_004_000.bmp",
+        "classInfo": [
+            {
+                "count": "10",
+                "classNm": "GPC",
+                "afterGrade": "Few",
+                "beforeGrade": "Moderate"
+            },
+            {
+                "count": "4",
+                "classNm": "GNB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Many"
+            },
+            {
+                "count": "2",
+                "classNm": "GPB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Few"
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "classInfo": [
+            {
+                "count": "47",
+                "classNm": "WBC",
+                "afterGrade": "Moderate",
+                "beforeGrade": "Many"
+            },
+            {
+                "count": "1",
+                "classNm": "Yeast",
+                "afterGrade": "Exist",
+                "beforeGrade": "Exist"
+            },
+            {
+                "count": "24",
+                "classNm": "GPC",
+                "afterGrade": "Few",
+                "beforeGrade": "Moderate"
+            },
+            {
+                "count": "43",
+                "classNm": "GNB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Many"
+            },
+            {
+                "count": "2",
+                "classNm": "GPB",
+                "afterGrade": "Rare",
+                "beforeGrade": "Few"
+            }
+        ]
+    }
+]

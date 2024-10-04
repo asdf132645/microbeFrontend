@@ -46,27 +46,9 @@
 
     <div v-if="currentAnalysisType === moTestType.BLOOD">
       <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
-        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
-        <input
-            type="checkbox"
-            :checked="`${category[databaseDetailBeforeAfterStatus + 'Grade']}` === 'Exist'"
-            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-            @click="handleClickGrade"
-        />
-      </div>
-
+      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
       <div class="mt22"></div>
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
-        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
-        <input
-            type="checkbox"
-            :checked="`${category[databaseDetailBeforeAfterStatus + 'Grade']}` === 'Exist'"
-            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-            @click="handleClickGrade"
-        />
-      </div>
-
+      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
     </div>
 
     <div v-else-if="currentAnalysisType === moTestType.URINE && moInfoTotal.classInfo">
@@ -78,7 +60,7 @@
 
       <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm">
         <label style="width: 240px;">{{ category?.classNm }}</label>
-        {{ category[databaseDetailBeforeAfterStatus + 'Grade'] }}
+        {{ category[`${databaseDetailBeforeAfterStatus}Grade`] }}
         <input
             v-for="grade in fourGrades"
             :key="grade"
@@ -86,33 +68,72 @@
             style="margin-top: 2px; width: 24px;"
             type="radio"
             :value="grade"
-            v-model="category[databaseDetailBeforeAfterStatus + 'Grade']"
+            v-model="category[`${databaseDetailBeforeAfterStatus}Grade`]"
             :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
             @click="handleClickGrade"
         />
       </div>
 
-      <div class="mt24 flex-align-center" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm">
-        <h3>{{ category.classNm }}</h3>
-        <div class="w-full flex-column-center">
-          <label>Exist</label>
-          <input
-              :class="['mt12 flex-column-center', { 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-              type="checkbox"
-              v-model="category[databaseDetailBeforeAfterStatus + 'Grade']"
-              true-value="Exist"
-              false-value="None"
-              :checked="category[databaseDetailBeforeAfterStatus + 'Grade'] === 'Exist'"
-              @click="handleClickGrade"
-          />
-        </div>
-
-      </div>
-
+      <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
+      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
     </div>
 
     <div v-else-if="currentAnalysisType === moTestType.SPUTUM">
+      <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo" :key="category.classNm">
+        <template v-if="category.classNm === moCategory.WBC">
+          <h1 class="fs12 classInfoClassTitle">Sputum</h1>
 
+          <div class="table-container">
+            <table class="sputum-table">
+              <thead>
+              <tr>
+                <th></th>
+                <th v-for="column in sputumGrades.grades" :key="column">{{ column }}</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Sputum</td>
+                <td v-for="column in sputumGrades.grades" :key="column">
+                  <div :class="['circle', {'green': column === sputumStatus }]"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>EP Cell</td>
+                <td v-for="value in sputumGrades.EPCellGrades" :key="value">{{ value }}</td>
+              </tr>
+              <tr>
+                <td>WBC</td>
+                <td v-for="value in sputumGrades.WBCGrades" :key="value">{{ value }}</td>
+              </tr>
+              <tr>
+                <td>WBC/EP Cell</td>
+                <td v-for="(value, index) in sputumGrades.WBCEPCellRatioGrades" :key="index">{{ value }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <div class="classDetailInfoWrapper">
+          <ul class="w-full flex-justify-end" style="gap: 24px;">
+            <li v-for="type in fourGrades" :key="type" class="flex-justify-center">{{ type }}</li>
+          </ul>
+        </div>
+        <div class="w-full mt24 flex-align-center-justify-start" v-for="item in moInfoTotal?.classInfo" :key="item?.classNm">
+          <label style="width: 240px;">{{ item?.classNm }}</label>
+          <input
+              v-for="type in fourGrades"
+              :key="type"
+              :name="item?.classNm"
+              style="margin-top: 2px; width: 24px;"
+              type="radio"
+              :value="type"
+              v-model="item.beforeGrade"
+              :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+          />
+        </div>
+      </div>
     </div>
 
 
@@ -152,8 +173,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch, watchEffect} from 'vue';
-import {getBarcodeDetailImageUrl, getCurrentAnalysisType} from "@/common/lib/utils/conversionDataUtils";
+import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch } from 'vue';
+import { getBarcodeDetailImageUrl, getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
 import { barcodeImgDir } from "@/common/defines/constFile/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
@@ -164,7 +185,16 @@ import Confirm from "@/components/commonUi/Confirm.vue";
 import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
-import {beforeAfterStatus, fourGrades, moCategory, moTestType, powerMode} from "@/common/defines/constFile/dataBase";
+import {
+  beforeAfterStatus,
+  fourGrades,
+  moCategory,
+  moTestType,
+  powerMode,
+  sputumGrades
+} from "@/common/defines/constFile/dataBase";
+import {calculateSputumStatus} from "@/common/lib/utils/changeData";
+import ExistInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/existInput.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -190,11 +220,13 @@ const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
 const currentAnalysisType = ref(moTestType.URINE);
-const currentPageType = ref<LocationQueryValue | LocationQueryValue[]>(powerMode.LOW_POWER);
+const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>(powerMode.LOW_POWER);
 const moInfoTotal = ref<any>([]);
+const sputumStatus = ref('1');
 const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
 
 onMounted(() => {
+  currentPowerType.value = route.query.pageType;
   testBarcodeImage();
 })
 
@@ -204,19 +236,18 @@ onMounted(() => {
 
 watch(() => route.query.pageType, async (newPageType) => {
   await nextTick();
-  currentPageType.value = newPageType;
-  if (selectItems.value) {
+  currentPowerType.value = newPageType;
+  if (!isObjectEmpty(selectItems.value)) {
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
     selectTotalItems(selectItems.value);
-    console.log('moInfoTotal.value', moInfoTotal.value);
   }
 })
 
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
-  selectItems.value = newSelectItems;
 
   if (!isObjectEmpty(newSelectItems)) {
+    selectItems.value = newSelectItems;
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
     selectTotalItems(newSelectItems);
     memo.value = selectItems.value?.moMemo;
@@ -236,6 +267,9 @@ watch(() => props.selectItems, async (newSelectItems) => {
 
 const selectTotalItems = (newSelectItems: any) => {
   moInfoTotal.value = newSelectItems?.moInfo.find((item: any) => item.id === '2');
+  if (currentAnalysisType.value === moTestType.SPUTUM) {
+    sputumStatus.value = calculateSputumStatus(moInfoTotal.value.classInfo);
+  }
 }
 
 const testBarcodeImage = () => {
@@ -320,11 +354,15 @@ const memoCancel = () => {
   memoModal.value = false;
 }
 
-const handleClickGrade = async () => {
-  const result = await detailRunningApi(String(selectItems.value?.id));
-  const updatedItem = { moInfo: selectItems.value.moInfo };
-  const updatedRunningInfo = {...result.data, ...updatedItem}
-  await resRunningItem(updatedRunningInfo, true);
+const handleClickGrade = async (updatedMoInfo: any) => {
+  const updatedSelectItems = selectItems.value;
+  const updatingSelectItems = updatedSelectItems.moInfo.find((item:any) => item.id === '2').classInfo;
+
+
+  Object.assign(updatingSelectItems, updatedMoInfo);
+  Object.assign(updatedSelectItems, updatingSelectItems);
+  console.log('www', updatedSelectItems);
+  await resRunningItem(updatedSelectItems, true);
 }
 
 const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
@@ -381,3 +419,41 @@ const changeBeforeAfterStatus = async (clickedStatus: string) => {
 }
 
 </script>
+
+<style scoped>
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.sputum-table {
+  border-collapse: collapse;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.sputum-table th, .sputum-table td {
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+}
+
+.sputum-table th {
+  background-color: black;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  margin: 0 auto;
+  border: 1px solid black;
+}
+
+.circle.green {
+  background-color: green;
+}
+</style>
