@@ -8,10 +8,11 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.8",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.5",
-    "@tanstack/vue-query": "^5.56.2",
     "@types/xml2js": "^0.4.14",
+    "@vue/apollo-composable": "^4.2.1",
     "axios": "^1.6.5",
     "core-js": "^3.8.3",
     "glob-all": "^3.3.1",
@@ -27,6 +28,7 @@
     "simple-hl7": "^3.2.4",
     "socket.io-client": "^4.7.4",
     "vue": "^3.2.13",
+    "vue-apollo": "^3.1.2",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "4",
     "vue3-datepicker": "^0.4.0",
@@ -42,6 +44,7 @@
     "@fortawesome/fontawesome-free": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@nuxt/types": "^2.17.3",
+    "@types/graphql": "^14.5.0",
     "@types/lodash": "^4.17.1",
     "@types/moment": "^2.13.0",
     "@types/moment-timezone": "^0.5.30",

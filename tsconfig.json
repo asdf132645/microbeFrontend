@@ -21,7 +21,9 @@
     "types": [
       "webpack-env",
       "webapi",
-      "node"
+      "node",
+      "graphql",
+      "@apollo/client"
     ],
     "paths": {
       "@/*": ["src/*"],
