@@ -38,6 +38,10 @@
     margin-left: 150px;
 }
 
+.ml288 {
+    margin-left: 288px;
+}
+
 .ml320 {
     margin-left: 320px;
 }
@@ -76,6 +80,10 @@
 
 .gap12 {
     gap: 12px;
+}
+
+.gap40 {
+    gap: 40px;
 }
 
 .w-full {
@@ -138,6 +146,17 @@
 .flex-justify-end {
     display: flex;
     justify-content: flex-end;
+}
+
+.flex-justify-start {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.flex-justify-start-align-end {
+    display: flex;
+    align-items: end;
+    justify-content: flex-start;
 }
 
 .flex-justify-center-align-start {
@@ -232,6 +251,22 @@
 
 .w20 {
     width: 20px;
+}
+
+.w210 {
+    width: 210px;
+}
+
+.w240 {
+    width: 240px;
+}
+
+.w250 {
+    width: 250px;
+}
+
+.text-start {
+    text-align: start;
 }
 
 .textLeft {
@@ -656,7 +691,7 @@ p.startStopP {
 }
 
 .customSettingContainer {
-    margin-top: 4rem;
+    margin-top: 2rem;
 }
 
 ul.customClass li span {
@@ -1942,6 +1977,7 @@ input.alarmInput {
 
 .alertMessage {
     padding: 10px;
+    color: var(--white-color);
 }
 
 .filterListDiv > div > button {
@@ -2115,6 +2151,7 @@ select.downloadPath {
 }
 
 .settingCellImgAnalyzedContainer {
+    width: 700px;
     max-height: 750px;
 }
 
@@ -2297,12 +2334,12 @@ ul.cellImgBox {
 
 .classInfoDetailTop > h3:nth-child(1) {
     text-align: center;
-    width: 40%;
+    width: 30%;
 }
 
 .classInfoDetailTop > h3:nth-child(2) {
     text-align: center;
-    width: 60%;
+    width: 70%;
 }
 
 ul.cellImgBox input {
@@ -3176,6 +3213,7 @@ ul.normalItems li div span:last-child {
 .dbImageContainer {
     overflow-y: auto;
     max-height: 54vh;
+
 }
 
 .dbRightImages {
@@ -3318,8 +3356,10 @@ ul.normalItems li div span:last-child {
 
 /* setting/analysis/database */
 .tab-content {
-    width: 700px;
     margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 button.rollbackButton {
@@ -3664,6 +3704,8 @@ table.cbcTable td {
 }
 
 .layer-body {
+    display: flex;
+    flex-direction: column;
     color: var(--white-color);
     font-size: 0.8rem;
 }
@@ -3732,6 +3774,26 @@ table.cbcTable td {
 .contentRight > .contentRightChild.realtime {
     width: 74%;
 }
+
+.grade-container {
+    display: flex;
+    gap: 40px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.grade-dot-wrapper {
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.grade-dot-wrapper.active {
+    background-color: #4CAF50;
+}
+
 @media screen and (max-width: 1900px) {
     .contentRight > div[data-v-c20ace0e]:first-child {
         width: 20%;

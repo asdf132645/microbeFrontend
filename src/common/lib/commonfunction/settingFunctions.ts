@@ -7,28 +7,8 @@ import {
     getCbcCodeRbcApi,
     createCbcCodeRbcApi,
 } from '@/common/api/service/setting/settingApi';
-import { defaultCbcList, defaultGramRange } from "@/common/defines/constFile/settings";
-
-const defaultCellImgData = {
-    testTypeCd: '01',
-    diffCellAnalyzingCount: '20',
-    diffWbcPositionMargin: '0',
-    diffRbcPositionMargin: '0',
-    diffPltPositionMargin: '0',
-    pbsCellAnalyzingCount: '100',
-    stitchCount: '1',
-    edgeShotType: '0',
-    bfCellAnalyzingCount: '100',
-    iaRootPath: 'D:\\MOIA_proc',
-    isAlarm: false,
-    alarmCount: '5',
-    keepPage: false,
-    backupPath: '',
-    backupStartDate: new Date(),
-    backupEndDate: new Date(),
-    userId: '', // 사용자 ID 기본값
-};
-
+import {defaultCbcList, defaultCellImageAnalyzed, defaultGramRange} from "@/common/defines/constFile/settings";
+import { useStore } from "vuex";
 
 /**
  * API 요청 시 분류할 Constant
@@ -93,22 +73,14 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
     switch (initializeType) {
         case 'cellImage':
             const cellImgSet = {
-                analysisType: defaultCellImgData.testTypeCd,
-                diffCellAnalyzingCount: defaultCellImgData.diffCellAnalyzingCount,
-                diffWbcPositionMargin: defaultCellImgData.diffWbcPositionMargin,
-                diffRbcPositionMargin: defaultCellImgData.diffRbcPositionMargin,
-                diffPltPositionMargin: defaultCellImgData.diffPltPositionMargin,
-                pbsCellAnalyzingCount: defaultCellImgData.pbsCellAnalyzingCount,
-                stitchCount: defaultCellImgData.stitchCount,
-                edgeShotType: defaultCellImgData.edgeShotType,
-                bfCellAnalyzingCount: defaultCellImgData.bfCellAnalyzingCount,
-                iaRootPath: defaultCellImgData.iaRootPath,
-                isAlarm: defaultCellImgData.isAlarm,
-                alarmCount: defaultCellImgData.alarmCount,
-                keepPage: defaultCellImgData.keepPage,
-                backupPath: defaultCellImgData.backupPath,
-                backupStartDate: defaultCellImgData.backupStartDate.toISOString().split('T')[0],
-                backupEndDate: defaultCellImgData.backupEndDate.toISOString().split('T')[0],
+                analysisType: defaultCellImageAnalyzed.analysisType,
+                iaRootPath: defaultCellImageAnalyzed.iaRootPath,
+                isAlarm: defaultCellImageAnalyzed.isAlarm,
+                alarmCount: defaultCellImageAnalyzed.alarmCount,
+                keepPage: defaultCellImageAnalyzed.keepPage,
+                backupPath: defaultCellImageAnalyzed.backupPath,
+                backupStartDate: defaultCellImageAnalyzed.backupStartDate.toISOString().split('T')[0],
+                backupEndDate: defaultCellImageAnalyzed.backupEndDate.toISOString().split('T')[0],
                 autoBackUpMonth: 'Not selected',
                 autoBackUpStartDate: null,
             };
@@ -120,15 +92,11 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
 }
 
 /** Response를 받은 후 할 작업 정리 함수 */
-const afterResponse = (initializeType: string) => {
+const afterResponse = async (initializeType: string) => {
+    const store = useStore();
     switch (initializeType) {
         case 'cellImage':
-            sessionStorage.setItem('wbcPositionMargin', String(defaultCellImgData?.diffWbcPositionMargin));
-            sessionStorage.setItem('rbcPositionMargin', String(defaultCellImgData?.diffRbcPositionMargin));
-            sessionStorage.setItem('pltPositionMargin', String(defaultCellImgData?.diffPltPositionMargin));
-            sessionStorage.setItem('edgeShotType', String(defaultCellImgData?.edgeShotType));
-            sessionStorage.setItem('iaRootPath', String(defaultCellImgData?.iaRootPath));
-            sessionStorage.setItem('keepPage', String(defaultCellImgData?.keepPage));
+            await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: defaultCellImageAnalyzed })
             break;
         default:
             break;

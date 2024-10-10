@@ -39,9 +39,6 @@ onBeforeMount(async () => {
 });
 
 
-const rbcUpdate = (data: any) => {
-  emits('rbcAppUpdate', data);
-}
 
 const classInfoUpdate = (data: any) => {
   emits('classAppUpdateLast', data);

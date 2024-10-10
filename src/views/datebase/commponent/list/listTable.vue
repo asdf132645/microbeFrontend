@@ -114,34 +114,34 @@
 
     <!-- 컨텐츠 슬롯에 들어갈 내용 -->
     <template #content>
-      <div>
+<!--      <div>-->
         <ul class="editOrder">
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="testType">PB/BF</label>
             <input id="testType" class="inputDisabled" type="text" v-model="itemObj.testType" readonly disabled/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="traySlot">Tray Slot</label>
             <input id="traySlot" class="inputDisabled" type="text" v-model="itemObj.traySlot" readonly disabled/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="barcode">BARCODE ID</label>
             <input id="barcode" type="text" v-model="itemObj.barcodeNo" placeholder="BARCODE ID"/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="patientId">PATIENT ID</label>
             <input id="patientId" type="text" v-model="itemObj.patientId" placeholder="PATIENT ID"/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="patientName">PATIENT NAME</label>
             <input id="patientName" type="text" v-model="itemObj.patientNm" placeholder="PATIENT NAME"/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="analyzedDate">Analyzed date</label>
             <input id="analyzedDate" class="inputDisabled" type="text" v-model="itemObj.analyzedDttm" readonly
                    disabled/>
           </li>
-          <li class="flexColumn">
+          <li class="flex-column-justify-center">
             <label for="signedState">Signed state</label>
             <input id="signedState" class="inputDisabled" type="text" v-model="itemObj.submitState" readonly disabled/>
           </li>
@@ -150,7 +150,7 @@
             <img class="mt1" :src="barcodeImg" @error="onImageError"/>
           </li>
         </ul>
-      </div>
+<!--      </div>-->
       <div class="modalBottom">
         <button class="alertButton" @click="dbDataEditSet">Save</button>
       </div>
@@ -206,6 +206,7 @@ const visible = ref(false);
 const itemObj = ref({});
 const store = useStore();
 const userModuleDataGet = computed(() => store.state.userModule);
+const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
 const projectType = ref('');
 const showAlert = ref(false);
 const alertType = ref('');
@@ -475,7 +476,6 @@ const selectItem = async (item) => {
   }
 
   firstShiftKeyStr.value = item.id;
-
   emits('selectItem', item);
   selectedItemId.value = item.id;
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(item.id)});
@@ -518,6 +518,7 @@ const rowDbClick = async (item) => {
   }
 
   await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: item.id });
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: item });
   await getIpAddress(item);
   await router.push({
     name: 'databaseDetail',
@@ -598,7 +599,7 @@ const deleteRow = async () => {
         return;
       }
       const idsToDelete = selectedItems
-      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
+      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : cellImageAnalyzedSetting.value.iaRootPath;
       const rootArr = `${path}/${selectedItems.slotId}`;
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
       const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
@@ -624,7 +625,7 @@ const deleteRow = async () => {
         showErrorAlert(messages.lockRow);
         return
       }
-      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
+      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : cellImageAnalyzedSetting.value.iaRootPath;
       const rootArr = selectedItems.map(item => `${path}/${item.slotId}`);
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
       const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);

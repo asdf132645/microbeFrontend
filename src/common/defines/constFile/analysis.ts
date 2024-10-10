@@ -1,4 +1,4 @@
-export const lpCaptureOptions = [
+export const LP_CAPTURE_OPTIONS = [
     { value: "10", text: "10 LP Capture" },
     { value: "20", text: "20 LP Capture" },
     { value: "30", text: "30 LP Capture" },
@@ -6,7 +6,7 @@ export const lpCaptureOptions = [
     { value: "50", text: "50 LP Capture" },
 ]
 
-export const slideCard = {
+export const SLIDE_CARD = {
     input: [
         {slotNo: 1, slotState: "0"},
         {slotNo: 2, slotState: "0"},
@@ -37,7 +37,7 @@ export const slideCard = {
     ]
 };
 
-export const slideCard100a = {
+export const SLIDE_CARD_100A = {
     input: [
         {slotNo: 1, slotState: "0"},
         {slotNo: 2, slotState: "0"},
@@ -63,8 +63,3 @@ export const slideCard100a = {
         {slotNo: 10, slotState: "0"},
     ]
 };
-
-/**
- * id 0 - LP, 1 - HP, 2 _ Total
- * grade - Exist, None, Rare, Few, Moderate, Many
- * */

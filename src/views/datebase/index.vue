@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="min-height: 92.5vh;">
     <h3 class="titleH3">
 <!--      Classification List-->
 <!--      <button @click="classListToggleEvent" class="classificationListBtn">-->

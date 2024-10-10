@@ -6,7 +6,6 @@
     <main class="content">
       <router-view/>
       <Analysis @classAppUpdateLast="classAppUpdateLast"
-                @rbcAppUpdate="rbcAppUpdate"
                 :parsedData="parsedDataProps"
                 :isClass="router.currentRoute.value.path === '/'"
                 :startStatus="startStatus"
@@ -56,7 +55,7 @@ import { basicWbcArr } from "@/common/defines/constFile/classArr";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import axios from "axios";
-import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -80,7 +79,6 @@ const isDownloadOrUploading = computed(() => store.state.commonModule.isDownload
 
 const runningArr: any = ref<any>([]);
 const classArr = ref<any>([]);
-const rbcArr = ref<any>([]);
 const viewerCheckApp = ref('');
 const parsedDataProps = ref<any>({});
 const startStatus = ref(false);
@@ -239,6 +237,7 @@ const isIpMatching = (url: any, ip: any) => {
 onMounted(async () => {
   await nextTick();
   await cellImgGet();
+  await getGramRange();
   startChecking();
   const result = await getDeviceIpApi();
   ipMatches.value = isIpMatching(window.APP_API_BASE_URL, result.data);
@@ -251,9 +250,6 @@ onMounted(async () => {
   }
 
   if (!commonDataGet.value.isRunningState) {
-    if (userId.value && userId.value !== '') {
-      await getGramRange();
-    }
     if (!commonDataGet.value.firstLoading && ipMatches.value && window.FORCE_VIEWER === 'main') {
       countingInterStartval = setInterval(async () => {
         await startSysPostWebSocket();
@@ -378,7 +374,6 @@ async function socketData(data: any) {
         await store.dispatch('commonModule/setCommonInfo', {slotIndex: 0});
         await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
         classArr.value = [];
-        rbcArr.value = [];
         break;
       case 'RECOVERY':
         barcodeNum.value = '';
@@ -422,7 +417,6 @@ async function socketData(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
       startStatus.value = true;
       classArr.value = [];
-      rbcArr.value = [];
       runningInfoBoolen.value = true;
     }
 
@@ -504,12 +498,10 @@ async function socketData(data: any) {
         }
 
         const classElements = classArr.value.filter((element: any) => element?.slotId === completeSlot.slotId);
-        const rbcArrElements = rbcArr.value.filter((element: any) => element?.slotId === completeSlot.slotId);
 
         const matchedWbcInfo = classElements[0];
         const newWbcInfo = {
           wbcInfo: matchedWbcInfo?.wbcInfo,
-          nonRbcClassList: matchedWbcInfo?.nonRbcClassList,
           totalCount: matchedWbcInfo?.totalCount,
           maxWbcCount: matchedWbcInfo?.maxWbcCount,
         }
@@ -540,7 +532,6 @@ async function socketData(data: any) {
           analyzedDttm: tcpReq().embedStatus.settings.reqDttm,
           tactTime: completeSlot.tactTime,
           maxWbcCount: completeSlot.maxWbcCount,
-          bf_lowPowerPath: completeSlot.bf_lowPowerPath,
           wbcInfo: wbcInfoNewVal,
           wbcInfoAfter: wbcInfoAfter,
           bminfo: completeSlot.bminfo,
@@ -560,7 +551,7 @@ async function socketData(data: any) {
       try {
         const deviceData = await getDeviceInfoApi();
         if (deviceData.data.length === 0 || !deviceData.data) {
-          await createDeviceInfoApi({deviceItem: deviceInfo});
+          await createDeviceInfoApi({ deviceItem: deviceInfo });
           siteCdDvBarCode.value = true;
         } else {
           siteCdDvBarCode.value = true;
@@ -606,9 +597,6 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
     });
   }, delay);
 };
-const rbcAppUpdate = (data: any) => {
-  rbcArr.value[data.iCasStatArr] = data.rbc;
-}
 
 const classAppUpdateLast = (data: any) => {
   classArr.value[data.iCasStatArr] = data.classInfo;
@@ -693,9 +681,8 @@ const cellImgGet = async () => {
     if (result) {
       if (result?.data) {
         const data = result.data;
-        sessionStorage.setItem('iaRootPath', data?.iaRootPath);
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
-        sessionStorage.setItem('keepPage', String(data?.keepPage));
+        await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
       }
     }
   } catch (e) {

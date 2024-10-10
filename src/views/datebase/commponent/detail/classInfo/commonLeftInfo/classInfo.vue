@@ -44,111 +44,174 @@
       <h3>Grade</h3>
     </div>
 
-    <div v-if="currentAnalysisType === moTestType.BLOOD">
-      <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
-      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
-      <div class="mt22"></div>
-      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
+    <div v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD">
+      <h3 class="ml288 mt30" style="height: 40px;">Exist</h3>
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-align-center-justify-start mb14">
+        <p class="ml40 w250">{{ category.classNm }}</p>
+        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+          <div
+              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
+              class="grade-dot-wrapper"
+              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+          ></div>
+        </div>
+      </div>
+
+      <div class="mt40"></div>
+
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-align-center-justify-start mb14">
+        <p class="ml40 w250">{{ category.classNm }}</p>
+        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+          <div
+              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
+              class="grade-dot-wrapper"
+              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+          >
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div v-else-if="currentAnalysisType === moTestType.URINE && moInfoTotal.classInfo">
+    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && moInfoTotal.classInfo">
       <div class="flex-justify-around ml150">
-        <div v-for="grade in fourGrades" :key="grade" class="w-full flex-justify-center mb14">
+        <div v-for="grade in FOUR_GRADES" :key="grade" class="w-full flex-justify-center mb14">
           <h3>{{ grade }}</h3>
         </div>
       </div>
 
-      <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm">
-        <label style="width: 240px;">{{ category?.classNm }}</label>
-        {{ category[`${databaseDetailBeforeAfterStatus}Grade`] }}
-        <input
-            v-for="grade in fourGrades"
-            :key="grade"
-            :name="category?.classNm"
-            style="margin-top: 2px; width: 24px;"
-            type="radio"
-            :value="grade"
-            v-model="category[`${databaseDetailBeforeAfterStatus}Grade`]"
-            :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-            @click="handleClickGrade"
-        />
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
+        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+          <div
+              v-for="grade in FOUR_GRADES"
+              :key="grade"
+              @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
+              class="grade-dot-wrapper"
+              :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+          >
+          </div>
+        </div>
       </div>
 
       <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
-      <ExistInput :moInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" @handleClickGrade="handleClickGrade" />
+
+      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
+        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+          <div
+              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
+              class="grade-dot-wrapper"
+              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+          >
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div v-else-if="currentAnalysisType === moTestType.SPUTUM">
+    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM">
       <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo" :key="category.classNm">
-        <template v-if="category.classNm === moCategory.WBC">
+        <template v-if="category.classNm === moCategory.SPUTUM">
           <h1 class="fs12 classInfoClassTitle">Sputum</h1>
+          <div class="classInfoHorizontalRule"></div>
 
           <div class="table-container">
             <table class="sputum-table">
               <thead>
               <tr>
                 <th></th>
-                <th v-for="column in sputumGrades.grades" :key="column">{{ column }}</th>
+                <th v-for="column in SPUTUM_GRADES.GRADES" :key="column">{{ column }}</th>
               </tr>
               </thead>
               <tbody>
               <tr>
                 <td>Sputum</td>
-                <td v-for="column in sputumGrades.grades" :key="column">
-                  <div :class="['circle', {'green': column === sputumStatus }]"></div>
+                <td
+                    v-for="grade in SPUTUM_GRADES.GRADES"
+                    :key="grade"
+                    @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
+                    class="grade-dot-wrapper"
+                    :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+                >
                 </td>
               </tr>
               <tr>
                 <td>EP Cell</td>
-                <td v-for="value in sputumGrades.EPCellGrades" :key="value">{{ value }}</td>
+                <td v-for="value in SPUTUM_GRADES.EPCELL_GRADES" :key="value">{{ value }}</td>
               </tr>
               <tr>
                 <td>WBC</td>
-                <td v-for="value in sputumGrades.WBCGrades" :key="value">{{ value }}</td>
+                <td v-for="value in SPUTUM_GRADES.WBC_GRADES" :key="value">{{ value }}</td>
               </tr>
               <tr>
                 <td>WBC/EP Cell</td>
-                <td v-for="(value, index) in sputumGrades.WBCEPCellRatioGrades" :key="index">{{ value }}</td>
+                <td v-for="(value, index) in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="index">{{ value }}</td>
               </tr>
               </tbody>
             </table>
           </div>
         </template>
+      </div>
 
-        <div class="classDetailInfoWrapper">
-          <ul class="w-full flex-justify-end" style="gap: 24px;">
-            <li v-for="type in fourGrades" :key="type" class="flex-justify-center">{{ type }}</li>
-          </ul>
+      <div class="classDetailInfoWrapper">
+        <ul class="w-full flex-justify-end" style="gap: 24px;">
+          <li v-for="grade in FOUR_GRADES" :key="grade" class="flex-justify-center">{{ grade }}</li>
+        </ul>
+      </div>
+      <div
+          class="w-full flex-align-center-justify-start mt24"
+          v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === 'GPC' || item.classNm ==='GNB' || item.classNm === 'GPB' || item.classNm === 'GNDC')"
+          :key="category.classNm"
+      >
+        <div>
+          <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+
+          <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+            <div
+                v-for="grade in FOUR_GRADES"
+                :key="grade"
+                @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
+                class="grade-dot-wrapper"
+                :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+            >
+            </div>
+          </div>
         </div>
-        <div class="w-full mt24 flex-align-center-justify-start" v-for="item in moInfoTotal?.classInfo" :key="item?.classNm">
-          <label style="width: 240px;">{{ item?.classNm }}</label>
-          <input
-              v-for="type in fourGrades"
-              :key="type"
-              :name="item?.classNm"
-              style="margin-top: 2px; width: 24px;"
-              type="radio"
-              :value="type"
-              v-model="item.beforeGrade"
-              :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-          />
+      </div>
+
+
+      <div
+          class="w-full flex-align-center-justify-start mt24"
+          v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === 'Yeast' || item.classNm ==='Hyphae')"
+          :key="category.classNm"
+      >
+        <div>
+          <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+
+          <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
+            <div
+                @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
+                class="grade-dot-wrapper"
+                :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
+            >
+            </div>
+          </div>
         </div>
       </div>
     </div>
-
 
   </div>
 
   <div class="flex-center mt24 gap12">
     <button
-        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
-        @click="changeBeforeAfterStatus(beforeAfterStatus.BEFORE)"
+        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE }]"
+        @click="changeBeforeAfterStatus(BEFORE_AFTER_STATUS.BEFORE)"
     >
       Before
     </button>
     <button
-        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === beforeAfterStatus.AFTER }]"
-        @click="changeBeforeAfterStatus(beforeAfterStatus.AFTER)"
+        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.AFTER }]"
+        @click="changeBeforeAfterStatus(BEFORE_AFTER_STATUS.AFTER)"
     >
       After
     </button>
@@ -186,24 +249,25 @@ import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
 import {
-  beforeAfterStatus,
-  fourGrades,
+  BEFORE_AFTER_STATUS,
+  FOUR_GRADES,
   moCategory,
-  moTestType,
-  powerMode,
-  sputumGrades
+  MO_TEST_TYPE,
+  POWER_MODE,
+  SPUTUM_GRADES
 } from "@/common/defines/constFile/dataBase";
 import {calculateSputumStatus} from "@/common/lib/utils/changeData";
 import ExistInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/existInput.vue";
+import FourGradeInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/fourGradeInput.vue";
 
 const store = useStore();
 const route = useRoute();
-const props = defineProps(['selectItems', 'type', 'isCommitChanged']);
+const props = defineProps(['type', 'isCommitChanged']);
 const emits = defineEmits();
 const userModuleDataGet = computed(() => store.state.userModule);
 
 
-const selectItems = ref(props.selectItems);
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const memo = ref('');
@@ -219,10 +283,9 @@ const okMessageType = ref('');
 const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
-const currentAnalysisType = ref(moTestType.URINE);
-const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>(powerMode.LOW_POWER);
+const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
+const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>(POWER_MODE.LOW_POWER);
 const moInfoTotal = ref<any>([]);
-const sputumStatus = ref('1');
 const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
 
 onMounted(() => {
@@ -243,11 +306,10 @@ watch(() => route.query.pageType, async (newPageType) => {
   }
 })
 
-watch(() => props.selectItems, async (newSelectItems) => {
+watch(() => selectItems.value, async (newSelectItems) => {
   await nextTick();
 
   if (!isObjectEmpty(newSelectItems)) {
-    selectItems.value = newSelectItems;
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
     selectTotalItems(newSelectItems);
     memo.value = selectItems.value?.moMemo;
@@ -255,9 +317,9 @@ watch(() => props.selectItems, async (newSelectItems) => {
     // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
 
     await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value?.testType});
-    if (newSelectItems?.submitState === "" || !newSelectItems?.submitState) {
-      const result: any = detailRunningApi(String(newSelectItems?.id));
-      const updatedItem = { id: newSelectItems.id ,submitState: 'checkFirst' };
+    if (selectItems.value?.submitState === "" || !selectItems.value?.submitState) {
+      const result: any = detailRunningApi(String(selectItems.value?.id));
+      const updatedItem = { id: selectItems.value.id ,submitState: 'checkFirst' };
       const updatedRuningInfo = {...result.data, ...updatedItem}
       await resRunningItem(updatedRuningInfo, true);
     }
@@ -267,15 +329,13 @@ watch(() => props.selectItems, async (newSelectItems) => {
 
 const selectTotalItems = (newSelectItems: any) => {
   moInfoTotal.value = newSelectItems?.moInfo.find((item: any) => item.id === '2');
-  if (currentAnalysisType.value === moTestType.SPUTUM) {
-    sputumStatus.value = calculateSputumStatus(moInfoTotal.value.classInfo);
-  }
 }
 
 const testBarcodeImage = () => {
   const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
   const iaRootPath = 'D:\\MOIA_proc';
-  barcodeImg.value = `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + '/20240906153702_02_MO-0036/' + barcodeImgDir.barcodeDirName + '/'}&imageName=barcode_image.jpg`;
+  const slotId = '20240906153702_02_MO-0036';
+  barcodeImg.value = `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + `/${slotId}/` + barcodeImgDir.barcodeDirName + '/'}&imageName=barcode_image.jpg`;
 }
 
 const testAfterBarcodeImage = (imgDriveRootPath: string) => {
@@ -296,7 +356,7 @@ const toggleLockEvent = () => {
 
 const barcodeCopy = async () => {
   const textarea = document.createElement('textarea');
-  textarea.value = props.selectItems.barcodeNo;
+  textarea.value = selectItems.value.barcodeNo;
   document.body.appendChild(textarea);
   textarea.select();
   document.execCommand('copy');
@@ -322,7 +382,7 @@ const hideConfirm = () => {
 
 const onCommit = async () => {
   const localTime = moment().local();
-  const result: any = await detailRunningApi(String(props.selectItems?.id));
+  const result: any = await detailRunningApi(String(selectItems.value?.id));
   const updatedItem = {
     submitState: 'Submit',
     submitOfDate: localTime.format(),
@@ -339,7 +399,7 @@ const onCommit = async () => {
 const memoChange = async () => {
   const enterAppliedMoMemo = memo.value.replaceAll('\r\n', '<br>');
   const updatedItem = { moMemo: enterAppliedMoMemo };
-  const result: any = await detailRunningApi(String(props.selectItems?.id));
+  const result: any = await detailRunningApi(String(selectItems.value?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
 
   await resRunningItem(updatedRuningInfo);
@@ -354,14 +414,60 @@ const memoCancel = () => {
   memoModal.value = false;
 }
 
-const handleClickGrade = async (updatedMoInfo: any) => {
-  const updatedSelectItems = selectItems.value;
-  const updatingSelectItems = updatedSelectItems.moInfo.find((item:any) => item.id === '2').classInfo;
+const checkGrade = (gradeText: string, paramGrade: string) => {
+  return gradeText === paramGrade;
+}
 
+const checkToggleGrade = (currentGrade: string | boolean) => {
+  return currentGrade === 'Exist' || currentGrade === true;
+}
 
-  Object.assign(updatingSelectItems, updatedMoInfo);
-  Object.assign(updatedSelectItems, updatingSelectItems);
-  console.log('www', updatedSelectItems);
+const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
+  updateGrade(updatingMoInfo, className, grade);
+}
+
+const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
+  const newGrade = grade === 'Exist' ? 'None' : 'Exist';
+  updateGrade(updatingMoInfo, className, newGrade);
+}
+
+const updateGrade = async (updatingMoInfo: any, className: string, grade: string) => {
+  const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classNm === className)
+  updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
+    if (item.classNm === className) {
+      return { ...item, afterGrade: grade };
+    }
+    return item;
+  })
+
+  const updatedMoInfoObj = selectItems.value.moInfo.map((item: any) => {
+    if (item.id === filteredMoInfo.id && item.name === filteredMoInfo.name) {
+      return {...item, ...filteredMoInfo };
+    }
+    return item;
+  })
+  const updatedSelectItems = {
+    ...selectItems.value,
+    moInfo: updatedMoInfoObj
+  }
+
+  await resRunningItem(updatedSelectItems, true);
+}
+
+const handleClickGrade = async (changedMoInfo: any) => {
+
+  const updatedMoInfo = selectItems.value.moInfo.map((item: any) => {
+    if (item.id === '2') {
+      return {...item, ...moInfoTotal.value };
+    }
+    return item;
+  })
+
+  const updatedSelectItems = {
+    ...selectItems.value,
+    moInfo: updatedMoInfo,
+  }
+
   await resRunningItem(updatedSelectItems, true);
 }
 

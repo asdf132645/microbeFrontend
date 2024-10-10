@@ -3,13 +3,13 @@
     <ul>
 
       <template v-if="true">
-        <li :class='{ "onRight": isActive("LP") }' @click="pageGo(`/databaseDetail/${currentSampleId}?pageType=LP`)">
+        <li :class='{ "onRight": isActive("LP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=LP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'disease']"/>
           </p>
           <p>LP Image</p>
         </li>
-        <li v-if="!isLoading" :class='{ "onRight": isActive("HP") }' @click="pageGo(`/databaseDetail/${currentSampleId}?pageType=HP`)">
+        <li v-if="!isLoading" :class='{ "onRight": isActive("HP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=HP`)">
           <p class="menuIco">
             <font-awesome-icon :icon="['fas', 'clipboard']"/>
           </p>
@@ -56,7 +56,6 @@ import {
 import router from "@/router";
 
 import {
-  classInfoMenuDetailSelectQueryApi,
   clearPcIpState,
   detailRunningApi,
   pageUpDownRunnIngApi,
@@ -75,10 +74,9 @@ const props = defineProps(['isNext']);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const selectItems = ref<any>(null);
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const resData = ref<any>([]);
 const wbcInfo = ref<any>([]);
-const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
 
 const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const isButtonDisabled = ref(false);
@@ -92,12 +90,12 @@ let socketTimeoutId: number | undefined = undefined; // 타이머 ID 저장
 const testType = computed(() => store.state.commonModule.testType);
 const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFirstNum);
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
+const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
 
 onBeforeMount(async () => {
-  currentSampleId.value = route.params.id;
   await getDetailRunningInfo();
   isLoading.value = false;
-  keepPage.value = JSON.parse(JSON.stringify(sessionStorage.getItem('keepPage')));
+  keepPage.value = cellImageAnalyzedSetting.value.keepPage;
 })
 
 onMounted(async () => {
@@ -121,13 +119,11 @@ watch(props.isNext, (newVal) => {
 
 const getDetailRunningInfo = async () => {
   try {
-    const result = await classInfoMenuDetailSelectQueryApi(String(currentSampleId.value));
-    selectItems.value = result.data;
+    const result = await detailRunningApi(String(selectItems.value.id));
     await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value.testType});
     resData.value = result.data;
   } catch (e) {
     console.log(e);
-    selectItems.value = null;
     resData.value = null;
   }
 }
@@ -195,6 +191,7 @@ async function pageUpDownRunnIng(id: number, step: string, type: string) {
     const res = await pageUpDownRunnIngApi(req);
     if (res.data !== null) {
       resData.value = res.data;
+      await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: res.data });
       await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(res.data.id)});
     }
   } catch (e) {
@@ -245,8 +242,7 @@ const processNextDbIndex = async (direction: any, id: number) => {
 
 const handleDataResponse = async () => {
   if (!resData.value) return;
-  selectItems.value = resData.value;
-  await updateUpDown(resData.value);
+  await updateUpDown(selectItems.value);
 };
 
 const updateUpDown = async (selectItemsNewVal: any) => {

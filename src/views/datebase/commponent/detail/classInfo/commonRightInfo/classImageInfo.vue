@@ -28,7 +28,7 @@
         </span>
         </div>
 
-        <ClassDetailInfo :selectItems="selectItems" :selectedImageName="selectedImageName" />
+        <ClassDetailInfo :selectedImageName="selectedImageName" />
       </div>
 
 
@@ -54,10 +54,10 @@ import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
 import ClassImageSlider from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageSlider.vue";
 import type { DirectionType, ImageSourceType } from "#/database/image";
-import { arrowDirection } from "@/common/defines/constFile/dataBase";
+import { ARROW_DIRECTION, FOLDER_NAME } from "@/common/defines/constFile/dataBase";
+import {LocationQueryValue, useRoute} from "vue-router";
 
 const emits = defineEmits();
-const props = defineProps(['selectItems']);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -67,21 +67,37 @@ let viewer: any = ref<any>(null);
 const isMagnifyingGlass = ref(false);
 const tilingViewerLayer = ref(null);
 const tileExist = ref(true);
-const selectItems = ref<any>({});
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 
 const store = useStore();
+const route = useRoute();
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const allImages = ref<any>([]);
 const selectedImageName = ref('');
+const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
 
 onMounted(async () => {
   await initElement();
+  currentPowerType.value = route.query.pageType;
 })
 
-watch(() => props.selectItems, async (newSelectItems) => {
-  selectItems.value = newSelectItems;
+watch(() => route.query.pageType, async (newPageType) => {
+  currentPowerType.value = newPageType;
+  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
+  if (tilingViewerLayer) {
+    tilingViewerLayer.innerHTML = ''; // 기존 내용 삭제
+
+    // OpenSeadragon 인스턴스가 존재하면 초기화하지 않고 캔버스만 업데이트
+    if (viewer.value) {
+      viewer.value.destroy(); // 기존 뷰어 인스턴스 파괴
+    }
+    await initElement();
+  }
+})
+
+watch(() => selectItems.value, async () => {
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
   if (tilingViewerLayer) {
     tilingViewerLayer.innerHTML = ''; // 기존 내용 삭제
@@ -96,8 +112,12 @@ watch(() => props.selectItems, async (newSelectItems) => {
 
 const initElement = async () => {
 
+
+  const rootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const powerFolderName = currentPowerType.value === 'HP' ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
+  const folderPath = `${rootPath}/${selectItems.value.slotId}/${powerFolderName}`;
   const path = `D:\\MO_IMAGE_TEST\\1`;
-  const imageSources = await fetchImage(path);
+  const imageSources = await fetchImage(folderPath);
   allImages.value = imageSources.map((imageSource, index: number) => {
     return {
       url: imageSource.url,
@@ -217,7 +237,13 @@ const initElement = async () => {
 const fetchImage = async (folderPath: string): Promise<ImageSourceType[]> => {
   const url = `${apiBaseUrl}/folders?folderPath=${folderPath}`;
   const response = await fetch(url);
+  if (response.statusText === 'Not Found') {
+    console.log('response', response);
+  }
+
   const imageNames = await response.json()
+
+
 
   const imageSources = imageNames.map((imageName: string) => ({
     type: 'image',
@@ -233,9 +259,9 @@ const fetchImage = async (folderPath: string): Promise<ImageSourceType[]> => {
 const handleImageArrow = (direction: DirectionType) => {
   const currentImageIndex = viewer.value.currentPage()
   const totalPages = viewer.value.tileSources.length;
-  if (direction === arrowDirection.LEFT && currentImageIndex > 0) {
+  if (direction === ARROW_DIRECTION.LEFT && currentImageIndex > 0) {
     viewer.value.goToPage(currentImageIndex - 1);
-  } else if (direction === arrowDirection.RIGHT && currentImageIndex < totalPages) {
+  } else if (direction === ARROW_DIRECTION.RIGHT && currentImageIndex < totalPages) {
     viewer.value.goToPage(currentImageIndex + 1);
   }
 }

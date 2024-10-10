@@ -196,7 +196,6 @@ const alertMessage = ref('');
 const clickType = ref('');
 const userSetOutUl = ref(false);
 const isStartCountUpdated = ref(false);
-const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
 
 const keydownHandler = (e: KeyboardEvent) => {
   if (e.ctrlKey && ['61', '107', '173', '109', '187', '189'].includes(String(e.which))) {
@@ -259,7 +258,6 @@ const fullScreen = () => {
 
 onMounted(async () => {
 
-  currentSampleId.value = route.params.id;
   updateDateTime(); // 초기 시간 설정
   const timerId = setInterval(updateDateTime, 1000); // 1초마다 현재 시간을 갱신
   // 컴포넌트가 해제되기 전에 타이머를 정리하여 메모리 누수를 방지
@@ -507,7 +505,7 @@ const cellImgGet = async () => {
       if (result?.data) {
         const data = result.data;
         alarmCount.value = data?.isAlarm ? Number(data.alarmCount) * 1000 : 5000;
-        sessionStorage.setItem('iaRootPath', data?.iaRootPath);
+        await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
 
       }

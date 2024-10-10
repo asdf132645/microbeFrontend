@@ -1,4 +1,4 @@
-export const rulers = [{
+export const RULERS = [{
     id: 'none',
     text: 'None',
   }, {

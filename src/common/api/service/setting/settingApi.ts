@@ -19,8 +19,8 @@ export const getCellImgApi = async (): Promise<ApiResponse<CellImgAnalyzedRespon
     return httpClient.httpGet(apiConstants.settings.cellImgAnalyzedPost.cellImgGet);
 };
 
-export const putCellImgApi = async (request: any, id: string): Promise<ApiResponse<CellImgAnalyzedResponse | undefined>> => {
-    return httpClient.httpPut(apiConstants.settings.cellImgAnalyzedPost.cellImgPut, request, id);
+export const putCellImgApi = async (request: any): Promise<ApiResponse<CellImgAnalyzedResponse | undefined>> => {
+    return httpClient.httpPut(apiConstants.settings.cellImgAnalyzedPost.cellImgPut, request);
 };
 
 

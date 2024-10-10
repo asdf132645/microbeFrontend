@@ -106,3 +106,17 @@ export const settingName = {
     cbcCode: 'cbcCode',
     filePathSet: 'filePathSet',
 }
+
+export const defaultCellImageAnalyzed = {
+    analysisType: '',
+    iaRootPath: 'D:\\MOIA_proc',
+    LPCaptureCount: '20',
+    isAlarm: false,
+    alarmCount: '5',
+    keepPage: false,
+    backupPath: '',
+    backupStartDate: new Date(),
+    backupEndDate: new Date(),
+    autoBackUpMonth: 'Not selected',
+    autoBackUpStartDate: new Date(),
+}

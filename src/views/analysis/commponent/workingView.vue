@@ -64,7 +64,7 @@ import {useStore} from "vuex";
 import {SlotInfo} from "@/store/modules/testPageCommon/ruuningInfo";
 import {EmbeddedStatusState} from "@/store/modules/embeddedStatusModule";
 import {getCountToTime} from "@/common/lib/utils/dateUtils";
-import {slideCard, slideCard100a} from "@/common/defines/constFile/analysis";
+import { SLIDE_CARD, SLIDE_CARD_100A } from "@/common/defines/constFile/analysis";
 
 // 스토어
 const store = useStore();
@@ -91,7 +91,7 @@ const slideTime = ref('');
 const totalSlideTime = ref('');
 let countingInterval: any = null;
 let countingIntervalTotal: any = null;
-const slideCardData = ref(slideCard);
+const slideCardData = ref(SLIDE_CARD);
 let totalElapsedTimeCount = ref(0);
 let elapsedTimeCount = ref(0);
 const isBlinking = ref(false);
@@ -220,7 +220,7 @@ watch(
 onBeforeMount(() => {
   microbeVersion.value = window.MICROBE_VERSION;
   // slideCard100a
-  slideCardData.value = microbeVersion.value === '100a' ? slideCard100a : slideCard;
+  slideCardData.value = microbeVersion.value === '100a' ? SLIDE_CARD_100A : SLIDE_CARD;
 })
 
 onMounted(() => {

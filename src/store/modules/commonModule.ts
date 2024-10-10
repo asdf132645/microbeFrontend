@@ -1,6 +1,8 @@
 // commonModule.ts
 import {Commit} from 'vuex';
 import { BeforeAfterStatusType } from "#/database/image";
+import {CellImgAnalyzedResponse} from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
+import {defaultCellImageAnalyzed} from "@/common/defines/constFile/settings";
 
 export interface CommonState {
     startEmbedded: boolean;
@@ -31,20 +33,12 @@ export interface CommonState {
     loginSetData: string;
     siteCd: string;
     deviceSerialNm: string;
-    clonedWbcInfo: any[];
-    clonedRbcInfo: any[];
-    moveImgIsBool: boolean;
-    classInfoSort: any[];
-    chatRunningData: any[];
     cbcLayer: boolean;
-    inhaTestCode: string;
     rbcReData: boolean;
-    rbcReDataClass: boolean;
     rbcInfoAfterData: any[];
     resetRbcArr: boolean;
     selectedSampleId: string;
     classInfoArr: any[];
-    appAlertOpen: boolean;
     dataBasePageReset: boolean;
     resetAnalyzing: boolean;
     testType: string;
@@ -60,6 +54,8 @@ export interface CommonState {
     settingType: string;
     isDownloadOrUploading: boolean;
     databaseDetailBeforeAfterStatus: BeforeAfterStatusType;
+    cellImageAnalyzedSetting: CellImgAnalyzedResponse;
+    currentSelectItems: any;
 }
 
 interface CommonModule {
@@ -96,20 +92,12 @@ interface CommonModule {
         setLoginSetData: (state: CommonState, value: string) => void;
         setSiteCd: (state: CommonState, value: string) => void;
         setDeviceSerialNm: (state: CommonState, value: string) => void;
-        setClonedWbcInfo: (state: CommonState, value: any[]) => void;
-        setClonedRbcInfo: (state: CommonState, value: any[]) => void;
-        setMoveImgIsBool: (state: CommonState, value: boolean) => void;
-        setClassInfoSort: (state: CommonState, value: any[]) => void;
-        setChatRunningData: (state: CommonState, value: any[]) => void;
         setCbcLayer: (state: CommonState, value: boolean) => void;
-        setInhaTestCode: (state: CommonState, value: string) => void;
         setRbcReData: (state: CommonState, value: boolean) => void;
-        setRbcReDataClass: (state: CommonState, value: boolean) => void;
         setRbcInfoAfterData: (state: CommonState, value: any[]) => void;
         setResetRbcArr: (state: CommonState, value: boolean) => void;
         setSelectedSampleId: (state: CommonState, value: string) => void;
         setClassInfoArr: (state: CommonState, value: any[]) => void;
-        setAppAlertOpen: (state: CommonState, value: boolean) => void;
         setDataBasePageReset: (state: CommonState, value: boolean) => void;
         setResetAnalyzing: (state: CommonState, value: boolean) => void;
         setTestType: (state: CommonState, value: string) => void;
@@ -125,6 +113,8 @@ interface CommonModule {
         setSettingType: (state: CommonState, value: string) => void;
         setIsDownloadOrUploading: (state: CommonState, value: boolean) => void;
         setDatabaseDetailBeforeAfterStatus: (state: CommonState, value: BeforeAfterStatusType) => void;
+        setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
+        setCurrentSelectItems: (state: CommonState, value: any) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -162,20 +152,12 @@ export const commonModule: CommonModule = {
         loginSetData: '',
         siteCd: '',
         deviceSerialNm: '',
-        clonedWbcInfo: [],
-        clonedRbcInfo: [],
-        moveImgIsBool: false,
-        classInfoSort: [],
-        chatRunningData: [],
         cbcLayer: false,
-        inhaTestCode: '',
         rbcReData: false,
-        rbcReDataClass: false,
         rbcInfoAfterData: [],
         resetRbcArr: false,
         selectedSampleId: '',
         classInfoArr:[],
-        appAlertOpen: false,
         dataBasePageReset: false,
         resetAnalyzing: false,
         testType: '',
@@ -191,6 +173,8 @@ export const commonModule: CommonModule = {
         settingType: '',
         isDownloadOrUploading: false,
         databaseDetailBeforeAfterStatus: 'before',
+        cellImageAnalyzedSetting: defaultCellImageAnalyzed,
+        currentSelectItems: {},
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -286,35 +270,14 @@ export const commonModule: CommonModule = {
         setSiteCd(state: CommonState, value: string): void {
             state.siteCd = value;
         },
-        setClonedWbcInfo(state: CommonState, value: any[]): void {
-            state.clonedWbcInfo = value;
-        },
-        setClonedRbcInfo(state: CommonState, value: any[]): void {
-            state.clonedRbcInfo = value;
-        },
-        setMoveImgIsBool(state: CommonState, value: boolean): void {
-            state.moveImgIsBool = value;
-        },
-        setClassInfoSort(state: CommonState, value: any[]): void {
-            state.classInfoSort = value;
-        },
-        setChatRunningData(state: CommonState, value: any[]): void {
-            state.chatRunningData = value;
-        },
         setSelectedSampleId(state: CommonState, value: string): void {
             state.selectedSampleId = value;
         },
         setCbcLayer(state: CommonState, value: boolean): void {
             state.cbcLayer = value;
         },
-        setInhaTestCode(state: CommonState, value: string): void {
-            state.inhaTestCode = value;
-        },
         setRbcReData(state: CommonState, value: boolean): void {
             state.rbcReData = value;
-        },
-        setRbcReDataClass(state: CommonState, value: boolean): void {
-            state.rbcReDataClass = value;
         },
         setResetRbcArr(state: CommonState, value: boolean): void {
             state.resetRbcArr = value;
@@ -325,9 +288,6 @@ export const commonModule: CommonModule = {
         // classInfoArr
         setClassInfoArr(state: CommonState, value: any[]): void {
             state.classInfoArr = value;
-        },
-        setAppAlertOpen(state: CommonState, value: boolean): void {
-            state.appAlertOpen = value;
         },
         setDataBasePageReset(state: CommonState, value: boolean): void {
             state.dataBasePageReset = value;
@@ -373,6 +333,12 @@ export const commonModule: CommonModule = {
         },
         setDatabaseDetailBeforeAfterStatus(state: CommonState, value: BeforeAfterStatusType): void {
             state.databaseDetailBeforeAfterStatus = value;
+        },
+        setCellImageAnalyzedSetting(state: CommonState, value: CellImgAnalyzedResponse): void {
+            state.cellImageAnalyzedSetting = value;
+        },
+        setCurrentSelectItems(state: CommonState, value: any): void {
+            state.currentSelectItems = value;
         }
     },
     actions: {
@@ -470,36 +436,14 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('deviceSerialNm')) {
                 commit('setDeviceSerialNm', payload.deviceSerialNm);
             }
-            if (payload.hasOwnProperty('clonedWbcInfo')) {
-                commit('setClonedWbcInfo', payload.clonedWbcInfo);
-            }
-            if (payload.hasOwnProperty('clonedRbcInfo')) {
-                commit('setClonedRbcInfo', payload.clonedRbcInfo);
-            }
-            if (payload.hasOwnProperty('moveImgIsBool')) {
-                commit('setMoveImgIsBool', payload.moveImgIsBool)
-            }
-            if (payload.hasOwnProperty('classInfoSort')) {
-                commit('setClassInfoSort', payload.classInfoSort)
-            }
-            if (payload.hasOwnProperty('chatRunningData')) {
-                commit('setChatRunningData', payload.chatRunningData)
-            }
             if (payload.hasOwnProperty('selectedSampleId')) {
                 commit('setSelectedSampleId', payload.selectedSampleId)
             }
             if (payload.hasOwnProperty('cbcLayer')) {
                 commit('setCbcLayer', payload.cbcLayer)
             }
-            // setInhaTestCode
-            if (payload.hasOwnProperty('inhaTestCode')) {
-                commit('setInhaTestCode', payload.inhaTestCode)
-            }
             if (payload.hasOwnProperty('rbcReData')) {
                 commit('setRbcReData', payload.rbcReData)
-            }
-            if(payload.hasOwnProperty('rbcReDataClass')){
-                commit('setRbcReDataClass', payload.rbcReDataClass)
             }
             if (payload.hasOwnProperty('rbcInfoAfterData')) {
                 commit('setRbcInfoAfterData', payload.rbcInfoAfterData)
@@ -509,9 +453,6 @@ export const commonModule: CommonModule = {
             }
             if(payload.hasOwnProperty('classInfoArr')) {
                 commit('setClassInfoArr', payload.classInfoArr)
-            }
-            if(payload.hasOwnProperty('appAlertOpen')){
-                commit('setAppAlertOpen', payload.appAlertOpen);
             }
             if (payload.hasOwnProperty('dataBasePageReset')){
                 commit('setDataBasePageReset', payload.dataBasePageReset);
@@ -557,6 +498,12 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('databaseDetailBeforeAfterStatus')) {
                 commit('setDatabaseDetailBeforeAfterStatus', payload.databaseDetailBeforeAfterStatus);
+            }
+            if (payload.hasOwnProperty('cellImageAnalyzedSetting')) {
+                commit('setCellImageAnalyzedSetting', payload.cellImageAnalyzedSetting);
+            }
+            if (payload.hasOwnProperty('currentSelectItems')) {
+                commit('setCurrentSelectItems', payload.currentSelectItems);
             }
         },
     },

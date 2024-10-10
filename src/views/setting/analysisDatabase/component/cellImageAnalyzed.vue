@@ -288,7 +288,6 @@ const autoBackUpMonth = ref('Not selected');
 const saveHttpType = ref('');
 const drive = ref<string[]>([]);
 const backupDrive = ref<any>([]);
-const cellimgId = ref('');
 
 const uploadSlotIdObj = ref({duplicated: [], nonDuplicated: []});
 const possibleUploadCount = computed(() => uploadSlotIdObj.value?.nonDuplicated && uploadSlotIdObj.value?.nonDuplicated.length);
@@ -334,7 +333,6 @@ onMounted(async () => {
 
 watch([lowPowerCaptureCount, iaRootPath, isAlarm, alarmCount, keepPage], async () => {
   const cellAfterSettingObj = {
-    id: cellimgId.value,
     LPCaptureCount: lowPowerCaptureCount.value,
     iaRootPath: iaRootPath.value,
     isAlarm: isAlarm.value,
@@ -401,7 +399,6 @@ const cellImgGet = async () => {
 
         const data = result.data;
 
-        cellimgId.value = String(data.id);
         iaRootPath.value = data.iaRootPath;
         lowPowerCaptureCount.value = data.LPCaptureCount;
         downloadRootPath.value = data.backupPath || 'D:\\UIMD_MO_backup';
@@ -412,7 +409,6 @@ const cellImgGet = async () => {
         backupEndDate.value = moment(data.backupEndDate).local().toDate();
 
         const cellBeforeSettingObj = {
-          id: cellimgId.value,
           LPCaptureCount: data?.LPCaptureCount,
           iaRootPath: data?.iaRootPath,
           isAlarm: data?.isAlarm,
@@ -451,7 +447,7 @@ const cellImgSet = async () => {
     if (saveHttpType.value === 'post') {
       result = await createCellImgApi(cellImgSet);
     } else {
-      result = await putCellImgApi(cellImgSet, cellimgId.value);
+      result = await putCellImgApi(cellImgSet);
     }
 
     if (result) {
@@ -459,8 +455,7 @@ const cellImgSet = async () => {
       showSuccessAlert(text);
       const data = result?.data;
       // 공통으로 사용되는 부분 세션스토리지 저장 새로고침시에도 가지고 있어야하는부분
-      sessionStorage.setItem('iaRootPath', data?.iaRootPath);
-      sessionStorage.setItem('keepPage', String(data?.keepPage));
+      await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
       await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
     }
 

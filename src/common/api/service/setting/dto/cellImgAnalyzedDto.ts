@@ -13,7 +13,6 @@ export interface CellImgAnalyzedRequest {
 }
 
 export interface CellImgAnalyzedResponse {
-    id: number;
     analysisType: string;
     iaRootPath: string;
     LPCaptureCount: string;

@@ -60,7 +60,7 @@ export const apiConstants = {
     settings: {
         cellImgAnalyzedPost: {
             cellImgAdd: {
-                endpoint:'cellImgAnalyzed/cellImgAdd',
+                endpoint:'cellImgAnalyzed/create',
                 requiresToken: false,
             },
             cellImgGet: {

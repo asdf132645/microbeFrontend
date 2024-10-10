@@ -17,12 +17,12 @@
     </div>
     <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
     <div :class="'databaseWbcRight shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
-        <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage" />
+        <ClassInfo type='listTable' @nextPage="nextPage" />
     </div>
 
 
     <div :class="'databaseMoRight' + (cbcLayer ? ' cbcLayer' : '')">
-      <ClassImageInfo :selectItems="selectItems" />
+      <ClassImageInfo />
     </div>
   </div>
 
@@ -48,14 +48,15 @@ import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
 import { LocationQueryValue, useRoute } from "vue-router";
-import { beforeAfterStatus } from "@/common/defines/constFile/dataBase";
+import { BEFORE_AFTER_STATUS } from "@/common/defines/constFile/dataBase";
+import {useQuery} from "@vue/apollo-composable";
+import {GetRunningInfoByIdDocument} from "@/gql";
 
 
 const store = useStore();
 const route = useRoute();
 const wbcInfo = ref<any>(null);
-const selectItems = ref<any>(null);
-const currentSampleId = ref<LocationQueryValue | LocationQueryValue[]>('');
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
@@ -69,24 +70,25 @@ const alertType = ref('');
 const alertMessage = ref('');
 
 onMounted(async () => {
-  currentSampleId.value = route.params.id;
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
 
-watch(() => route.params.id, async (newId, oldId) => {
-  if (newId !== oldId) {
-    currentSampleId.value = newId;
-    await getDetailRunningInfo();
-  }
-})
-
 const getDetailRunningInfo = async () => {
+  const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
+  console.log('result', result);
+  console.log('loading', loading);
+  console.log('error', error);
   try {
-    const result = await detailRunningApi(currentSampleId.value);
-    selectItems.value = result.data;
+    // Store에 담아서 관리
+    // 상위 부모에서 호출 한번만
+    // Page 달라졌을 때만 업데이트
+
+    // Graph QL 사용하며
+    const result = await detailRunningApi(selectItems.value.id);
+    await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: result.data });
   } catch (e) {
-    selectItems.value = {};
+    await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: {} });
     console.log(e);
   } finally {
     iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
@@ -114,10 +116,10 @@ const hideAlert = () => {
 }
 const refreshClass = async (data: any) => {
   await getDetailRunningInfo();
-  selectItems.value = data;
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
-  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: beforeAfterStatus.BEFORE })
+  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: BEFORE_AFTER_STATUS.BEFORE })
 }
 
 </script>

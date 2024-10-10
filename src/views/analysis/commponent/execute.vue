@@ -46,7 +46,7 @@
 import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
 
 import {useStore} from "vuex";
-import { lpCaptureOptions } from '@/common/defines/constFile/analysis';
+import { LP_CAPTURE_OPTIONS } from '@/common/defines/constFile/analysis';
 import { messages } from '@/common/defines/constFile/constantMessageText';
 import { tcpReq } from '@/common/tcpRequest/tcpReq';
 import { getCellImgApi } from "@/common/api/service/setting/settingApi";
@@ -97,7 +97,7 @@ onMounted(async () => {
 });
 
 const initDataExecute = async () => {
-  lpCaptureCountType.value = lpCaptureOptions;
+  lpCaptureCountType.value = LP_CAPTURE_OPTIONS;
 
   await nextTick();
   await cellImgGet();

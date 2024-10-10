@@ -3,33 +3,28 @@
     <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
     <input
         type="checkbox"
-        :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === beforeAfterStatus.BEFORE }]"
+        :class="[{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE }]"
         v-model="category[`${databaseDetailBeforeAfterStatus}Grade`]"
         true-value="Exist"
         false-value="None"
-        @click="handleClickGrade"
+        @change="handleClickGrade(moInfo)"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, defineEmits, watch, ref} from "vue";
+import { computed, defineProps, defineEmits } from "vue";
 import { useStore } from "vuex";
-import { beforeAfterStatus, moCategory } from "@/common/defines/constFile/dataBase";
+import { BEFORE_AFTER_STATUS } from "@/common/defines/constFile/dataBase";
 
 const store = useStore();
 const emits = defineEmits();
 const props = defineProps(['moInfo']);
-const showingMoInfo = ref(props.moInfo);
 
 const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
 
-watch(() => props.moInfo, (newMoInfo) => {
-  showingMoInfo.value = newMoInfo;
-})
-
-const handleClickGrade = () => {
-  emits('handleClickGrade', showingMoInfo.value);
+const handleClickGrade = (changedMoInfo: any) => {
+  emits('handleClickGrade', changedMoInfo);
 }
 
 </script>

@@ -1,5 +1,5 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
-import {moTestType, testType} from "@/common/defines/constFile/dataBase";
+import {MO_TEST_TYPE, TEST_TYPE } from "@/common/defines/constFile/dataBase";
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
 
@@ -24,7 +24,7 @@ export function stringToDateTime(str: string): string {
 }
 
 export const getTestTypeText = (value: string) => {
-    const matchingOption = testType.find(option => option.value === value);
+    const matchingOption = TEST_TYPE.find(option => option.value === value);
     return matchingOption ? matchingOption.text : '';
 };
 
@@ -34,7 +34,7 @@ export const getBarcodeDetailImageUrl =  (imageName: string, iaRootPath: string,
 }
 
 export const getCurrentAnalysisType = (cassetId: string) => {
-    if (cassetId.includes('B')) return moTestType.BLOOD;
-    if (cassetId.includes('U')) return moTestType.URINE;
-    return moTestType.SPUTUM;
+    if (cassetId.includes('B')) return MO_TEST_TYPE.BLOOD;
+    if (cassetId.includes('U')) return MO_TEST_TYPE.URINE;
+    return MO_TEST_TYPE.SPUTUM;
 }

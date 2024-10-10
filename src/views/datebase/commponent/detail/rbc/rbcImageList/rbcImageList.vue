@@ -74,7 +74,7 @@
               <button
                   class="tab-ruler-btn_img_list"
                   @click="onClickRuler(ruler)"
-                  v-for="ruler in rulers"
+                  v-for="ruler in RULERS"
                   :key="ruler.id"
                   :class="{ 'active': activeRuler === ruler.text, 'inactive': activeRuler !== ruler.text}"
               >{{ ruler.text }}
@@ -157,7 +157,7 @@
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import OpenSeadragon from 'openseadragon';
-import {rulers} from '@/common/defines/constFile/rbc';
+import { RULERS } from '@/common/defines/constFile/rbc';
 import {dirName} from "@/common/defines/constFile/settings";
 import {readDziFile, readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {useStore} from "vuex";

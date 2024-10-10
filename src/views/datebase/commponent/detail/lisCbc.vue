@@ -69,7 +69,6 @@ const cbcSex = ref('');
 const loading = ref(false);
 
 const cbcAge = ref('');
-const inhaTestCode = ref('');
 const cbcFilePathSetArr: any = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const deviceSerialNm = computed(() => store.state.commonModule.deviceSerialNm);
@@ -253,10 +252,6 @@ const inhaCbc = async () => {
         cbcPatientNm.value = res?.name;
         cbcSex.value = res?.sex;
         cbcAge.value = res?.age;
-        inhaTestCode.value = res?.testCode;
-
-        // 공통 정보 설정
-        await store.dispatch('commonModule/setCommonInfo', {inhaTestCode: res?.testCode});
 
         // 테스트 코드 리스트 처리
         const testCodeList = res.testCode.split(',');

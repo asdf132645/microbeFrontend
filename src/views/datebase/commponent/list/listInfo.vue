@@ -23,7 +23,7 @@
           </li>
         </ul>
         <div>
-          <img v-show="!barCodeImageShowError" @error="onImageError" :src="pilePath"
+          <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath"
                style="width: 200px; float:right;"/>
         </div>
       </div>
@@ -42,16 +42,14 @@ const props = defineProps(['selectedItem']);
 const iaRootPath = ref(store.state.commonModule.iaRootPath);
 const siteCd = computed(() => store.state.commonModule.siteCd);
 
-const pilePath = ref('');
+const filePath = ref('');
 const barCodeImageShowError = ref(false);
-const wbcTotal = ref(0);
-const nonWbcTitles = ['NR', 'GP', 'PA', 'AR', 'MA', 'SM', 'OT'];
 
 onMounted(async () => {
   barCodeImageShowError.value = false;
   // iaRootPath가 존재하면 getImageUrl 함수 호출
   if (iaRootPath.value) {
-    pilePath.value = getImageUrl('barcode_image.jpg');
+    filePath.value = getImageUrl('barcode_image.jpg');
   }
 });
 
@@ -60,46 +58,9 @@ watch(() => props.selectedItem, (newSelectedItem) => {
   // setWbcTotalAndPercent();
 
   if (iaRootPath.value) {
-    pilePath.value = getImageUrl('barcode_image.jpg', newSelectedItem);
+    filePath.value = getImageUrl('barcode_image.jpg', newSelectedItem);
   }
 });
-
-const setWbcTotalAndPercent = () => {
-  wbcTotal.value = props.selectedItem.wbcInfoAfter.reduce((acc, item) => {
-    if (!nonWbcTitles.includes(item.title)) return acc + Number(item.count)
-    return acc
-  }, 0)
-  for (const item of props.selectedItem.wbcInfoAfter) {
-    const targetArray = getStringArrayBySiteCd(siteCd.value, props.selectedItem?.testType);
-    if (!targetArray.includes(item.title)) {
-      const percentage = ((Number(item.count) / Number(wbcTotal.value)) * 100).toFixed(1); // 소수점 0인경우 정수 표현
-      item.percent = (Number(percentage) === Math.floor(Number(percentage))) ? Math.floor(Number(percentage)).toString() : percentage;
-    }
-  }
-}
-
-const getStringArrayBySiteCd = (siteCd, testType) => {
-  if (!siteCd && siteCd === '') {
-    siteCd = '0000';
-    testType = '01';
-  }
-  const arraysBySiteCd = { // 0006 -> 고대
-    '0006': {
-      includesStr: ["AR", "NR", "GP", "PA", "MC", "MA", "SM", 'NE', 'GP', 'PA', 'OT'],
-      includesStr2: ["NR", "AR", "MC", "MA", "SM", 'NE', 'GP', 'PA', 'OT'],
-    },
-  };
-
-  // 지정된 siteCd에 대한 배열을 가져오거나, 기본 배열을 반환
-  const arraysForSiteCd = arraysBySiteCd[siteCd] || {
-    includesStr: ["AR", "NR", "GP", "PA", "MC", "SM", "MA", 'GP', 'PA', 'OT'],
-    includesStr2: ["NR", "AR", "MC", "MA", "SM", 'GP', 'PA', 'OT'],
-  };
-
-  // testType에 따라 제외할 부분 정의
-  return (testType === '01' || testType === '04') ? arraysForSiteCd.includesStr : arraysForSiteCd.includesStr2;
-};
-
 
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 
