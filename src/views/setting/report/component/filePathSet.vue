@@ -15,9 +15,8 @@
   <Confirm
       v-if="showConfirm"
       :is-visible="showConfirm"
+      :type="MESSAGES.SETTING"
       :message="confirmMessage"
-      :confirmText="messages.SAVE"
-      :closeText="messages.LEAVE"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
   />
@@ -34,12 +33,12 @@
 
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
-import {lisHotKeyAndLisFilePathAndUrl, settingName} from "@/common/defines/constFile/settings";
+import {lisHotKeyAndLisFilePathAndUrl, settingName} from "@/common/defines/constFile/settings/settings";
 import {ApiResponse} from "@/common/api/httpClient";
 import { createFilePathSetApi, getFilePathSetApi, updateFilePathSetApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {FilePathItem} from "@/common/api/service/setting/dto/filePathSetDto";
-import {messages} from '@/common/defines/constFile/constantMessageText';
+import {MESSAGES} from '@/common/defines/constFile/constantMessageText';
 import Confirm from "@/components/commonUi/Confirm.vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
@@ -75,7 +74,7 @@ watch(() => settingChangedChecker.value, () => {
 
 const checkIsMovingWhenSettingNotSaved = () => {
   showConfirm.value = true;
-  confirmMessage.value = `${settingType.value} ${messages.settingNotSaved}`;
+  confirmMessage.value = `${settingType.value} ${MESSAGES.SETTING_NOT_SAVED}`;
 }
 
 const saveFilePathSet = async () => {
@@ -88,10 +87,10 @@ const saveFilePathSet = async () => {
       const updateResult = await updateFilePathSetApi({ filePathSetItems: filePathSetArr.value });
 
       if (updateResult.data) {
-        showSuccessAlert(messages.UPDATE_SUCCESSFULLY);
+        showSuccessAlert(MESSAGES.UPDATE_SUCCESSFULLY);
         await getFilePathSetData();
       } else {
-        showErrorAlert(messages.settingUpdateFailure);
+        showErrorAlert(MESSAGES.SETTING_UPDATE_FAILURE);
       }
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
       await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
@@ -99,7 +98,7 @@ const saveFilePathSet = async () => {
     }
 
     if (result) {
-      showSuccessAlert(messages.settingSaveSuccess);
+      showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
       saveHttpType.value = 'put';
       await getFilePathSetData();
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -139,13 +138,13 @@ const updateCbcFilePath = (event: any, index: number) => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 

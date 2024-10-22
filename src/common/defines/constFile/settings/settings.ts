@@ -1,4 +1,6 @@
-export const lowPowerCaptureCountList = [
+import type { GramRange } from "@/common/defines/constFile/settings/settings.dto";
+
+export const LOW_POWER_CAPTURE_COUNT_LIST = [
     { value: '10', text: '10' },
     { value: '20', text: '20' },
     { value: '30', text: '30' },
@@ -6,7 +8,7 @@ export const lowPowerCaptureCountList = [
     { value: '50', text: '50' },
 ]
 
-export const defaultCbcList = [
+export const DEFAULT_CBC_LIST = [
     { cd: '01', classCd: 'clusters', fullNm: 'GPC Clusters' },
     { cd: '02', classCd: 'pairs', fullNm: 'GPC Pairs' },
     { cd: '03', classCd: 'chains', fullNm: 'GPC Chains' },
@@ -23,46 +25,33 @@ export const defaultCbcList = [
     { cd: '14', classCd: '', fullNm: 'Hyphae' },
 ];
 
-export const defaultGramRange = [
+export const DEFAULT_GRAM_RANGE: GramRange[] = [
     {
-        abbreviation: 'WBC',
         fullNm: 'WBC',
         classId: '01',
-        rareMost: '0',
-        fewLeast: '1',
-        fewMost: '5',
-        moderateLeast: '6',
-        moderateMost: '30',
-        manyLeast: '31',
-        unit: 'LPF',
+        fewBoundary: 1,
+        rareBoundary: 6,
+        moderateBoundary: 30,
     },
     {
-        abbreviation: 'EP Cell',
         fullNm: 'EP Cell',
         classId: '02',
-        rareMost: '0',
-        fewLeast: '1',
-        fewMost: '5',
-        moderateLeast: '6',
-        moderateMost: '30',
-        manyLeast: '31',
-        unit: 'LPF',
+        fewBoundary: 1,
+        rareBoundary: 6,
+        moderateBoundary: 30,
     },
     {
-        abbreviation: 'Gram',
         fullNm: 'Gram',
         classId: '03',
-        rareMost: '0',
-        fewLeast: '1',
-        fewMost: '5',
-        moderateLeast: '6',
-        moderateMost: '30',
-        manyLeast: '31',
-        unit: 'HPF',
+        fewBoundary: 1,
+        rareBoundary: 6,
+        moderateBoundary: 30,
     },
 ]
 
-export const defaultImagePrint = [
+export const GRAM_RANGE_UNIT = { LPF: 'LPF', HPF: 'HPF' };
+
+export const DEFAULT_IMAGE_PRINT = [
     { fullNm: '1', classId: '01', checked: false },
     { fullNm: '2', classId: '02', checked: false },
     { fullNm: '3', classId: '03', checked: false },

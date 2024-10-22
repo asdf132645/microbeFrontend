@@ -286,7 +286,7 @@ import {detailRunningApi, updateRunningApi} from "@/common/api/service/runningIn
 import {useStore} from "vuex";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import {useRouter} from "vue-router";
 import moment from "moment/moment";
 import SliderBar from "@/components/commonUi/SliderBar.vue";
@@ -934,7 +934,7 @@ const resRunningItem = async (updatedRuningInfo: any, alertShow?: any, degree?: 
         // allCheckType.value = true;
       }
       if (alertShow) {
-        showSuccessAlert('success');
+        showSuccessAlert(MESSAGES.SUCCESS_ALERT);
       }
       const filteredItems = updatedRuningInfo;
       memo.value = filteredItems.rbcMemo;
@@ -949,7 +949,7 @@ const resRunningItem = async (updatedRuningInfo: any, alertShow?: any, degree?: 
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
   window.scrollTo({top: 0, behavior: 'smooth'});
 };
@@ -957,7 +957,7 @@ const showSuccessAlert = (message: string) => {
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 
@@ -970,7 +970,7 @@ const commitConfirmed = () => {
     return;
   }
   showConfirm.value = true;
-  confirmMessage.value = messages.IDS_MSG_CONFIRM_SLIDE;
+  confirmMessage.value = MESSAGES.IDS_MSG_CONFIRM_SLIDE;
 }
 
 const handleOkConfirm = () => {

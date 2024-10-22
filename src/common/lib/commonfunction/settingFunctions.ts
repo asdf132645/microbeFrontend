@@ -7,8 +7,9 @@ import {
     getCbcCodeRbcApi,
     createCbcCodeRbcApi,
 } from '@/common/api/service/setting/settingApi';
-import {defaultCbcList, defaultCellImageAnalyzed, defaultGramRange} from "@/common/defines/constFile/settings";
+import {DEFAULT_CBC_LIST, defaultCellImageAnalyzed, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
 import { useStore } from "vuex";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 /**
  * API 요청 시 분류할 Constant
@@ -20,7 +21,7 @@ import { useStore } from "vuex";
 const settingsConstant = ref<any>({
     'cbcCode': {
         'sendingForm': 'cbcCodeItems',
-        'defaultItem': defaultCbcList,
+        'defaultItem': DEFAULT_CBC_LIST,
         'getRequest': getCbcCodeRbcApi,
         'createRequest': createCbcCodeRbcApi,
     },
@@ -30,7 +31,7 @@ const settingsConstant = ref<any>({
     },
     'gramRange': {
         'sendingForm': 'gramRangeItems',
-        'defaultItem': defaultGramRange,
+        'defaultItem': DEFAULT_GRAM_RANGE,
         'getRequest': getGramRangeApi,
         'createRequest': createGramRangeApi,
     },
@@ -46,9 +47,9 @@ export const initializeAllSettings = async () => {
 const firstGetSettings = async (initializeType: string) => {
     const getRequest = settingsConstant.value[initializeType].getRequest;
     try {
-        const {data} = await getRequest() || {};
+        const { data } = await getRequest() || {};
 
-        if (!data || data.length === 0) {
+        if (!data || data.length === 0 || isObjectEmpty(data)) {
             const sendingFormStr = settingsConstant.value[initializeType]?.sendingForm;
             const defaultItem = settingsConstant.value[initializeType].defaultItem;
             const createRequest = settingsConstant.value[initializeType].createRequest;

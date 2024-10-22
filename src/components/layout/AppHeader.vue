@@ -1,6 +1,7 @@
 <template>
   <header class='header'>
     <nav>
+      <!--  좌측메뉴  -->
       <div class='appHeaderLeft bmComponent' v-if="!appHeaderLeftHidden">
         <div class="borderLine">
           <img src="@/assets/celli.png" class="headerLogo"/>
@@ -28,23 +29,21 @@
           <span class='icoText'>Database</span>
         </router-link>
 
-        <!--  좌측메뉴  -->
+        <!--  우측메뉴  -->
         <div class="small-icon-menu">
           <div class="lastMenu">
             <ul>
-              <li>{{ formattedDate }} {{ formattedTime }}</li>
-              <li class="lastLiM">
-                <div class="cursorPointer userBox" @click="userSetOutToggle">
+              <li class="flex-align-center-justify-between">
+                <span>
                   <font-awesome-icon :icon="['fas', 'circle-user']"/>
-                  {{ userModuleDataGet.userId }}
-                </div>
-                <ul v-show="userSetOutUl" class="userSetOutUl" @click.stop>
-                  <li @click="logout">LOGOUT</li>
-                </ul>
-                <div class="logOutBox" @click="exit">
-                  EXIT
-                </div>
-                <div class="logOutBox" @click='fullScreen'>FULL SCREEN</div>
+                {{ userModuleDataGet.userId }}
+                </span>
+                <span>{{ formattedDate }} {{ formattedTime }}</span>
+              </li>
+              <li class="lastLiM">
+                <span class="logOutBox" @click="logout">LOGOUT</span>
+                <span class="logOutBox" @click="exit"> EXIT</span>
+                <span class="logOutBox" @click='fullScreen'>FULL SCREEN</span>
               </li>
             </ul>
           </div>
@@ -124,7 +123,6 @@
   <Confirm
       v-if="showConfirm"
       :is-visible="showConfirm"
-      :type="confirmType"
       :message="confirmMessage"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
@@ -137,7 +135,7 @@ import {computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref,
 import {useStore} from "vuex";
 import router from "@/router";
 import Modal from '@/components/commonUi/modal.vue';
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import {getCellImgApi} from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {tcpReq} from "@/common/tcpRequest/tcpReq";
@@ -253,6 +251,8 @@ const hideConfirm = () => {
 const fullScreen = () => {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
   }
 }
 
@@ -350,12 +350,12 @@ const closeUserSetBox = (event: any) => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 const hideAlert = () => {
@@ -368,7 +368,7 @@ const isActive = (path: string) => {
 
 const logout = () => {
   clickType.value = 'logout';
-  confirmMessage.value = messages.Logout;
+  confirmMessage.value = MESSAGES.Logout;
   showConfirm.value = true;
   localStorage.removeItem('user')
   userSetOutUl.value = false;
@@ -376,7 +376,7 @@ const logout = () => {
 
 const exit = async () => {
   clickType.value = 'exit';
-  confirmMessage.value = messages.exit;
+  confirmMessage.value = MESSAGES.exit;
   showConfirm.value = true;
   userSetOutUl.value = false;
 }
@@ -465,7 +465,7 @@ const onReset = () => {
     payload: settings
   });
 
-  showSuccessAlert(messages.SUCCESS_ALERT);
+  showSuccessAlert(MESSAGES.SUCCESS_ALERT);
 }
 
 const getPercent = () => {

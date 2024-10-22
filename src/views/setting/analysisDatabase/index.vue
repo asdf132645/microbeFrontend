@@ -16,9 +16,8 @@
   <Confirm
       v-if="showConfirm"
       :is-visible="showConfirm"
+      :type="MESSAGES.SETTING"
       :message="confirmMessage"
-      :confirmText="messages.SAVE"
-      :closeText="messages.LEAVE"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
   />
@@ -40,7 +39,7 @@ import DeviceControls from '@/views/setting/analysisDatabase/component/deviceCon
 import GramRange from "@/views/setting/analysisDatabase/component/gramRange.vue";
 import {useStore} from "vuex";
 import Alert from "@/components/commonUi/Alert.vue";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import {settingUpdate} from "@/common/lib/utils/settingSave";
 
@@ -63,7 +62,7 @@ const activateTab = (tabName: string) => {
   movingTab.value = tabName;
   if (beforeSettingFormattedString.value !== afterSettingFormattedString.value) {
     showConfirm.value = true;
-    confirmMessage.value = `${settingType.value} ${messages.settingNotSaved}`;
+    confirmMessage.value = `${settingType.value} ${MESSAGES.SETTING_NOT_SAVED}`;
   } else {
     activeTab.value = movingTab.value;
   }
@@ -71,13 +70,13 @@ const activateTab = (tabName: string) => {
 
 const showSuccessAlert = async (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 }
 
 const showErrorAlert = async (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 
@@ -110,9 +109,9 @@ const handleOkConfirm = async () => {
   try {
     console.log(settingType.value);
     await settingUpdate(settingType.value, JSON.parse(afterSettingFormattedString.value));
-    await showSuccessAlert(messages.settingSaveSuccess);
+    await showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
   } catch (e) {
-    await showErrorAlert(messages.settingSaveFailure);
+    await showErrorAlert(MESSAGES.SETTING_SAVE_FAILURE);
   }
 }
 

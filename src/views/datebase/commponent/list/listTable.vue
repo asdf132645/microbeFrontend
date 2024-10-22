@@ -190,12 +190,12 @@ import {
   updateRunningApi
 } from "@/common/api/service/runningInfo/runningInfoApi";
 import {useStore} from "vuex";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import moment from "moment";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
-import {barcodeImgDir} from "@/common/defines/constFile/settings";
+import {barcodeImgDir} from "@/common/defines/constFile/settings/settings";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItemIdFalse', 'notStartLoading', 'loadingDelayParents']);
@@ -392,7 +392,7 @@ const handleOutsideClick = (event) => {
 
 const rowRightClick = async (item, event) => {
   if (props.dbData.filter(data => data.id === item.id).lock_status === false) {
-    showSuccessAlert(messages.IDS_ERROR_SELECT_A_TARGET_ITEM);
+    showSuccessAlert(MESSAGES.IDS_ERROR_SELECT_A_TARGET_ITEM);
     return;
   }
 
@@ -443,13 +443,13 @@ const handleIntersection = (entries, observer) => {
 
 const showSuccessAlert = (message) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorAlert = (message) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 }
 
@@ -561,7 +561,7 @@ const dbDataEditSet = async () => {
       dayQuery: dayQuery,
     })
     if (response) {
-      showSuccessAlert('success');
+      showSuccessAlert(MESSAGES.SUCCESS_ALERT);
       emits('initData');
       closeLayer();
     } else {
@@ -591,11 +591,11 @@ const deleteRow = async () => {
   try {
     let selectedItems = props.dbData.filter(item => item.checked);
     if (selectedItems.length === 0 && selectedItemId.value === '') {
-      showErrorAlert(messages.IDS_ERROR_SELECT_A_TARGET_ITEM);
+      showErrorAlert(MESSAGES.IDS_ERROR_SELECT_A_TARGET_ITEM);
     } else if (selectedItems.length === 0 && selectedItemId.value !== '') {
       selectedItems = props.dbData.find(item => item.id === selectedItemId.value);
       if (selectedItems.lock_status) {
-        showErrorAlert(messages.lockRow);
+        showErrorAlert(MESSAGES.lockRow);
         return;
       }
       const idsToDelete = selectedItems
@@ -622,7 +622,7 @@ const deleteRow = async () => {
       const idsToDelete = selectedItems.map(item => item.id);
       const idsToDeleteLock = selectedItems.map(item => item.lock_status);
       if (idsToDeleteLock.includes(true)) {
-        showErrorAlert(messages.lockRow);
+        showErrorAlert(MESSAGES.lockRow);
         return
       }
       const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : cellImageAnalyzedSetting.value.iaRootPath;

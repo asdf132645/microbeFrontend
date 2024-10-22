@@ -31,7 +31,7 @@
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 import Alert from "@/components/commonUi/Alert.vue";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import {onCameraResetWebSocket, onGripperOpenWebSocket} from "@/common/lib/sendWebSocket/common";
 import EventBus from "@/eventBus/eventBus";
 import {tcpReq} from "@/common/tcpRequest/tcpReq";
@@ -103,7 +103,7 @@ const onCameraReset = () => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 const hideAlert = () => {

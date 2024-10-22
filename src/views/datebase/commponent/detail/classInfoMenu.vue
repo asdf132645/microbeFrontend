@@ -1,22 +1,26 @@
 <template>
   <div class="wbcMenu">
     <ul>
+      <li :class='{ "onRight": isActive("LP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=LP`)">
+        <p class="menuIco">
+          <font-awesome-icon :icon="['fas', 'disease']"/>
+        </p>
+        <p>LP Image</p>
+      </li>
 
-      <template v-if="true">
-        <li :class='{ "onRight": isActive("LP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=LP`)">
-          <p class="menuIco">
-            <font-awesome-icon :icon="['fas', 'disease']"/>
-          </p>
-          <p>LP Image</p>
-        </li>
-        <li v-if="!isLoading" :class='{ "onRight": isActive("HP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=HP`)">
-          <p class="menuIco">
-            <font-awesome-icon :icon="['fas', 'clipboard']"/>
-          </p>
-          <p>HP Image</p>
-        </li>
-      </template>
+      <li :class='{ "onRight": isActive("HP") }' @click="pageGo(`/databaseDetail/${selectItems.id}?pageType=HP`)">
+        <p class="menuIco">
+          <font-awesome-icon :icon="['fas', 'clipboard']"/>
+        </p>
+        <p>HP Image</p>
+      </li>
 
+      <li :class='{ "onRight": isActive("/report") }' @click="pageGo('/report')">
+        <p class="menuIco">
+          <font-awesome-icon :icon="['fas', 'clipboard']"/>
+        </p>
+        <p>REPORT</p>
+      </li>
     </ul>
 <!--    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }'>-->
 <!--      <font-awesome-icon :icon="['fas', 'desktop']"/>-->
@@ -47,7 +51,6 @@ import {
   defineEmits,
   defineProps,
   getCurrentInstance,
-  onBeforeMount,
   onMounted,
   onUnmounted,
   ref,
@@ -65,6 +68,7 @@ import {useStore} from "vuex";
 import {LocationQueryValue, useRoute} from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -92,13 +96,10 @@ const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFir
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
 const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
 
-onBeforeMount(async () => {
+onMounted(async () => {
   await getDetailRunningInfo();
   isLoading.value = false;
   keepPage.value = cellImageAnalyzedSetting.value.keepPage;
-})
-
-onMounted(async () => {
   pageMoveDeleteStop.value = true;
   const ip = await getDeviceIpApi();
   ipAddress.value = ip.data;
@@ -135,8 +136,8 @@ const hideAlert = () => {
 const deleteConnectionStatus = async () => {
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(resData.value?.id)});
   const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-  const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-  const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+  const { startDate, endDate, page, searchText, testType } = JSON.parse(day);
+  const dayQuery = startDate + endDate + page + searchText + testType;
   const req = `oldPcIp=${ipAddress.value}&dayQuery=${dayQuery}`
   await clearPcIpState(req)
       .then(response => {
@@ -203,14 +204,14 @@ const moveWbc = async (direction: any) => {
   if (direction === 'up') {
     if (dbListDataFirstNum.value === selectItems.value?.id) {
       showAlert.value = true;
-      alertType.value = 'success';
+      alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
       alertMessage.value = 'This is the first page. Navigation to other pages is not possible.';
       return;
     }
   } else {
     if (dbListDataLastNum.value === selectItems.value?.id) {
       showAlert.value = true;
-      alertType.value = 'success';
+      alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
       alertMessage.value = 'This is the last page. Navigation to other pages is not possible.';
       return;
     }
@@ -233,7 +234,7 @@ const processNextDbIndex = async (direction: any, id: number) => {
   const res: any = await pageUpDownRunnIng(id, '1', direction);
   if (resData.value?.lock_status) {
     showAlert.value = true;
-    alertType.value = 'success';
+    alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
     alertMessage.value = 'Someone else is editing.';
     return;
   }

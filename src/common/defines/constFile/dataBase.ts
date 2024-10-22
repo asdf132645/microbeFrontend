@@ -29,6 +29,7 @@ export const SPUTUM_GRADES = {
     EPCELL_GRADES: ['> 25', '> 25', '> 25', '> 25', '10 ~ 25', '10 ~ 25', '< 10', '< 10'],
     WBC_GRADES: ['< 10', '10 ~ 25', '> 25', '> 25', '> 25', '> 25', '> 25', '< 10'],
     WBC_EPCELL_RATIO_GRADES: ['', '', 'x10 ↓', 'x10 ↑', 'x10 ↓', 'x10 ↑', '', ''],
+    COLUMNS: ['Sputum', 'EP Cell', 'WBC', 'WBC/EP Cell']
 }
 
 export const POWER_MODE = {
@@ -42,7 +43,7 @@ export const MO_TEST_TYPE = {
     SPUTUM: 'Sputum'
 }
 
-export const moCategory = {
+export const MO_CATEGORY = {
     GPC_CLUSTERS: 'GPC Clusters',
     GPC_PAIRS: 'GPC Pairs',
     GPC_CHAINS: 'GPC Chains',
@@ -57,17 +58,19 @@ export const moCategory = {
     GPB: 'GPB',
     EP_CELL: 'EP Cell',
     HYPHAE: 'Hyphae',
-    SPUTUM: 'Sputum'
-}
+    SPUTUM: 'Sputum',
+    WBC_EPCELL: 'WBC/EP Cell',
+    GRAM: 'Gram'
+};
 
 export const BLOOD_TYPE = {
-    HIGH_POWER: [ moCategory.GPC_CLUSTERS, moCategory.GPC_PAIRS, moCategory.GPC_CHAINS, moCategory.GNB, moCategory.GPB_SMALL, moCategory.GPB_LARGE, moCategory.GNDC, moCategory.GNCB ],
-    LOW_POWER: [ moCategory.YEAST ]
+    HIGH_POWER: [ MO_CATEGORY.GPC_CLUSTERS, MO_CATEGORY.GPC_PAIRS, MO_CATEGORY.GPC_CHAINS, MO_CATEGORY.GNB, MO_CATEGORY.GPB_SMALL, MO_CATEGORY.GPB_LARGE, MO_CATEGORY.GNDC, MO_CATEGORY.GNCB ],
+    LOW_POWER: [ MO_CATEGORY.YEAST ]
 }
 
 export const URINE_TYPE = {
-    HIGH_POWER: [ moCategory.GPC, moCategory.GNB, moCategory.GPB ],
-    LOW_POWER: [ moCategory.WBC, moCategory.YEAST ],
+    HIGH_POWER: [ MO_CATEGORY.GPC, MO_CATEGORY.GNB, MO_CATEGORY.GPB ],
+    LOW_POWER: [ MO_CATEGORY.WBC, MO_CATEGORY.YEAST ],
 }
 
 export const ARROW_DIRECTION = {
@@ -85,6 +88,16 @@ export const FOLDER_NAME = {
     LOW_POWER: '13_LOW_Detection'
 }
 
+export const FIVE_COL_GRADES = ['', ...FOUR_GRADES];
+
+export const YEAST_COL_GRADES = ['', MO_CATEGORY.YEAST];
+
+/** TODO
+ * description
+ * 1. BLOOD, URINE, SPUTUM
+ * 2. BLOOD TYPE
+ * 3. URINE TYPE
+ * 4. SPUTUM TYPE*/
 const test = [
     {
         "id": "0",
@@ -93,7 +106,7 @@ const test = [
             {
                 "count": "10",
                 "classNm": "WBC",
-                "afterGrade": "4-1",
+                "afterGrade": "Most",
                 "beforeGrade": "Few"
             },
             {

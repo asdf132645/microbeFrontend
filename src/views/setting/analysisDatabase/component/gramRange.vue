@@ -12,27 +12,63 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="gramItem in gramItems" :key="gramItem.id">
+        <tr v-for="(gramItem, index) in gramItems" :key="gramItem.classId">
           <td>{{ gramItem.fullNm }}</td>
           <td>
             ~
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'rareMost')" v-model="gramItem.rareMost">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.rareBoundary"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'rareBoundary', 'upper')"
+            >
           </td>
           <td>
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'fewLeast')" v-model="gramItem.fewLeast">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.rareBoundary + 1"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'rareBoundary', 'lower')"
+            >
             ~
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'fewMost')" v-model="gramItem.fewMost">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.fewBoundary"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'fewBoundary', 'upper')"
+            >
           </td>
           <td>
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'moderateLeast')" v-model="gramItem.moderateLeast">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.fewBoundary + 1"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'fewBoundary', 'lower')"
+            >
             ~
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'moderateMost')" v-model="gramItem.moderateMost">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.moderateBoundary"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'moderateBoundary', 'upper')"
+            >
           </td>
           <td>
-            <input style="width: 32px;" type="text" @input="filterNumbersOnly($event, gramItem, 'manyLeast')" v-model="gramItem.manyLeast">
+            <input
+                style="width: 32px;"
+                type="text"
+                :value="gramItem.moderateBoundary + 1"
+                @keydown="allowOnlyNumbers"
+                @input="updateBoundaryDebounced($event, index, 'moderateBoundary', 'lower')"
+            >
             ~
           </td>
-          <td>({{ gramItem.unit }})</td>
+          <td>({{ getUnit(gramItem.fullNm) }})</td>
         </tr>
       </tbody>
     </table>
@@ -42,9 +78,8 @@
   <Confirm
       v-if="showConfirm"
       :is-visible="showConfirm"
+      :type="MESSAGES.SETTING"
       :message="confirmMessage"
-      :confirmText="messages.SAVE"
-      :closeText="messages.LEAVE"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
   />
@@ -61,20 +96,24 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
+import { debounce } from "lodash";
 import { createGramRangeApi, getGramRangeApi, updateGramRangeApi } from "@/common/api/service/setting/settingApi";
 import { ApiResponse } from "@/common/api/httpClient";
 import Alert from "@/components/commonUi/Alert.vue";
-import { defaultGramRange, settingName } from "@/common/defines/constFile/settings";
-import { messages } from '@/common/defines/constFile/constantMessageText';
+import {DEFAULT_GRAM_RANGE, GRAM_RANGE_UNIT, settingName} from "@/common/defines/constFile/settings/settings";
+import { MESSAGES } from '@/common/defines/constFile/constantMessageText';
 import Confirm from "@/components/commonUi/Confirm.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { gramRangeValidate } from "@/common/lib/utils/validate";
+import { MO_CATEGORY } from "@/common/defines/constFile/dataBase";
+import {GramRangeItems} from "@/common/api/service/setting/dto/gramRangeDto";
+
 
 const store = useStore();
 const router = useRouter();
 const saveHttpType = ref('');
-const gramItems = ref<any>([]);
+const gramItems = ref<GramRangeItems[]>(DEFAULT_GRAM_RANGE);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -102,7 +141,7 @@ watch(() => settingChangedChecker.value, () => {
 
 const checkIsMovingWhenSettingNotSaved = () => {
   showConfirm.value = true;
-  confirmMessage.value = `${settingType.value} ${messages.settingNotSaved}`;
+  confirmMessage.value = `${settingType.value} ${MESSAGES.SETTING_NOT_SAVED}`;
 }
 
 const saveGramRange = async () => {
@@ -120,17 +159,17 @@ const saveGramRange = async () => {
       const updateResult = await updateGramRangeApi({gramRangeItems: gramItems.value});
 
       if (updateResult.data) {
-        showSuccessAlert(messages.UPDATE_SUCCESSFULLY);
+        showSuccessAlert(MESSAGES.UPDATE_SUCCESSFULLY);
         await getGramRange();
       } else {
-        showErrorAlert('update failed');
+        showErrorAlert('Update failed');
       }
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
       await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
       return;
     }
     if (result) {
-      showSuccessAlert(messages.settingSaveSuccess);
+      showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
       saveHttpType.value = 'put';
       await getGramRange();
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -141,11 +180,61 @@ const saveGramRange = async () => {
   }
 };
 
-const filterNumbersOnly = (event: Event, item: any, field: 'rareMost' | 'fewLeast' | 'fewMost' | 'moderateLeast' | 'moderateMost' | 'manyLeast') => {
-  const input = event.target as HTMLInputElement;
-  const filteredValue = input.value.replace(/[^0-9]/g, '');
-  item[field] = filteredValue.trim();
+const boundaries = ['rareBoundary', 'fewBoundary', 'moderateBoundary'] as const;
+
+const allowOnlyNumbers = (event: KeyboardEvent) => {
+  const key = event.key;
+
+  // 숫자, 백스페이스, Delete, 화살표 키를 허용
+  if (!/^\d$/.test(key) && key !== 'Backspace' && key !== 'Delete' &&
+      key !== 'ArrowLeft' && key !== 'ArrowRight') {
+    event.preventDefault();
+  }
 };
+
+const updateBoundary = (
+    event: Event,
+    index: number,
+    boundary: typeof boundaries[number],
+    position: 'upper' | 'lower'
+) => {
+  const inputValue = +(event.target as HTMLInputElement).value;
+  if (isNaN(inputValue) || inputValue < 0) return;
+
+  const updatedGramItem = { ...gramItems.value[index] };
+
+  if (position === 'upper') {
+    updatedGramItem[boundary] = inputValue;
+
+    const nextBoundary = getNextBoundary(boundary);
+    if (nextBoundary && updatedGramItem[nextBoundary] <= inputValue) {
+      // 인접한 상위 값이 현재 값보다 작거나 같으면, 인접한 값을 업데이트된 값 + 1로 설정
+      updatedGramItem[nextBoundary] = inputValue;
+    }
+  } else {
+    updatedGramItem[boundary] = inputValue;
+
+    const prevBoundary = getPreviousBoundary(boundary, position);
+    if (prevBoundary && updatedGramItem[prevBoundary] >= inputValue) {
+      // 인접한 하위 값이 현재 값보다 크거나 같으면, 인접한 값을 업데이트된 값 - 1로 설정
+      updatedGramItem[prevBoundary] = inputValue - 1;
+    }
+  }
+
+  // 업데이트된 아이템 적용
+  gramItems.value[index] = updatedGramItem;
+};
+
+
+const updateBoundaryDebounced = debounce(updateBoundary, 300);
+
+const getPreviousBoundary = (boundary: typeof boundaries[number], position: 'lower' | 'upper') => {
+  if (position === 'lower') return boundaries[boundaries.indexOf(boundary)];
+  return boundaries[boundaries.indexOf(boundary) - 1];
+
+}
+const getNextBoundary = (boundary: typeof boundaries[number]) => boundaries[boundaries.indexOf(boundary) + 1];
+
 
 const getGramRange = async () => {
   try {
@@ -153,7 +242,7 @@ const getGramRange = async () => {
     if (result) {
       if (!result?.data || (result?.data instanceof Array && result?.data.length === 0)) {
         saveHttpType.value = 'post';
-        gramItems.value = defaultGramRange;
+        gramItems.value = DEFAULT_GRAM_RANGE;
       } else {
         saveHttpType.value = 'put';
         gramItems.value = result.data;
@@ -167,15 +256,20 @@ const getGramRange = async () => {
   }
 }
 
+const getUnit = (classNm: string) => {
+  if (classNm === MO_CATEGORY.GRAM) return GRAM_RANGE_UNIT.HPF;
+  return GRAM_RANGE_UNIT.LPF;
+}
+
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 

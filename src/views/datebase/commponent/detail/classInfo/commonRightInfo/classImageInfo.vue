@@ -1,5 +1,5 @@
 <template>
-  <div class="rbc-container imgList">
+  <div class="mo-right-detail-container rbc-container imgList shadowBox borderRadiusRound">
 
     <div class="flex-column-justify-center">
       <div class="flex-justify-center-align-start mt40">
@@ -56,6 +56,7 @@ import ClassImageSlider from "@/views/datebase/commponent/detail/classInfo/commo
 import type { DirectionType, ImageSourceType } from "#/database/image";
 import { ARROW_DIRECTION, FOLDER_NAME } from "@/common/defines/constFile/dataBase";
 import {LocationQueryValue, useRoute} from "vue-router";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
 const emits = defineEmits();
 const showAlert = ref(false);
@@ -213,6 +214,18 @@ const initElement = async () => {
     canvasOverlay.value = canvas;
 
     viewer.value.addHandler('open', function (event: any) {
+      const fullPageButton = viewer.value.buttons.buttons.find((button: any) => button.tooltip === 'Toggle full page');
+      if (fullPageButton) {
+        fullPageButton.element.addEventListener('click', async () => {
+          if (viewer.value.isFullPage()) {
+            await document.exitFullscreen();
+            viewer.value.setFullPage(false);
+          } else {
+            viewer.value.setFullPage(true);
+          }
+        });
+      }
+
       selectedImageName.value = event.source.url;
       // 캔버스 크기를 조정
       canvas.width = event.source.width;
@@ -229,6 +242,15 @@ const initElement = async () => {
         });
       }
     });
+
+    viewer.value.addHandler('full-page', async (event: any) => {
+      if (!event.fullPage) {
+        viewer.value.element.style.backgroundColor = '';
+        await document.documentElement.requestFullscreen();
+      } else {
+        viewer.value.element.style.backgroundColor = 'black';
+      }
+    })
   } catch (err) {
     console.error('Error:', err);
   }
@@ -268,7 +290,7 @@ const handleImageArrow = (direction: DirectionType) => {
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 

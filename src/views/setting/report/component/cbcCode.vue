@@ -12,9 +12,8 @@
   <Confirm
       v-if="showConfirm"
       :is-visible="showConfirm"
+      :type="MESSAGES.SETTING"
       :message="confirmMessage"
-      :confirmText="messages.SAVE"
-      :closeText="messages.LEAVE"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
   />
@@ -31,12 +30,12 @@
 
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
-import {defaultCbcList, settingName} from "@/common/defines/constFile/settings";
+import {DEFAULT_CBC_LIST, settingName} from "@/common/defines/constFile/settings/settings";
 import { ApiResponse } from "@/common/api/httpClient";
 import { createCbcCodeRbcApi, getCbcCodeRbcApi, updateCbcCodeRbcApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {cbcCodeItem} from "@/common/api/service/setting/dto/lisCodeDto";
-import {messages} from '@/common/defines/constFile/constantMessageText';
+import {MESSAGES} from '@/common/defines/constFile/constantMessageText';
 import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import {useStore} from "vuex";
@@ -75,7 +74,7 @@ watch(() => settingChangedChecker.value, () => {
 
 const checkIsMovingWhenSettingNotSaved = () => {
   showConfirm.value = true;
-  confirmMessage.value = `${settingType.value} ${messages.settingNotSaved}`;
+  confirmMessage.value = `${settingType.value} ${MESSAGES.SETTING_NOT_SAVED}`;
 }
 
 const saveCbcCode = async () => {
@@ -88,10 +87,10 @@ const saveCbcCode = async () => {
       const updateResult = await updateCbcCodeRbcApi({ cbcCodeItems: cbcCodeArr.value });
 
       if (updateResult.data) {
-        showSuccessAlert(messages.UPDATE_SUCCESSFULLY);
+        showSuccessAlert(MESSAGES.UPDATE_SUCCESSFULLY);
         await getImagePrintData();
       } else {
-        showErrorAlert(messages.settingUpdateFailure);
+        showErrorAlert(MESSAGES.SETTING_UPDATE_FAILURE);
       }
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
       await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
@@ -99,7 +98,7 @@ const saveCbcCode = async () => {
     }
 
     if (result) {
-      showSuccessAlert(messages.settingSaveSuccess);
+      showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
       saveHttpType.value = 'put';
       await getImagePrintData();
       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -119,7 +118,7 @@ const getImagePrintData = async () => {
 
       if (!data || (data instanceof Array && data.length === 0)) {
         saveHttpType.value = 'post';
-        cbcCodeArr.value = defaultCbcList;
+        cbcCodeArr.value = DEFAULT_CBC_LIST;
 
       } else {
         saveHttpType.value = 'put';
@@ -137,13 +136,13 @@ const getImagePrintData = async () => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 

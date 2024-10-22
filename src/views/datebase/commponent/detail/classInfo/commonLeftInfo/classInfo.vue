@@ -30,10 +30,6 @@
       >
         <font-awesome-icon :icon="['fas', 'upload']"/>
       </li>
-      <li>
-        <font-awesome-icon :icon="['fas', 'lock']" v-if="!toggleLock" @click="toggleLockEvent"/>
-        <font-awesome-icon :icon="['fas', 'lock-open']" v-if="toggleLock" @click="toggleLockEvent"/>
-      </li>
     </ul>
   </div>
 
@@ -44,108 +40,67 @@
       <h3>Grade</h3>
     </div>
 
-    <div v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD">
-      <h3 class="ml288 mt30" style="height: 40px;">Exist</h3>
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-align-center-justify-start mb14">
-        <p class="ml40 w250">{{ category.classNm }}</p>
-        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-          <div
-              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
-              class="grade-dot-wrapper"
-              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-          ></div>
-        </div>
-      </div>
+    <template v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD">
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle :noHead="true" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+    </template>
 
-      <div class="mt40"></div>
+    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && moInfoTotal.classInfo">
+      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+    </template>
 
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-align-center-justify-start mb14">
-        <p class="ml40 w250">{{ category.classNm }}</p>
-        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-          <div
-              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
-              class="grade-dot-wrapper"
-              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-          >
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && moInfoTotal.classInfo">
-      <div class="flex-justify-around ml150">
-        <div v-for="grade in FOUR_GRADES" :key="grade" class="w-full flex-justify-center mb14">
-          <h3>{{ grade }}</h3>
-        </div>
-      </div>
-
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm !== moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
-        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
-        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-          <div
-              v-for="grade in FOUR_GRADES"
-              :key="grade"
-              @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
-              class="grade-dot-wrapper"
-              :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-          >
-          </div>
-        </div>
-      </div>
-
-      <h3 class="ml320 mt30" style="height: 40px;">Exist</h3>
-
-      <div v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === moCategory.YEAST)" :key="category.classNm" class="w-full flex-justify-center mb14">
-        <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
-        <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-          <div
-              @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
-              class="grade-dot-wrapper"
-              :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-          >
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM">
-      <div class="w-full flex-align-center-justify-start mt24" v-for="category in moInfoTotal.classInfo" :key="category.classNm">
-        <template v-if="category.classNm === moCategory.SPUTUM">
-          <h1 class="fs12 classInfoClassTitle">Sputum</h1>
-          <div class="classInfoHorizontalRule"></div>
-
-          <div class="table-container">
-            <table class="sputum-table">
+    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM">
+      <div class="w-full flex-align-center-justify-start" v-for="category in moInfoTotal.classInfo" :key="category.classNm">
+        <template v-if="category.classNm === MO_CATEGORY.SPUTUM">
+          <div class="classDetailInfoWrapper w-full" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.SPUTUM)" :key="category.classNm">
+            <table class="no-css-table">
               <thead>
-              <tr>
                 <th></th>
-                <th v-for="column in SPUTUM_GRADES.GRADES" :key="column">{{ column }}</th>
-              </tr>
+                <th v-for="column in SPUTUM_GRADES.GRADES" :key="column" width="8%;">{{ column }}</th>
               </thead>
+              <colgroup>
+                <col width="2%" />
+                <col width="4%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+              </colgroup>
               <tbody>
               <tr>
-                <td>Sputum</td>
-                <td
-                    v-for="grade in SPUTUM_GRADES.GRADES"
-                    :key="grade"
-                    @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
-                    class="grade-dot-wrapper"
-                    :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-                >
-                </td>
+                <td class="text-left">Sputum</td>
+                <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
+                  <td @click="handleGradeClick(moInfoTotal, category.classNm, grade)">
+                    <font-awesome-icon
+                        class="grade-dot-wrapper top-half"
+                        :icon="['fac', 'half-circle-down']"
+                        size="lg"
+                        :class="{ 'active-before': checkGrade(category.beforeGrade, grade)}"
+                    />
+                    <font-awesome-icon
+                        class="grade-dot-wrapper bottom-half"
+                        :icon="['fac', 'half-circle-up']"
+                        size="lg"
+                        :class="{ 'active-after': checkGrade(category.afterGrade, grade)}"
+                    />
+                  </td>
+                </template>
+
               </tr>
               <tr>
-                <td>EP Cell</td>
-                <td v-for="value in SPUTUM_GRADES.EPCELL_GRADES" :key="value">{{ value }}</td>
+                <td class="fs08">EP Cell</td>
+                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.EPCELL_GRADES" :key="column">{{ column }}</td>
               </tr>
               <tr>
-                <td>WBC</td>
-                <td v-for="value in SPUTUM_GRADES.WBC_GRADES" :key="value">{{ value }}</td>
+                <td class="fs08">WBC</td>
+                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.WBC_GRADES" :key="column">{{ column }}</td>
               </tr>
               <tr>
-                <td>WBC/EP Cell</td>
-                <td v-for="(value, index) in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="index">{{ value }}</td>
+                <td class="fs08">WBC / EP Cell</td>
+                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="column">{{ column }}</td>
               </tr>
               </tbody>
             </table>
@@ -153,68 +108,10 @@
         </template>
       </div>
 
-      <div class="classDetailInfoWrapper">
-        <ul class="w-full flex-justify-end" style="gap: 24px;">
-          <li v-for="grade in FOUR_GRADES" :key="grade" class="flex-justify-center">{{ grade }}</li>
-        </ul>
-      </div>
-      <div
-          class="w-full flex-align-center-justify-start mt24"
-          v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === 'GPC' || item.classNm ==='GNB' || item.classNm === 'GPB' || item.classNm === 'GNDC')"
-          :key="category.classNm"
-      >
-        <div>
-          <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
+      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.GPC || item.classNm === MO_CATEGORY.GNB || item.classNm === MO_CATEGORY.GPB || item.classNm === MO_CATEGORY.GNDC)" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST || item.classNm === MO_CATEGORY.HYPHAE)" />
+    </template>
 
-          <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-            <div
-                v-for="grade in FOUR_GRADES"
-                :key="grade"
-                @click="handleGradeClick(moInfoTotal, category.classNm, grade)"
-                class="grade-dot-wrapper"
-                :class="{ active: checkGrade(grade, category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-            >
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div
-          class="w-full flex-align-center-justify-start mt24"
-          v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === 'Yeast' || item.classNm ==='Hyphae')"
-          :key="category.classNm"
-      >
-        <div>
-          <p class="ml40" style="width: 340px;">{{ category.classNm }}</p>
-
-          <div class="grade-container" :class="{ 'pointerEventsNone': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE} ">
-            <div
-                @click="handleToggleGradeClick(moInfoTotal, category.classNm, category[`${databaseDetailBeforeAfterStatus}Grade`])"
-                class="grade-dot-wrapper"
-                :class="{ active: checkToggleGrade(category[`${databaseDetailBeforeAfterStatus}Grade`])}"
-            >
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="flex-center mt24 gap12">
-    <button
-        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.BEFORE }]"
-        @click="changeBeforeAfterStatus(BEFORE_AFTER_STATUS.BEFORE)"
-    >
-      Before
-    </button>
-    <button
-        :class="['classInfoBtn', { 'color-red': databaseDetailBeforeAfterStatus === BEFORE_AFTER_STATUS.AFTER }]"
-        @click="changeBeforeAfterStatus(BEFORE_AFTER_STATUS.AFTER)"
-    >
-      After
-    </button>
   </div>
 
   <Alert
@@ -238,27 +135,25 @@
 <script setup lang="ts">
 import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch } from 'vue';
 import { getBarcodeDetailImageUrl, getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
-import { barcodeImgDir } from "@/common/defines/constFile/settings";
+import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
-import { messages } from "@/common/defines/constFile/constantMessageText";
+import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
 import {
-  BEFORE_AFTER_STATUS,
-  FOUR_GRADES,
-  moCategory,
+  FOUR_GRADES, GRADE_TEXT,
+  MO_CATEGORY,
   MO_TEST_TYPE,
   POWER_MODE,
   SPUTUM_GRADES
 } from "@/common/defines/constFile/dataBase";
-import {calculateSputumStatus} from "@/common/lib/utils/changeData";
-import ExistInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/existInput.vue";
-import FourGradeInput from "@/views/datebase/commponent/detail/classInfo/commonClassInfoInputBox/fourGradeInput.vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -272,7 +167,6 @@ const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const memo = ref('');
 const memoModal = ref(false);
-const toggleLock = ref(false);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -328,7 +222,7 @@ watch(() => selectItems.value, async (newSelectItems) => {
 }, { deep: true });
 
 const selectTotalItems = (newSelectItems: any) => {
-  moInfoTotal.value = newSelectItems?.moInfo.find((item: any) => item.id === '2');
+  moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => item.id === '2');
 }
 
 const testBarcodeImage = () => {
@@ -345,13 +239,8 @@ const testAfterBarcodeImage = (imgDriveRootPath: string) => {
 
 const lisModalOpen = () => {
   showConfirm.value = true;
-  confirmMessage.value = messages.IDS_MSG_UPLOAD_LIS;
+  confirmMessage.value = MESSAGES.IDS_MSG_UPLOAD_LIS;
   okMessageType.value = 'lis';
-}
-
-
-const toggleLockEvent = () => {
-  toggleLock.value = !toggleLock.value;
 }
 
 const barcodeCopy = async () => {
@@ -361,13 +250,13 @@ const barcodeCopy = async () => {
   textarea.select();
   document.execCommand('copy');
   document.body.removeChild(textarea);
-  showSuccessAlert(messages.SUCCESS_ALERT);
+  showSuccessAlert(MESSAGES.SUCCESS_ALERT);
 }
 
 const commitConfirmed = () => {
   submittedScreen.value = true;
   showConfirm.value = true;
-  confirmMessage.value = messages.IDS_MSG_CONFIRM_SLIDE;
+  confirmMessage.value = MESSAGES.IDS_MSG_CONFIRM_SLIDE;
   okMessageType.value = 'commit';
 }
 
@@ -432,6 +321,7 @@ const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: s
 }
 
 const updateGrade = async (updatingMoInfo: any, className: string, grade: string) => {
+  console.log('updatingMoInfo', updatingMoInfo)
   const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classNm === className)
   updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
     if (item.classNm === className) {
@@ -440,7 +330,7 @@ const updateGrade = async (updatingMoInfo: any, className: string, grade: string
     return item;
   })
 
-  const updatedMoInfoObj = selectItems.value.moInfo.map((item: any) => {
+  const updatedMoInfoObj = selectItems.value.classInfo.map((item: any) => {
     if (item.id === filteredMoInfo.id && item.name === filteredMoInfo.name) {
       return {...item, ...filteredMoInfo };
     }
@@ -449,23 +339,6 @@ const updateGrade = async (updatingMoInfo: any, className: string, grade: string
   const updatedSelectItems = {
     ...selectItems.value,
     moInfo: updatedMoInfoObj
-  }
-
-  await resRunningItem(updatedSelectItems, true);
-}
-
-const handleClickGrade = async (changedMoInfo: any) => {
-
-  const updatedMoInfo = selectItems.value.moInfo.map((item: any) => {
-    if (item.id === '2') {
-      return {...item, ...moInfoTotal.value };
-    }
-    return item;
-  })
-
-  const updatedSelectItems = {
-    ...selectItems.value,
-    moInfo: updatedMoInfo,
   }
 
   await resRunningItem(updatedSelectItems, true);
@@ -483,7 +356,7 @@ const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
     })
     if (response) {
       if (!noAlert) {
-        showSuccessAlert('success');
+        showSuccessAlert(MESSAGES.SUCCESS_ALERT);
       }
       memo.value = updatedRuningInfo.moMemo;
     } else {
@@ -496,14 +369,14 @@ const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
   window.scrollTo({top: 0, behavior: 'smooth'});
 };
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 
@@ -525,41 +398,3 @@ const changeBeforeAfterStatus = async (clickedStatus: string) => {
 }
 
 </script>
-
-<style scoped>
-.table-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.sputum-table {
-  border-collapse: collapse;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-.sputum-table th, .sputum-table td {
-  border: 1px solid black;
-  padding: 10px;
-  text-align: center;
-}
-
-.sputum-table th {
-  background-color: black;
-}
-
-.circle {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: white;
-  margin: 0 auto;
-  border: 1px solid black;
-}
-
-.circle.green {
-  background-color: green;
-}
-</style>

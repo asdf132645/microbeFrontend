@@ -34,7 +34,7 @@
 
 <script setup>
 import { ref, defineProps, onMounted, watch, computed } from 'vue';
-import {barcodeImgDir} from "@/common/defines/constFile/settings";
+import {barcodeImgDir} from "@/common/defines/constFile/settings/settings";
 import {useStore} from "vuex";
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 const store = useStore();

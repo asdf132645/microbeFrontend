@@ -44,6 +44,7 @@ import {ApiResponse} from "@/common/api/httpClient";
 import {useStore} from "vuex";
 import Alert from "@/components/commonUi/Alert.vue";
 import { initializeAllSettings } from "@/common/lib/commonfunction/settingFunctions";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
 // 스토어
 const store = useStore();
@@ -161,7 +162,7 @@ const updateAccount = async (viewerCheck: string) => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 

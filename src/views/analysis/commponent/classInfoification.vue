@@ -98,7 +98,6 @@ import { computed, ref, onMounted, watch, defineProps, getCurrentInstance, defin
 import { useStore } from "vuex";
 import {
   WbcInfo,
-  basicWbcArr,
   basicBmClassList,
   basicWbcArrClint,
   basicBmClassListClint

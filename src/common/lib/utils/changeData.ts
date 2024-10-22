@@ -1,3 +1,5 @@
+import {GRADE_TEXT} from "@/common/defines/constFile/dataBase";
+
 export const checkPbNormalCell = (wbcInfo: any, norMalRange: any) => {
     let totalCount = 0;
     let neutrophilCount = 0;
@@ -114,3 +116,27 @@ export const calculateSputumStatus = (moInfo: any) => {
 
     return '2';
 }
+
+export const getSputumGrade = (wbcCount: number, epCellCount: number) => {
+    const epCellWbcRatio = (epCellCount / wbcCount);
+
+    if (epCellCount > 25 && wbcCount < 10) return GRADE_TEXT["1"];
+    if (epCellCount > 25 && (10 <= wbcCount && wbcCount <= 25)) return GRADE_TEXT['2'];
+    if (epCellCount > 25 && wbcCount > 25 && epCellWbcRatio < 10) return GRADE_TEXT['3-1'];
+    if (epCellCount > 25 && wbcCount > 25 && epCellWbcRatio >= 10) return GRADE_TEXT['3-2'];
+    if ((10 <= epCellCount && epCellCount >= 25) && wbcCount > 25 && epCellWbcRatio < 10) return GRADE_TEXT['4-1'];
+    if ((10 <= epCellCount && epCellCount >= 25) && wbcCount > 25 && epCellWbcRatio >= 10) return GRADE_TEXT['4-2'];
+    if (epCellCount < 10 && wbcCount > 25) return GRADE_TEXT['5'];
+    if (epCellCount < 10 && wbcCount < 10) return GRADE_TEXT['6'];
+
+    return GRADE_TEXT['2'];
+}
+
+export const getGradeByRange = (settingObj: any, count: number) => {
+    if (count < Number(settingObj.rareBoundary)) return GRADE_TEXT.RARE;
+    if (count < Number(settingObj.fewBoundary)) return GRADE_TEXT.FEW;
+    if (count < Number(settingObj.moderateBoundary)) return GRADE_TEXT.MODERATE;
+    return GRADE_TEXT.MANY;
+}
+
+export const existOrNone = (count: number) => count > 0 ? GRADE_TEXT.EXIST : GRADE_TEXT.NONE;

@@ -158,11 +158,12 @@
 import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import OpenSeadragon from 'openseadragon';
 import { RULERS } from '@/common/defines/constFile/rbc';
-import {dirName} from "@/common/defines/constFile/settings";
+import {dirName} from "@/common/defines/constFile/settings/settings";
 import {readDziFile, readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {useStore} from "vuex";
 import pako from 'pako';
 import Alert from "@/components/commonUi/Alert.vue";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -413,7 +414,7 @@ const rbcClassRightClick = (event: MouseEvent) => {
 };
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 

@@ -107,7 +107,7 @@ function createAllImages(): void {
 
 const getImageFolder = async () => {
   const { selectedItem } = props;
-  if (!selectedItem?.moInfo || selectedItem?.moInfo.length === 0) {
+  if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) {
     return '';
   }
 
@@ -120,7 +120,7 @@ const getImageFolder = async () => {
 
 const showImage = (imageName: string) => {
   const { selectedItem } = props;
-  if (!selectedItem?.moInfo || selectedItem?.moInfo.length === 0) {
+  if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) {
     return '';
   }
 

@@ -1,4 +1,4 @@
-export  const messages = {
+export  const MESSAGES = {
     Logout: 'Would you like to log out?',
 
     // Message
@@ -65,11 +65,14 @@ export  const messages = {
     lockRow: 'Deletion is not allowed when locked.',
     exit: 'Are you sure you want to quit the program?',
 
-    settingSaveSuccess: 'Saved successfully',
-    settingSaveFailure: 'Save failed',
-    settingUpdateSuccess: 'Updated successfully',
-    settingUpdateFailure: 'Update failed',
-    settingNotSaved: 'Setting not saved',
+    SETTING_SAVE_SUCCESS: 'Saved successfully',
+    SETTING_SAVE_FAILURE: 'Save failed',
+    SETTING_UPDATE_SUCCESS: 'Updated successfully',
+    SETTING_UPDATE_FAILURE: 'Update failed',
+    SETTING_NOT_SAVED: 'Setting not saved',
+
+    ALERT_TYPE_SUCCESS: 'success',
+    ALERT_TYPE_ERROR: 'error',
 
     FAILED_ALERT: 'Failed',
     SUCCESS_ALERT: 'Success',
@@ -82,6 +85,7 @@ export  const messages = {
     DELETE: 'Delete',
     UPLOAD: 'Upload',
     OK: 'Ok',
+    SETTING: 'Setting',
 
     SETTING_INFO_DOWNLOAD_SAVE_PATH_EN: 'Destination path for download and Origin path for upload',
     SETTING_INFO_DOWNLOAD_SAVE_PATH_KO: '다운로드 시 저장 경로 & 업로드 시 백업 파일 경로',

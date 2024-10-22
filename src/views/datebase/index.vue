@@ -412,7 +412,7 @@ const getDbData = async (type: string, pageNum?: number) => {
         }
 
         if (titleItem.value.length === 0) {
-          titleItem.value = dbGetData.value[0]?.moInfo;
+          titleItem.value = dbGetData.value[0]?.classInfo;
         }
 
         if (wbcCountOrder.value === '' || wbcCountOrder.value === 'all') {

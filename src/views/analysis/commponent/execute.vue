@@ -47,7 +47,7 @@ import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
 
 import {useStore} from "vuex";
 import { LP_CAPTURE_OPTIONS } from '@/common/defines/constFile/analysis';
-import { messages } from '@/common/defines/constFile/constantMessageText';
+import { MESSAGES } from '@/common/defines/constFile/constantMessageText';
 import { tcpReq } from '@/common/tcpRequest/tcpReq';
 import { getCellImgApi } from "@/common/api/service/setting/settingApi";
 import EventBus from "@/eventBus/eventBus";
@@ -184,10 +184,10 @@ const toggleStartStop = (action: 'start' | 'stop') => {
     }
     // 실행 여부 체크
     if (isRunningState.value) {
-      showSuccessAlert(messages.IDS_ERROR_ALREADY_RUNNING);
+      showSuccessAlert(MESSAGES.IDS_ERROR_ALREADY_RUNNING);
       return;
     } else if (userStop.value) {
-      confirmMessage.value = messages.IDS_RECOVER_GRIPPER_CONDITION;
+      confirmMessage.value = MESSAGES.IDS_RECOVER_GRIPPER_CONDITION;
       showConfirm.value = true;
       return;
     }
@@ -211,7 +211,7 @@ const toggleStartStop = (action: 'start' | 'stop') => {
   } else {
     // 장비 중단
     if (!isRunningState.value) {
-      showSuccessAlert(messages.IDS_ERROR_STOP_PROCESS);
+      showSuccessAlert(MESSAGES.IDS_ERROR_STOP_PROCESS);
       return;
     }
     store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', {userStop: true});
@@ -224,13 +224,13 @@ const toggleStartStop = (action: 'start' | 'stop') => {
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorALert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 }
 

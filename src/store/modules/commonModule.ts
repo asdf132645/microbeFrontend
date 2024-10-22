@@ -2,7 +2,7 @@
 import {Commit} from 'vuex';
 import { BeforeAfterStatusType } from "#/database/image";
 import {CellImgAnalyzedResponse} from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
-import {defaultCellImageAnalyzed} from "@/common/defines/constFile/settings";
+import {defaultCellImageAnalyzed} from "@/common/defines/constFile/settings/settings";
 
 export interface CommonState {
     startEmbedded: boolean;

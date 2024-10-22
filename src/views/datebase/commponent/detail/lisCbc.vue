@@ -55,10 +55,10 @@ import {readFileTxt, readH7File} from "@/common/api/service/fileReader/fileReade
 import {getCbcCodeRbcApi, getFilePathSetApi} from "@/common/api/service/setting/settingApi";
 import {useStore} from "vuex";
 import {detailRunningApi, updateRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
-import {hospitalSiteCd} from "@/common/siteCd/siteCd";
 import {createCbcFile} from "@/common/api/service/fileSys/fileSysApi";
 import EventBus from "@/eventBus/eventBus";
-import {messages} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
+import {HOSPITAL_SITE_CD_BY_NAME} from "@/common/defines/constFile/siteCd";
 
 const store = useStore();
 const props = defineProps(['selectItems']);
@@ -97,31 +97,26 @@ onMounted(async () => {
 
 const initCbcData = async (newVal: any) => {
   loading.value = true;
-  let hospitalName = hospitalSiteCd.find(hospital => hospital.siteCd === siteCd.value)?.hospitalNm;
-  if (siteCd.value === '') {
-    hospitalName = '0000';
-  }
-  switch (hospitalName) {
-      // 서울 성모 cbc - 외부 url 진행 - 파일 없음
-    case '서울성모병원':
+  switch (siteCd.value) {
+    // 서울 성모 cbc - 외부 url 진행 - 파일 없음
+    case HOSPITAL_SITE_CD_BY_NAME['서울성모병원']:
       await cmcSeoulCbc(newVal);
       break;
-    case '고대안암병원':
+
+    case HOSPITAL_SITE_CD_BY_NAME['고대안암병원']:
+    case HOSPITAL_SITE_CD_BY_NAME['인천길병원']:
       await kuahGilHosCbc();
       break;
-    case '인천길병원':
-      await kuahGilHosCbc();
+
+    case HOSPITAL_SITE_CD_BY_NAME['삼광의료재단']:
+      /** TODO 작업 필요 */
       break;
-    case '0000':
-      await kuahGilHosCbc();
-      break;
-    case '삼광의료재단':
-      /** Todo 작업 필요 */
-      break;
-    case '인하대병원':
+
+    case HOSPITAL_SITE_CD_BY_NAME['인하대병원']:
       await inhaCbc();
       break;
-      // CBC 공통
+
+    // CBC 공통
     default:
       await commonCbc();
       break;
@@ -147,7 +142,7 @@ const initCbcData = async (newVal: any) => {
 
 const commonCbc = async () => {
   if(cbcFilePathSetArr.value === ''){
-    showErrorAlert(messages.UPLOAD_PLEASE_CBC);
+    showErrorAlert(MESSAGES.UPLOAD_PLEASE_CBC);
     return;
   }
   if (cbcFilePathSetArr.value.includes("http")) { // url
@@ -226,7 +221,7 @@ const commonCbc = async () => {
 
 const inhaCbc = async () => {
   if(cbcFilePathSetArr.value === ''){
-    showErrorAlert(messages.UPLOAD_PLEASE_CBC);
+    showErrorAlert(MESSAGES.UPLOAD_PLEASE_CBC);
     return;
   }
   if (cbcFilePathSetArr.value.includes("http")) { // url 설정인 경우
@@ -292,13 +287,13 @@ const inhaCbc = async () => {
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 const cmcSeoulCbc = async (newVal: any) => {

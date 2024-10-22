@@ -1,4 +1,4 @@
-import { settingName } from "@/common/defines/constFile/settings";
+import { settingName } from "@/common/defines/constFile/settings/settings";
 import {
     putCellImgApi,
     updateCbcCodeRbcApi,

@@ -1,3 +1,5 @@
+import {MO_CATEGORY} from "@/common/defines/constFile/dataBase";
+
 export const LP_CAPTURE_OPTIONS = [
     { value: "10", text: "10 LP Capture" },
     { value: "20", text: "20 LP Capture" },
@@ -63,3 +65,9 @@ export const SLIDE_CARD_100A = {
         {slotNo: 10, slotState: "0"},
     ]
 };
+
+export const DEFAULT_MO_ARRAY = [
+    {
+        id: '0', name: '', classInfo: [],
+    },
+]

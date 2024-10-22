@@ -59,11 +59,10 @@ export type RuningInfoDtoItems = {
     orderDttm: Scalars['String']['input'];
     gender: Scalars['String']['input'];
     birthDay: Scalars['String']['input'];
-    totalMoCount: Scalars['String']['input'];
     isNormal: Scalars['String']['input'];
-    moInfo: Array<Scalars['String']['input']>
+    classInfo: Array<Scalars['String']['input']>
     submitUserId?: InputMaybe<Scalars['String']['input']>;
-    moMemo?: InputMaybe<Scalars['String']['input']>;
+    memo?: InputMaybe<Scalars['String']['input']>;
     pcIp: Scalars['String']['input'];
     cbcPatientNo?: InputMaybe<Scalars['String']['input']>;
     cbcPatientNm?: InputMaybe<Scalars['String']['input']>;
@@ -91,11 +90,10 @@ export type RuningInfoEntity = {
     orderDttm: Scalars['String']['input'];
     gender: Scalars['String']['input'];
     birthDay: Scalars['String']['input'];
-    totalMoCount: Scalars['String']['input'];
     isNormal: Scalars['String']['input'];
-    moInfo: Array<Scalars['String']['input']>
+    classInfo: Array<Scalars['String']['input']>
     submitUserId?: InputMaybe<Scalars['String']['input']>;
-    moMemo?: InputMaybe<Scalars['String']['input']>;
+    memo?: InputMaybe<Scalars['String']['input']>;
     pcIp: Scalars['String']['input'];
     cbcPatientNo?: InputMaybe<Scalars['String']['input']>;
     cbcPatientNm?: InputMaybe<Scalars['String']['input']>;
@@ -135,9 +133,8 @@ export const GetRunningInfoByIdDocument = gql`
           orderDttm
           gender
           birthDay
-          totalMoCount
           isNormal
-          moInfo {
+          classInfo {
               id
               name
               classInfo {
@@ -148,7 +145,7 @@ export const GetRunningInfoByIdDocument = gql`
               }          
           }
           submitUserId
-          moMemo
+          memo
           pcIp
           cbcPatientNo
           cbcPatientNm

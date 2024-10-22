@@ -42,15 +42,16 @@ import { computed, getCurrentInstance, onMounted, ref, watch } from "vue";
 import { detailRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
 import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
+import { LocationQueryValue, useRoute } from "vue-router";
+import { BEFORE_AFTER_STATUS } from "@/common/defines/constFile/dataBase";
+import { useQuery } from "@vue/apollo-composable";
+import { GetRunningInfoByIdDocument } from "@/gql";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
 import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
-import { LocationQueryValue, useRoute } from "vue-router";
-import { BEFORE_AFTER_STATUS } from "@/common/defines/constFile/dataBase";
-import {useQuery} from "@vue/apollo-composable";
-import {GetRunningInfoByIdDocument} from "@/gql";
+
 
 
 const store = useStore();

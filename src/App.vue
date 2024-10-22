@@ -42,20 +42,23 @@ import {
 import {useStore} from "vuex";
 import {sysInfoStore, runningInfoStore} from '@/common/lib/storeSetData/common';
 import {tcpReq} from '@/common/tcpRequest/tcpReq';
-import {messages} from '@/common/defines/constFile/constantMessageText';
+import {MESSAGES} from '@/common/defines/constFile/constantMessageText';
 import { getCellImgApi, getGramRangeApi } from "@/common/api/service/setting/settingApi";
-import {checkPbNormalCell} from "@/common/lib/utils/changeData";
+import {checkPbNormalCell, existOrNone, getGradeByRange, getSputumGrade} from "@/common/lib/utils/changeData";
 import {ApiResponse} from "@/common/api/httpClient";
 import {createRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {useRouter} from "vue-router";
 import {createDeviceInfoApi, getDeviceInfoApi, getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import EventBus from "@/eventBus/eventBus";
-import { basicWbcArr } from "@/common/defines/constFile/classArr";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import axios from "axios";
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
+import { DEFAULT_MO_ARRAY } from "@/common/defines/constFile/analysis";
+import { DEFAULT_GRAM_RANGE } from "@/common/defines/constFile/settings/settings";
+import type { GramRange } from "@/common/defines/constFile/settings/settings.dto";
+import { MO_CATEGORY, MO_TEST_TYPE } from "@/common/defines/constFile/dataBase";
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -66,7 +69,7 @@ const instance = getCurrentInstance();
 const userId = ref('');
 const storedUser = sessionStorage.getItem('user');
 const getStoredUser = JSON.parse(storedUser || '{}');
-const normalItems = ref<any>([]);
+const gramItems = ref<any>([]);
 const userModuleDataGet = computed(() => store.state.userModule);
 const reqArr = computed(() => store.state.commonModule);
 const runningInfoBoolen = ref(false);
@@ -91,6 +94,10 @@ let intervalId: any;
 const stataasdasd = ref(false);
 const ipMatches = ref(false);
 const barcodeNum = ref('');
+
+const wbcConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.WBC)[0]);
+const epCellConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.EP_CELL)[0]);
+const gramConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.GRAM)[0]);
 
 instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async (isTcpConnected) => {
   console.log('isTcpConnected', isTcpConnected);
@@ -291,7 +298,7 @@ async function socketData(data: any) {
   deleteData.value = false;
   try {
     if (typeof data === 'string') {
-      await showSuccessAlert(messages.TCP_DiSCONNECTED);
+      await showSuccessAlert(MESSAGES.TCP_DiSCONNECTED);
       return
     }
     const textDecoder = new TextDecoder('utf-8');
@@ -300,7 +307,7 @@ async function socketData(data: any) {
     const parsedData = JSON.parse(stringData);
     const parseDataWarp = parsedData;
 
-    if (alertMessage.value === messages.TCP_DiSCONNECTED) {
+    if (alertMessage.value === MESSAGES.TCP_DiSCONNECTED) {
       hideAlert();
     }
 
@@ -384,7 +391,7 @@ async function socketData(data: any) {
         break;
       case 'ERROR_CLEAR':
         console.log('err')
-        await showSuccessAlert(messages.FAILED_ALERT);
+        await showSuccessAlert(MESSAGES.FAILED_ALERT);
         break;
       case 'SEARCH_CARD_COUNT':
         break;
@@ -491,30 +498,25 @@ async function socketData(data: any) {
 
         completeSlot.userId = userId.value;
         completeSlot.cassetId = params.cassetId;
-        completeSlot.isNormal = 'Y' // PB 비정상 클래스 체크
+        completeSlot.isNormal = 'Y' // MO 비정상 클래스 체크
 
         if (completeSlot.analysisType === '01') {
-          completeSlot.isNormal = checkPbNormalCell(completeSlot.wbcInfo, normalItems.value).isNormal;
+          /** TODO MO Normal 조건 추가 필요 */
+          completeSlot.isNormal = checkPbNormalCell(completeSlot.MOInfo, gramItems.value).isNormal;
         }
 
         const classElements = classArr.value.filter((element: any) => element?.slotId === completeSlot.slotId);
 
         const matchedWbcInfo = classElements[0];
-        const newWbcInfo = {
-          wbcInfo: matchedWbcInfo?.wbcInfo,
-          totalCount: matchedWbcInfo?.totalCount,
-          maxWbcCount: matchedWbcInfo?.maxWbcCount,
-        }
-        let wbcInfoAfter: any = [];
-        let wbcInfoNewVal: any = [];
-        const getDefaultWbcInfo = () => { wbcInfo: [basicWbcArr] };
-        const getDefaultWbcInfoAfter = () => [basicWbcArr];
+        const newMoInfo = { wbcInfo: matchedWbcInfo?.MOInfo }
 
-        const updateWbcInfo = () => isObjectEmpty(newWbcInfo) ? getDefaultWbcInfo() : newWbcInfo;
-        const updateWbcInfoAfter = () => isObjectEmpty(newWbcInfo) ? getDefaultWbcInfoAfter() : newWbcInfo?.wbcInfo[0];
+        const getDefaultMoInfo = () => { moInfo: [DEFAULT_MO_ARRAY] };
+        const updateWbcInfo = () => isObjectEmpty(newMoInfo) ? getDefaultMoInfo() : newMoInfo;
+        const moInfoNewVal = updateWbcInfo();
 
-        wbcInfoNewVal = updateWbcInfo();
-        wbcInfoAfter = updateWbcInfoAfter();
+        const cassetType = completeSlot.cassetId.split('_')[1].toUpperCase();
+
+        const convertedMoInfo = convertMoInfo(cassetType, moInfoNewVal);
 
         const newObj = {
           slotNo: completeSlot.slotNo,
@@ -525,16 +527,12 @@ async function socketData(data: any) {
           patientNm: completeSlot.patientNm,
           gender: completeSlot.gender,
           birthDay: completeSlot.birthDay,
-          wbcCount: completeSlot.wbcCount,
           slotId: completeSlot.slotId,
           orderDttm: completeSlot.orderDttm,
           testType: completeSlot.testType,
           analyzedDttm: tcpReq().embedStatus.settings.reqDttm,
           tactTime: completeSlot.tactTime,
-          maxWbcCount: completeSlot.maxWbcCount,
-          wbcInfo: wbcInfoNewVal,
-          wbcInfoAfter: wbcInfoAfter,
-          bminfo: completeSlot.bminfo,
+          classInfo: convertedMoInfo,
           cassetId: completeSlot.cassetId,
           isNormal: completeSlot.isNormal,
           submitState: '',
@@ -651,10 +649,15 @@ const getGramRange = async () => {
   try {
     const result = await getGramRangeApi();
     if (result) {
-      if (result?.data) {
-        const data = result.data;
-        normalItems.value = data;
+      if (!result?.data || (result?.data instanceof Array && result?.data.length === 0)) {
+        gramItems.value = DEFAULT_GRAM_RANGE;
+      } else {
+        gramItems.value = result.data;
       }
+
+      wbcConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'WBC')[0];
+      epCellConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'EP Cell')[0];
+      gramConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'Gram')[0];
     }
   } catch (e) {
     console.log(e);
@@ -674,6 +677,59 @@ const sendMessage = async (payload: any) => {
   deleteData.value = true;
 };
 
+const convertMoInfo = (cassetType: string, moInfo: any) => {
+  const convertedMoInfo = [];
+
+  for (const moItem of moInfo) {
+
+    // Sputum Gram 계산을 위한 WBC, EP Cell Count 추출
+    const wbcItem = moItem.classInfo.find((item: any) => item.classId === MO_CATEGORY.WBC);
+    const epCellItem = moItem.classInfo.find((item: any) => item.classId === MO_CATEGORY.EP_CELL);
+    const [wbcCount, epCellCount] = [wbcItem.count, epCellItem.count];
+
+    const updatingClassInfo = [];
+    for (const moClassInfoItem of moItem.classInfo) {
+      const gradeText = setMoInfoGrade(cassetType, moClassInfoItem.classNm, moClassInfoItem.count, wbcCount, epCellCount)
+      const convertMoItem = {
+        count: moClassInfoItem.count,
+        classNm: moClassInfoItem.classId,
+        beforeGrade: gradeText,
+        afterGrade: gradeText
+      }
+
+      updatingClassInfo.push(convertMoItem);
+    }
+
+    const updatedMoInfoItem = {
+      id: moItem.id,
+      name: moItem.name,
+      classInfo: updatingClassInfo
+    }
+    convertedMoInfo.push(updatedMoInfoItem);
+  }
+  return convertedMoInfo;
+};
+
+const setMoInfoGrade = (cassetType: string, classNm: string, count: number, wbcCountForSputumGrade: number, epCellCountForSputumGrade: number) => {
+
+  switch (cassetType) {
+    case MO_TEST_TYPE.BLOOD.toUpperCase():
+      return existOrNone(count);
+
+    case MO_TEST_TYPE.URINE.toUpperCase():
+      if (classNm === MO_CATEGORY.YEAST) return existOrNone(count);
+      return getGradeByRange(classNm === MO_CATEGORY.WBC ? wbcConvertSetting.value : gramConvertSetting.value, count);
+
+    case MO_TEST_TYPE.SPUTUM.toUpperCase():
+      if ([MO_CATEGORY.YEAST, MO_CATEGORY.HYPHAE].includes(classNm)) return existOrNone(count);
+      else if (classNm !== MO_CATEGORY.SPUTUM) {
+        return getGradeByRange(gramConvertSetting.value, count);
+      } else {
+        return getSputumGrade(wbcCountForSputumGrade, epCellCountForSputumGrade);
+      }
+
+  }
+}
 
 const cellImgGet = async () => {
   try {
@@ -692,30 +748,17 @@ const cellImgGet = async () => {
 
 const showSuccessAlert = async (message: string) => {
   showAlert.value = true;
-  alertType.value = 'success';
+  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = 'error';
+  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
 };
 
 const hideAlert = () => {
   showAlert.value = false;
 };
-
-
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #ffffff;
-  width: 100%;
-}
-</style>
