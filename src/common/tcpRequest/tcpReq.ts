@@ -15,7 +15,7 @@ export const tcpReq:any = () => {
             startAction: {
                 jobCmd: 'START',
                 reqUserId: '',
-                testType: '01',
+                testType: '06',
                 LPCount: '10',
                 reqDttm: reqDttm,
             },

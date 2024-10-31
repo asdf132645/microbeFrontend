@@ -1,7 +1,7 @@
 // commonModule.ts
 import {Commit} from 'vuex';
 import {CellImgAnalyzedResponse} from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
-import {defaultCellImageAnalyzed} from "@/common/defines/constFile/settings/settings";
+import {DEFAULT_CELL_IMAGE_ANALYZED} from "@/common/defines/constFile/settings/settings";
 
 export interface CommonState {
     startEmbedded: boolean;
@@ -173,7 +173,7 @@ export const commonModule: CommonModule = {
         enteringRouterPath: '',
         settingType: '',
         isDownloadOrUploading: false,
-        cellImageAnalyzedSetting: defaultCellImageAnalyzed,
+        cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
         currentImageIndex: 0,
         currentImageName: '',

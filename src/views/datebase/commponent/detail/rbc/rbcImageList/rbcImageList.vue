@@ -158,7 +158,7 @@
 import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import OpenSeadragon from 'openseadragon';
 import { RULERS } from '@/common/defines/constFile/rbc';
-import {dirName} from "@/common/defines/constFile/settings/settings";
+import {DIR_NAME} from "@/common/defines/constFile/settings/settings";
 import {readDziFile, readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {useStore} from "vuex";
 import pako from 'pako';
@@ -589,7 +589,7 @@ const initElement = async () => {
   const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
 
   try {
-    const folderPath = `${path}/${props.selectItems.slotId}/${dirName.rbcImageDirName}`;
+    const folderPath = `${path}/${props.selectItems.slotId}/${DIR_NAME.rbcImageDirName}`;
     const tilesInfo = await fetchTilesInfo(folderPath);
 
     if (tilesInfo.length !== 0) {

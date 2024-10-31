@@ -1,4 +1,4 @@
-import { settingName } from "@/common/defines/constFile/settings/settings";
+import { SETTING_NAME } from "@/common/defines/constFile/settings/settings";
 import {
     putCellImgApi,
     updateCbcCodeRbcApi,
@@ -12,7 +12,7 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
     if (!settingType || !settingUpdatingData) return;
 
     switch (settingType) {
-        case settingName.cellImageAnalyzed:
+        case SETTING_NAME.cellImageAnalyzed:
             try {
                 const result = await putCellImgApi(settingUpdatingData);
                 if (result) {
@@ -25,7 +25,7 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             }
             break;
 
-        case settingName.gramRange:
+        case SETTING_NAME.gramRange:
             try {
                 await updateGramRangeApi({ gramRangeItems: settingUpdatingData });
             } catch (e) {
@@ -33,7 +33,7 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             }
             break;
 
-        case settingName.imagePrint:
+        case SETTING_NAME.imagePrint:
             try {
                 await updateImagePrintApi({ imagePrintItems: settingUpdatingData });
             } catch (e) {
@@ -41,7 +41,7 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             }
             break;
 
-        case settingName.cbcCode:
+        case SETTING_NAME.cbcCode:
             try {
                 await updateCbcCodeRbcApi({ cbcCodeItems: settingUpdatingData });
             } catch (e) {
@@ -49,7 +49,7 @@ export const settingUpdate = async (settingType: string, settingUpdatingData: an
             }
             break;
 
-        case settingName.filePathSet:
+        case SETTING_NAME.filePathSet:
             try {
                 await updateFilePathSetApi({ filePathSetItems: settingUpdatingData });
             } catch (e) {

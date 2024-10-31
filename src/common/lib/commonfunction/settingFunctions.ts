@@ -7,7 +7,7 @@ import {
     getCbcCodeRbcApi,
     createCbcCodeRbcApi,
 } from '@/common/api/service/setting/settingApi';
-import {DEFAULT_CBC_LIST, defaultCellImageAnalyzed, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
+import {DEFAULT_CBC_LIST, DEFAULT_CELL_IMAGE_ANALYZED, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
 import { useStore } from "vuex";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
@@ -74,14 +74,15 @@ const defaultComputedValueForCreateRequest = async (initializeType: string) => {
     switch (initializeType) {
         case 'cellImage':
             const cellImgSet = {
-                analysisType: defaultCellImageAnalyzed.analysisType,
-                iaRootPath: defaultCellImageAnalyzed.iaRootPath,
-                isAlarm: defaultCellImageAnalyzed.isAlarm,
-                alarmCount: defaultCellImageAnalyzed.alarmCount,
-                keepPage: defaultCellImageAnalyzed.keepPage,
-                backupPath: defaultCellImageAnalyzed.backupPath,
-                backupStartDate: defaultCellImageAnalyzed.backupStartDate.toISOString().split('T')[0],
-                backupEndDate: defaultCellImageAnalyzed.backupEndDate.toISOString().split('T')[0],
+                analysisType: DEFAULT_CELL_IMAGE_ANALYZED.analysisType,
+                iaRootPath: DEFAULT_CELL_IMAGE_ANALYZED.iaRootPath,
+                isAlarm: DEFAULT_CELL_IMAGE_ANALYZED.isAlarm,
+                LPCaptureCount: DEFAULT_CELL_IMAGE_ANALYZED.LPCaptureCount,
+                alarmCount: DEFAULT_CELL_IMAGE_ANALYZED.alarmCount,
+                keepPage: DEFAULT_CELL_IMAGE_ANALYZED.keepPage,
+                backupPath: DEFAULT_CELL_IMAGE_ANALYZED.backupPath,
+                backupStartDate: DEFAULT_CELL_IMAGE_ANALYZED.backupStartDate.toISOString().split('T')[0],
+                backupEndDate: DEFAULT_CELL_IMAGE_ANALYZED.backupEndDate.toISOString().split('T')[0],
                 autoBackUpMonth: 'Not selected',
                 autoBackUpStartDate: null,
             };
@@ -97,7 +98,7 @@ const afterResponse = async (initializeType: string) => {
     const store = useStore();
     switch (initializeType) {
         case 'cellImage':
-            await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: defaultCellImageAnalyzed })
+            await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED })
             break;
         default:
             break;

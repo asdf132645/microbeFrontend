@@ -194,7 +194,7 @@ const toggleStartStop = (action: 'start' | 'stop') => {
 
     let startAction = tcpReq().embedStatus.startAction;
     Object.assign(startAction, {
-      testType: analysisType.value,
+      testType: '06',
       LPCount: lpCaptureCount.value,
       reqUserId: userId.value,
     });

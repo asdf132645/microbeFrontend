@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { DEFAULT_IMAGE_PRINT, settingName } from "@/common/defines/constFile/settings/settings";
+import { DEFAULT_IMAGE_PRINT, SETTING_NAME } from "@/common/defines/constFile/settings/settings";
 import { ApiResponse } from "@/common/api/httpClient";
 import {
   createImagePrintApi,
@@ -61,7 +61,7 @@ const allChecked = ref(false);
 
 onMounted(async () => {
   await getImagePrintData();
-  await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.imagePrint });
+  await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.imagePrint });
 });
 
 watch(() => selectedItems.value, async (newItem) => {
@@ -70,8 +70,8 @@ watch(() => selectedItems.value, async (newItem) => {
   });
 
   await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(imagePrintArr.value) });
-  if (settingType.value !== settingName.imagePrint) {
-    await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.imagePrint });
+  if (settingType.value !== SETTING_NAME.imagePrint) {
+    await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.imagePrint });
   }
 }, { deep: true });
 

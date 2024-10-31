@@ -100,7 +100,7 @@ import { debounce } from "lodash";
 import { createGramRangeApi, getGramRangeApi, updateGramRangeApi } from "@/common/api/service/setting/settingApi";
 import { ApiResponse } from "@/common/api/httpClient";
 import Alert from "@/components/commonUi/Alert.vue";
-import {DEFAULT_GRAM_RANGE, GRAM_RANGE_UNIT, settingName} from "@/common/defines/constFile/settings/settings";
+import { DEFAULT_GRAM_RANGE, GRAM_RANGE_UNIT, SETTING_NAME } from "@/common/defines/constFile/settings/settings";
 import { MESSAGES } from '@/common/defines/constFile/constantMessageText';
 import Confirm from "@/components/commonUi/Confirm.vue";
 import { useStore } from "vuex";
@@ -125,13 +125,13 @@ const settingType = computed(() => store.state.commonModule.settingType);
 
 onMounted(async () => {
   await getGramRange();
-  await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.gramRange });
+  await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.gramRange });
 });
 
 watch(() => gramItems.value, async (gramItemsAfterSettingObj) => {
   await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(gramItemsAfterSettingObj) });
-  if (settingType.value !== settingName.gramRange) {
-    await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.gramRange });
+  if (settingType.value !== SETTING_NAME.gramRange) {
+    await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.gramRange });
   }
 }, { deep: true });
 

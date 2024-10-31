@@ -5,12 +5,12 @@
         v-if="router.currentRoute.value.path !== '/user/login' && router.currentRoute.value.path !== '/user/join'"/>
     <main class="content">
       <router-view/>
-      <Analysis @classAppUpdateLast="classAppUpdateLast"
-                :parsedData="parsedDataProps"
-                :isClass="router.currentRoute.value.path === '/'"
-                :startStatus="startStatus"
-                :pb100aCassette="pb100aCassette"
-                :stataasdasd="stataasdasd"
+      <Analysis
+          :parsedData="parsedDataProps"
+          :isClass="router.currentRoute.value.path === '/'"
+          :startStatus="startStatus"
+          :pb100aCassette="pb100aCassette"
+          :stataasdasd="stataasdasd"
       />
     </main>
     <Alert
@@ -94,6 +94,7 @@ let intervalId: any;
 const stataasdasd = ref(false);
 const ipMatches = ref(false);
 const barcodeNum = ref('');
+const slotInfo = ref<any>({});
 
 const wbcConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.WBC)[0]);
 const epCellConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.EP_CELL)[0]);
@@ -154,11 +155,6 @@ watch(reqArr.value, async (newVal, oldVal) => {
   if (!newVal.reqArr) return;
   const uniqueReqArr = removeDuplicateJobCmd(newVal.reqArr);
   const notSysRunInfo = uniqueReqArr.filter((item: any) => !['SYSINFO', 'RUNNING_INFO'].includes(item.jobCmd));
-
-  if (isDownloadOrUploading.value) {
-    await store.dispatch('commonModule/setCommonInfo', {reqArrPaste: []});
-    return;
-  }
 
   if (notSysRunInfo.length > 0) {
     await sendMessage(notSysRunInfo[0]);
@@ -355,8 +351,9 @@ async function socketData(data: any) {
         runningInfoBoolen.value = false;
         break;
       case 'RUNNING_COMP':// 완료가 된 상태이므로 각 페이지에 완료가 되었다는 정보를 저장한다.
+        parsedDataProps.value = parseDataWarp;
         barcodeNum.value = '';
-        await runnComp();
+        await runnComp(parseDataWarp);
         break;
       case 'PAUSE':
         barcodeNum.value = '';
@@ -380,7 +377,6 @@ async function socketData(data: any) {
         await store.dispatch('commonModule/setCommonInfo', {runningSlotId: ''});
         await store.dispatch('commonModule/setCommonInfo', {slotIndex: 0});
         await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
-        classArr.value = [];
         break;
       case 'RECOVERY':
         barcodeNum.value = '';
@@ -397,7 +393,7 @@ async function socketData(data: any) {
         break;
     }
 
-    async function runnComp() {
+    async function runnComp(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningInfoStop: true});
       await store.dispatch('commonModule/setCommonInfo', {embeddedNumber: String(data?.iCasStat)});
       await store.dispatch('commonModule/setCommonInfo', {startEmbedded: false});
@@ -408,6 +404,7 @@ async function socketData(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
       await store.dispatch('runningInfoModule/setChangeSlide', {key: 'changeSlide', value: 'stop'});// 슬라이드가 끝났으므로 stop을 넣어서 끝낸다.
       await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: false});
+      await saveTestHistory(data, data?.slotInfo?.slotNo);
       runningInfoBoolen.value = false;
       startStatus.value = false;
     }
@@ -423,7 +420,6 @@ async function socketData(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningSlotId: ''});
       await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
       startStatus.value = true;
-      classArr.value = [];
       runningInfoBoolen.value = true;
     }
 
@@ -436,7 +432,7 @@ async function socketData(data: any) {
         const iCasStatArr: any = [...str];
         const lastCompleteIndex = iCasStatArr.lastIndexOf("3") === -1 ? 0 : iCasStatArr.lastIndexOf("3") + 1;
 
-        if (iCasStatArr.lastIndexOf("2") === 0) {
+        if (iCasStatArr.lastIndexOf("2") !== -1) {
           await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: true});
         }
         if (data?.iCasStat.indexOf("2") !== -1) {
@@ -463,7 +459,24 @@ async function socketData(data: any) {
               await store.dispatch('commonModule/setCommonInfo', {runningInfoStop: true});
             }
           }
-          await saveTestHistory(data, data?.slotInfo?.slotNo);
+
+          slotInfo.value = {
+            userId: userId.value,
+            cassetId: data?.cassetId,
+            testType: data?.slotInfo.testType,
+            slotNo: data?.slotInfo?.slotNo,
+            barcodeNo: data?.slotInfo.barcodeNo,
+            patientId: data?.slotInfo.patientId,
+            patientNm: data?.slotInfo.patientNm,
+            gender: data?.slotInfo.gender,
+            birthday: data?.slotInfo.birthday,
+            slotId: data?.slotInfo.slotId,
+            orderDttm: data?.slotInfo.orderDttm,
+            analyzedDttm: data?.slotInfo.analyzedDttm,
+            tactTime: data?.slotInfo.tactTime,
+            isNormal: 'Y',
+          }
+          // await saveTestHistory(data, data?.slotInfo?.slotNo);
           return;
         }
 
@@ -478,7 +491,7 @@ async function socketData(data: any) {
           if (lastCompleteIndex !== slotIndex.value) {
             await store.dispatch('runningInfoModule/setChangeSlide', {key: 'changeSlide', value: 'afterChange'});
             await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: true});
-            await saveTestHistory(runningArr.value, runningArr.value?.slotInfo?.slotNo);
+            // await saveTestHistory(runningArr.value, runningArr.value?.slotInfo?.slotNo);
             await store.dispatch('commonModule/setCommonInfo', {runningSlotId: currentSlot?.slotId});
             await store.dispatch('commonModule/setCommonInfo', {slotIndex: lastCompleteIndex})
           }
@@ -492,57 +505,45 @@ async function socketData(data: any) {
 
     }
 
-    async function saveTestHistory(params: any, idx: any, slotId?: any, lastCompleteIndex?: any) {
-      const completeSlot = params.slotInfo;
-      if (completeSlot) {
+    async function saveTestHistory(data: any, slotNo: string, slotId?: any, lastCompleteIndex?: any) {
 
-        completeSlot.userId = userId.value;
-        completeSlot.cassetId = params.cassetId;
-        completeSlot.isNormal = 'Y' // MO 비정상 클래스 체크
+      /** TODO MO Normal 조건 추가 필요 */
 
-        if (completeSlot.analysisType === '01') {
-          /** TODO MO Normal 조건 추가 필요 */
-          completeSlot.isNormal = checkPbNormalCell(completeSlot.MOInfo, gramItems.value).isNormal;
-        }
-
-        const classElements = classArr.value.filter((element: any) => element?.slotId === completeSlot.slotId);
-
-        // store
-        // [{moinfo: ...}, {moInfo: ...}, ]...
-        const matchedWbcInfo = classElements[0];
-        const getDefaultMoInfo = () => { moInfo: [DEFAULT_MO_ARRAY] };
-        const updateWbcInfo = () => isObjectEmpty(matchedWbcInfo?.MOInfo) ? getDefaultMoInfo() : matchedWbcInfo?.MOInfo;
-        const moInfoNewVal = updateWbcInfo();
-
-        const cassetType = completeSlot.cassetId.split('_')[1].toUpperCase();
-
-        const convertedMoInfo = convertMoInfo(cassetType, moInfoNewVal);
-
-        const newObj = {
-          slotNo: completeSlot.slotNo,
-          lock_status: false,
-          traySlot: '1-' + idx,
-          barcodeNo: completeSlot.barcodeNo,
-          patientId: completeSlot.patientId,
-          patientNm: completeSlot.patientNm,
-          gender: completeSlot.gender,
-          birthDay: completeSlot.birthDay,
-          slotId: completeSlot.slotId,
-          orderDttm: completeSlot.orderDttm,
-          testType: completeSlot.testType,
-          analyzedDttm: tcpReq().embedStatus.settings.reqDttm,
-          tactTime: completeSlot.tactTime,
-          classInfo: convertedMoInfo,
-          cassetId: completeSlot.cassetId,
-          isNormal: completeSlot.isNormal,
-          submitState: '',
-          submitOfDate: '',
-          submitUserId: '',
-          wbcMemo: '',
-        }
-
-        await saveRunningInfo(newObj, slotId, lastCompleteIndex);
+      if (isObjectEmpty(data?.MOInfo)) {
+        console.log('검체 데이터 저장 실패');
+        return;
       }
+
+      const moInfoNewVal = data?.MOInfo;
+      const splitedCassetId = slotInfo.value.cassetId.split('_');
+      const cassetType = splitedCassetId[splitedCassetId.length - 1].toUpperCase();
+
+      const convertedMoInfo = convertMoInfo(cassetType, moInfoNewVal);
+
+      const newObj = {
+
+        slotNo: slotInfo.value.slotNo,
+        lock_status: false,
+        traySlot: '1-' + slotNo,
+        barcodeNo: slotInfo.value.barcodeNo,
+        patientId: slotInfo.value.patientId,
+        patientNm: slotInfo.value.patientNm,
+        gender: slotInfo.value.gender,
+        birthDay: slotInfo.value.birthday,
+        slotId: slotInfo.value.slotId,
+        orderDttm: slotInfo.value.orderDttm,
+        testType: slotInfo.value.testType,
+        analyzedDttm: tcpReq().embedStatus.settings.reqDttm,
+        tactTime: slotInfo.value.tactTime,
+        classInfo: convertedMoInfo,
+        cassetId: slotInfo.value.cassetId,
+        isNormal: slotInfo.value.isNormal,
+        submitState: '',
+        submitOfDate: '',
+        submitUserId: '',
+        memo: '',
+      }
+      await saveRunningInfo(newObj, slotId, lastCompleteIndex);
     }
 
     async function saveDeviceInfo(deviceInfo: any) {
@@ -595,10 +596,6 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
     });
   }, delay);
 };
-
-const classAppUpdateLast = (data: any) => {
-  classArr.value[data.iCasStatArr] = data.classInfo;
-}
 
 // jobCmd가 중복되지 않도록 배열 필터링
 const removeDuplicateJobCmd = (reqArr: any) => {

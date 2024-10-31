@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
-import {DEFAULT_CBC_LIST, settingName} from "@/common/defines/constFile/settings/settings";
+import {DEFAULT_CBC_LIST, SETTING_NAME} from "@/common/defines/constFile/settings/settings";
 import { ApiResponse } from "@/common/api/httpClient";
 import { createCbcCodeRbcApi, getCbcCodeRbcApi, updateCbcCodeRbcApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
@@ -58,13 +58,13 @@ const siteCd = ref('');
 onMounted(async () => {
   await getDeviceInfo();
   await getImagePrintData();
-  await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cbcCode });
+  await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.cbcCode });
 });
 
 watch(() => cbcCodeArr.value, async (cbcCodeArrAfterSetting) => {
   await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(cbcCodeArrAfterSetting) });
-  if (settingType.value !== settingName.cbcCode) {
-    await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cbcCode });
+  if (settingType.value !== SETTING_NAME.cbcCode) {
+    await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.cbcCode });
   }
 }, { deep: true });
 

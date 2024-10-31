@@ -74,16 +74,6 @@ export const MO_CATEGORY_CLASS_ID = {
     [MO_CATEGORY.GNB]: '06'
 }
 
-export const ARROW_DIRECTION = {
-    LEFT: 'left',
-    RIGHT: 'right',
-}
-
-export const BEFORE_AFTER_STATUS = {
-    BEFORE: 'before',
-    AFTER: 'after',
-};
-
 export const FOLDER_NAME = {
     HIGH_POWER: '22_HIGH_Detection',
     LOW_POWER: '13_LOW_Detection'

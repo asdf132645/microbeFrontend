@@ -18,15 +18,13 @@ import ProcessInfo from '@/views/analysis/commponent/processInfo.vue';
 import Execute from '@/views/analysis/commponent/execute.vue';
 import workingView from '@/views/analysis/commponent/workingView.vue';
 import orderList from './commponent/orderList.vue';
-import wbcclassification from './commponent/classInfoification.vue';
-import rbcclassification from './commponent/rbcclassification.vue';
 import FoundingCells from "@/views/analysis/commponent/foundingCells.vue";
-import {defineEmits, defineProps, onMounted, ref, onBeforeMount, computed, watch} from "vue";
+import { defineEmits, defineProps, ref, onBeforeMount, computed } from "vue";
 import router from "@/router";
-import {useStore} from "vuex";
+import { useStore } from "vuex";
 import RealTimeProcess from "@/views/analysis/commponent/realTimeProcess.vue";
-const emits = defineEmits();
 
+const emits = defineEmits();
 const store = useStore();
 const props = defineProps(['parsedData','isClass', 'startStatus', 'pb100aCassette']);
 const initValData = ref(false);
@@ -37,12 +35,6 @@ onBeforeMount(async () => {
     router.push('/database')
   }
 });
-
-
-
-const classInfoUpdate = (data: any) => {
-  emits('classAppUpdateLast', data);
-}
 
 const initDataChangeText = (val: any) => {
   store.dispatch('commonModule/setCommonInfo', {initValData: val});

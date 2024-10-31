@@ -73,21 +73,20 @@ export const barcodeImgDir = {
     barcodeDirName: '00_Barcode_Image'
 }
 
-export const dirName = {
-    howellJollyDirName: '19_Howell_jolly',
-    malariaDirName: '43_InclusionBody_Malaria',
-    noMalariaDirName: '44_InclusionBody_NoMalaria',
-    rbcClassDirName: '03_RBC_Classification',
+export const DIR_NAME = {
     rbcImageDirName: '02_RBC_Image',
     barcodeDirName: '00_Barcode_Image',
-    wbcClassDirName: '01_WBC_Classification',
-    bfDirName: '02_LowPower_Image',
-    bfHighDirName: '03_HighPower_Image',
-    bfClassDirName: '05_BF_Classification',
+    bfDirName: '13_LOW_Detection',
+    bfHighDirName: '22_HIGH_Detection',
     iaRootPath: 'D:/ia_proc',
 }
 
-export const settingName = {
+export const FOLDER_NAME = {
+    HIGH_POWER: '22_HIGH_Detection',
+    LOW_POWER: '13_LOW_Detection'
+}
+
+export const SETTING_NAME = {
     cellImageAnalyzed: 'cellImageAnalyzed',
     gramRange: 'gramRange',
     normalRange: 'normalRange',
@@ -96,7 +95,7 @@ export const settingName = {
     filePathSet: 'filePathSet',
 }
 
-export const defaultCellImageAnalyzed = {
+export const DEFAULT_CELL_IMAGE_ANALYZED = {
     analysisType: '',
     iaRootPath: 'D:\\MOIA_proc',
     LPCaptureCount: '20',

@@ -235,7 +235,7 @@ import { createCellImgApi, getCellImgApi, getDrivesApi, putCellImgApi } from "@/
 import Datepicker from 'vue3-datepicker';
 
 import { computed, nextTick, onMounted, ref, watch, getCurrentInstance } from "vue";
-import { settingName, LOW_POWER_CAPTURE_COUNT_LIST } from "@/common/defines/constFile/settings/settings";
+import { SETTING_NAME, LOW_POWER_CAPTURE_COUNT_LIST } from "@/common/defines/constFile/settings/settings";
 import Alert from "@/components/commonUi/Alert.vue";
 import { useStore } from "vuex";
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
@@ -327,7 +327,7 @@ instance?.appContext.config.globalProperties.$socket.on('downloadUploadFinished'
 
 onMounted(async () => {
   await nextTick();
-  await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cellImageAnalyzed });
+  await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.cellImageAnalyzed });
   await cellImgGet();
   await driveGet();
 });
@@ -342,8 +342,8 @@ watch([lowPowerCaptureCount, iaRootPath, isAlarm, alarmCount, keepPage], async (
   }
 
   await store.dispatch('commonModule/setCommonInfo', {afterSettingFormattedString: JSON.stringify(cellAfterSettingObj)});
-  if (settingType.value !== settingName.cellImageAnalyzed) {
-    await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.cellImageAnalyzed });
+  if (settingType.value !== SETTING_NAME.cellImageAnalyzed) {
+    await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.cellImageAnalyzed });
   }
 })
 

@@ -40,7 +40,6 @@ import { detailRunningApi } from "@/common/api/service/runningInfo/runningInfoAp
 import { useStore } from "vuex";
 import { getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
 import { LocationQueryValue, useRoute } from "vue-router";
-import { BEFORE_AFTER_STATUS } from "@/common/defines/constFile/dataBase";
 import { useQuery } from "@vue/apollo-composable";
 import { GetRunningInfoByIdDocument } from "@/gql";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
@@ -110,10 +109,6 @@ const checkedClassSetFunc = (checkedClassSet: Set<string>) => checkedClassSetFor
 watch(userModuleDataGet.value, (newUserId, oldUserId) => {
   userId.value = newUserId.id;
 });
-
-async function updateOriginalDb(notWbcAfterSave?: string) {
-//
-}
 
 const hideAlert = () => {
   showAlert.value = false;

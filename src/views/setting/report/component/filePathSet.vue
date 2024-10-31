@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
-import {lisHotKeyAndLisFilePathAndUrl, settingName} from "@/common/defines/constFile/settings/settings";
+import { lisHotKeyAndLisFilePathAndUrl, SETTING_NAME } from "@/common/defines/constFile/settings/settings";
 import {ApiResponse} from "@/common/api/httpClient";
 import { createFilePathSetApi, getFilePathSetApi, updateFilePathSetApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
@@ -58,13 +58,13 @@ const settingType = computed(() => store.state.commonModule.settingType);
 
 onMounted(async () => {
   await getFilePathSetData();
-  await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.filePathSet });
+  await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.filePathSet });
 });
 
 watch(() => filePathSetArr.value, async (filePathSetArr) => {
   await store.dispatch('commonModule/setCommonInfo', {afterSettingFormattedString: JSON.stringify(filePathSetArr)});
-  if (settingType.value !== settingName.filePathSet) {
-    await store.dispatch('commonModule/setCommonInfo', { settingType: settingName.filePathSet });
+  if (settingType.value !== SETTING_NAME.filePathSet) {
+    await store.dispatch('commonModule/setCommonInfo', { settingType: SETTING_NAME.filePathSet });
   }
 }, { deep: true });
 
