@@ -2,27 +2,24 @@
   <ClassInfoMenu @refreshClass="refreshClass" :isNext="isNext" @isNextFalse="isNextFalse"/>
 
   <div class="wbcContent">
-    <div class="topClintInfo">
-      <ul>
-        <li>
-          {{ getTestTypeText(selectItems?.testType) }}
-        </li>
-        <li>{{ selectItems?.barcodeNo }}</li>
-        <li>{{ selectItems?.patientId || 'patientId No Data' }}</li>
-        <li>{{ selectItems?.cbcPatientNo }}</li>
-        <li>{{ selectItems?.patientName }}</li>
-        <li> {{ selectItems?.cbcPatientNm }} {{ selectItems?.cbcSex }} {{ selectItems?.cbcAge }}</li>
-        <li>{{ selectItems?.analyzedDttm }}</li>
-      </ul>
-    </div>
+    <DetailHeader
+        :testType="getTestTypeText(selectItems?.testType)"
+        :barcodeNo="selectItems?.barcodeNo"
+        :cbcPatientNo="selectItems?.cbcPatientNo"
+        :patientName="selectItems?.patientName"
+        :hospitalName="selectItems?.hosName"
+        :cbcPatientName="selectItems?.cbcPatientNm"
+        :cbcSex="selectItems?.cbcSex"
+        :cbcAge="selectItems?.cbcAge"
+    />
     <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
-    <div :class="'databaseWbcRight shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
-        <ClassInfo type='listTable' @nextPage="nextPage" />
+    <div :class="'databaseDetailLeft shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
+        <ClassInfo @checkedClassSet="checkedClassSetFunc" type='listTable' @nextPage="nextPage" />
     </div>
 
 
-    <div :class="'databaseMoRight' + (cbcLayer ? ' cbcLayer' : '')">
-      <ClassImageInfo />
+    <div :class="'databaseDetailRight' + (cbcLayer ? ' cbcLayer' : '')">
+      <ClassImageInfo :checkedClassSet="checkedClassSetForProps" />
     </div>
   </div>
 
@@ -51,6 +48,7 @@ import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftIn
 import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
+import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
 
 
 
@@ -69,17 +67,20 @@ const isNext = ref(false);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
+const checkedClassSetForProps = ref(new Set<string>());
 
 onMounted(async () => {
+  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
 
 const getDetailRunningInfo = async () => {
-  const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
-  console.log('result', result);
-  console.log('loading', loading);
-  console.log('error', error);
+  // const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
+  // console.log('result', result);
+  // console.log('loading', loading);
+  // console.log('error', error);
   try {
     // Store에 담아서 관리
     // 상위 부모에서 호출 한번만
@@ -104,6 +105,8 @@ const isNextFalse = () => {
   isNext.value = false;
 }
 
+const checkedClassSetFunc = (checkedClassSet: Set<string>) => checkedClassSetForProps.value = checkedClassSet;
+
 watch(userModuleDataGet.value, (newUserId, oldUserId) => {
   userId.value = newUserId.id;
 });
@@ -116,11 +119,9 @@ const hideAlert = () => {
   showAlert.value = false;
 }
 const refreshClass = async (data: any) => {
-  await getDetailRunningInfo();
   await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
-  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: BEFORE_AFTER_STATUS.BEFORE })
 }
 
 </script>

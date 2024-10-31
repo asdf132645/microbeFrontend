@@ -1,6 +1,5 @@
 // commonModule.ts
 import {Commit} from 'vuex';
-import { BeforeAfterStatusType } from "#/database/image";
 import {CellImgAnalyzedResponse} from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
 import {defaultCellImageAnalyzed} from "@/common/defines/constFile/settings/settings";
 
@@ -53,9 +52,10 @@ export interface CommonState {
     enteringRouterPath: string;
     settingType: string;
     isDownloadOrUploading: boolean;
-    databaseDetailBeforeAfterStatus: BeforeAfterStatusType;
     cellImageAnalyzedSetting: CellImgAnalyzedResponse;
     currentSelectItems: any;
+    currentImageIndex: number;
+    currentImageName: string;
 }
 
 interface CommonModule {
@@ -112,9 +112,10 @@ interface CommonModule {
         setEnteringRouterPath: (state: CommonState, value: string) => void;
         setSettingType: (state: CommonState, value: string) => void;
         setIsDownloadOrUploading: (state: CommonState, value: boolean) => void;
-        setDatabaseDetailBeforeAfterStatus: (state: CommonState, value: BeforeAfterStatusType) => void;
         setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
         setCurrentSelectItems: (state: CommonState, value: any) => void;
+        setCurrentImageIndex: (state: CommonState, value: number) => void;
+        setCurrentImageName: (state: CommonState, value: string) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -133,7 +134,7 @@ export const commonModule: CommonModule = {
         bfSelectFiles: [],
         slideProceeding: '',
         totalSlideTime: '00:00:00',
-        iaRootPath: '',
+        iaRootPath: 'D:\\MOIA_proc',
         runningSlotId: '',
         isRequestInProgress: false,
         startInfoBoolen: false,
@@ -172,9 +173,10 @@ export const commonModule: CommonModule = {
         enteringRouterPath: '',
         settingType: '',
         isDownloadOrUploading: false,
-        databaseDetailBeforeAfterStatus: 'before',
         cellImageAnalyzedSetting: defaultCellImageAnalyzed,
         currentSelectItems: {},
+        currentImageIndex: 0,
+        currentImageName: '',
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -331,14 +333,17 @@ export const commonModule: CommonModule = {
         setIsDownloadOrUploading(state: CommonState, value: boolean): void {
             state.isDownloadOrUploading = value;
         },
-        setDatabaseDetailBeforeAfterStatus(state: CommonState, value: BeforeAfterStatusType): void {
-            state.databaseDetailBeforeAfterStatus = value;
-        },
         setCellImageAnalyzedSetting(state: CommonState, value: CellImgAnalyzedResponse): void {
             state.cellImageAnalyzedSetting = value;
         },
         setCurrentSelectItems(state: CommonState, value: any): void {
             state.currentSelectItems = value;
+        },
+        setCurrentImageIndex(state: CommonState, value: number): void {
+            state.currentImageIndex = value;
+        },
+        setCurrentImageName(state: CommonState, value: string): void {
+            state.currentImageName = value;
         }
     },
     actions: {
@@ -496,14 +501,17 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('isDownloadOrUploading')) {
                 commit('setIsDownloadOrUploading', payload.isDownloadOrUploading);
             }
-            if (payload.hasOwnProperty('databaseDetailBeforeAfterStatus')) {
-                commit('setDatabaseDetailBeforeAfterStatus', payload.databaseDetailBeforeAfterStatus);
-            }
             if (payload.hasOwnProperty('cellImageAnalyzedSetting')) {
                 commit('setCellImageAnalyzedSetting', payload.cellImageAnalyzedSetting);
             }
             if (payload.hasOwnProperty('currentSelectItems')) {
                 commit('setCurrentSelectItems', payload.currentSelectItems);
+            }
+            if (payload.hasOwnProperty('currentImageIndex')) {
+                commit('setCurrentImageIndex', payload.currentImageIndex);
+            }
+            if (payload.hasOwnProperty('currentImageName')) {
+                commit('setCurrentImageName', payload.currentImageName);
             }
         },
     },

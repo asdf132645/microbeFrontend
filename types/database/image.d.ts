@@ -4,8 +4,7 @@ export interface ImageSourceType {
     width: number;
     height: number;
     url: string;
+    imageName: string;
 }
 
 export type DirectionType = 'left' | 'right';
-
-export type BeforeAfterStatusType = 'before' | 'after';

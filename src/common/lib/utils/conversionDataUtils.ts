@@ -1,5 +1,6 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
-import {MO_TEST_TYPE, TEST_TYPE } from "@/common/defines/constFile/dataBase";
+import {MO_CATEGORY_CLASS_ID, MO_TEST_TYPE, TEST_TYPE} from "@/common/defines/constFile/dataBase";
+import {ClassInfoType} from "@/common/api/service/runningInfo/dto/runningInfoDto";
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
 
@@ -34,7 +35,19 @@ export const getBarcodeDetailImageUrl =  (imageName: string, iaRootPath: string,
 }
 
 export const getCurrentAnalysisType = (cassetId: string) => {
-    if (cassetId.includes('B')) return MO_TEST_TYPE.BLOOD;
-    if (cassetId.includes('U')) return MO_TEST_TYPE.URINE;
-    return MO_TEST_TYPE.SPUTUM;
+    const splitedCassetId = cassetId.split('_');
+    switch (splitedCassetId[splitedCassetId.length - 1]) {
+        case 'S':
+            return MO_TEST_TYPE.SPUTUM;
+        case 'B':
+            return MO_TEST_TYPE.BLOOD;
+        case 'U':
+            return MO_TEST_TYPE.URINE;
+        default:
+            return MO_TEST_TYPE.URINE
+    }
+}
+
+export const getTotalCountOfClassInfo = (classInfo: ClassInfoType[]) => {
+    return classInfo.reduce((acc: number, item) => Number(item.count) + acc, 0);
 }

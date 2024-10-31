@@ -56,6 +56,7 @@ export const MO_CATEGORY = {
     WBC: 'WBC',
     GPC: 'GPC',
     GPB: 'GPB',
+    GNC: 'GNC',
     EP_CELL: 'EP Cell',
     HYPHAE: 'Hyphae',
     SPUTUM: 'Sputum',
@@ -63,14 +64,14 @@ export const MO_CATEGORY = {
     GRAM: 'Gram'
 };
 
-export const BLOOD_TYPE = {
-    HIGH_POWER: [ MO_CATEGORY.GPC_CLUSTERS, MO_CATEGORY.GPC_PAIRS, MO_CATEGORY.GPC_CHAINS, MO_CATEGORY.GNB, MO_CATEGORY.GPB_SMALL, MO_CATEGORY.GPB_LARGE, MO_CATEGORY.GNDC, MO_CATEGORY.GNCB ],
-    LOW_POWER: [ MO_CATEGORY.YEAST ]
-}
-
-export const URINE_TYPE = {
-    HIGH_POWER: [ MO_CATEGORY.GPC, MO_CATEGORY.GNB, MO_CATEGORY.GPB ],
-    LOW_POWER: [ MO_CATEGORY.WBC, MO_CATEGORY.YEAST ],
+export const MO_CATEGORY_CLASS_ID = {
+    [MO_CATEGORY.WBC]: '00',
+    [MO_CATEGORY.EP_CELL]: '01',
+    [MO_CATEGORY.YEAST]: '02',
+    [MO_CATEGORY.GPC]: '03',
+    [MO_CATEGORY.GPB]: '04',
+    [MO_CATEGORY.GNC]: '05',
+    [MO_CATEGORY.GNB]: '06'
 }
 
 export const ARROW_DIRECTION = {
@@ -87,207 +88,3 @@ export const FOLDER_NAME = {
     HIGH_POWER: '22_HIGH_Detection',
     LOW_POWER: '13_LOW_Detection'
 }
-
-export const FIVE_COL_GRADES = ['', ...FOUR_GRADES];
-
-export const YEAST_COL_GRADES = ['', MO_CATEGORY.YEAST];
-
-/** TODO
- * description
- * 1. BLOOD, URINE, SPUTUM
- * 2. BLOOD TYPE
- * 3. URINE TYPE
- * 4. SPUTUM TYPE*/
-const test = [
-    {
-        "id": "0",
-        "name": "AR_PB-0036_001_000.bmp",
-        "classInfo": [
-            {
-                "count": "10",
-                "classNm": "WBC",
-                "afterGrade": "Most",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "12",
-                "classNm": "Yeast",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            },
-            {
-                "count": "12",
-                "classNm": "EP Cell",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            },
-            {
-                "count": "2",
-                "classNm": "Hyphae",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            },
-            {
-                "count": "0",
-                "classNm": "Sputum",
-                "afterGrade": "1",
-                "beforeGrade": "3-1"
-            }
-        ]
-    },
-    {
-        "id": "1",
-        "name": "AR_PB-0036_001_000.bmp",
-        "classInfo": [
-            {
-                "count": "10",
-                "classNm": "GPC",
-                "afterGrade": "Few",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "4",
-                "classNm": "GNB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            },
-            {
-                "count": "3",
-                "classNm": "GPB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            },
-            {
-                "count": "1",
-                "classNm": "GNDC",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            }
-        ]
-    },
-    {
-        "id": "0",
-        "name": "AR_PB-0036_004_000.bmp",
-        "classInfo": [
-            {
-                "count": "10",
-                "classNm": "WBC",
-                "afterGrade": "3-2",
-                "beforeGrade": "Moderate"
-            },
-            {
-                "count": "0",
-                "classNm": "Yeast",
-                "afterGrade": "Exist",
-                "beforeGrade": "None"
-            },
-            {
-                "count": "0",
-                "classNm": "EP Cell",
-                "afterGrade": "None",
-                "beforeGrade": "None"
-            },
-            {
-                "count": "0",
-                "classNm": "Sputum",
-                "afterGrade": "1",
-                "beforeGrade": "2"
-            },
-            {
-                "count": "2",
-                "classNm": "Hyphae",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            }
-        ]
-    },
-    {
-        "id": "1",
-        "name": "AR_PB-0036_004_000.bmp",
-        "classInfo": [
-            {
-                "count": "10",
-                "classNm": "GPC",
-                "afterGrade": "Few",
-                "beforeGrade": "Moderate"
-            },
-            {
-                "count": "4",
-                "classNm": "GNB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "3",
-                "classNm": "GPB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "1",
-                "classNm": "GNDC",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            }
-        ]
-    },
-    {
-        "id": "2",
-        "classInfo": [
-            {
-                "count": "10",
-                "classNm": "WBC",
-                "afterGrade": "Few",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "12",
-                "classNm": "EP Cell",
-                "afterGrade": "Few",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "12",
-                "classNm": "Yeast",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            },
-            {
-                "count": "0",
-                "classNm": "Sputum",
-                "afterGrade": "1",
-                "beforeGrade": "3-1"
-            },
-            {
-                "count": "4",
-                "classNm": "Hyphae",
-                "afterGrade": "Exist",
-                "beforeGrade": "Exist"
-            },
-            {
-                "count": "20",
-                "classNm": "GPC",
-                "afterGrade": "Few",
-                "beforeGrade": "Few"
-            },
-            {
-                "count": "8",
-                "classNm": "GNB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            },
-            {
-                "count": "6",
-                "classNm": "GPB",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            },
-            {
-                "count": "2",
-                "classNm": "GNDC",
-                "afterGrade": "Rare",
-                "beforeGrade": "Rare"
-            }
-        ]
-    }
-]

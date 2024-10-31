@@ -65,10 +65,10 @@ interface RunningInfoResponse {
 interface MoInfo {
     id: string;
     name?: string;
-    classInfo: ClassInfo[];
+    classInfo: ClassInfoType[];
 }
 
-interface ClassInfo {
+interface ClassInfoType {
     count: string;
     classNm: string;
     beforeGrade: string;
@@ -95,4 +95,4 @@ interface RuningInfoApiRequest {
 }
 
 
-export { ClassInfo, RuningInfoApiRequest, RunningInfoRequest, RunningInfoResponse };
+export { ClassInfoType, RuningInfoApiRequest, RunningInfoRequest, RunningInfoResponse };

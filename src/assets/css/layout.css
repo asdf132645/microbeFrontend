@@ -444,20 +444,24 @@ main.bmComponent {
     font-size: 2rem;
 }
 
-.topClintInfo ul li {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 17px;
-    font-size: 0.8rem;
+.topClintInfo ul {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: 30px;
+    border-bottom: 1px solid var(--white-color);
+    padding: 12px 0;
+    list-style-type: none;
 }
 
-.topClintInfo ul {
-    text-align: left;
-    margin-left: 31px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--white-color);
-    padding-bottom: 10px;
-    padding-top: 10px;
+.topClintInfo ul li {
+    font-size: 0.8rem;
+    color: #f0f0f0;
+    white-space: nowrap;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background-color: #2a2b2e;
+    transition: background-color 0.2s;
 }
 
 .small-icon-menu {
@@ -1125,7 +1129,7 @@ button.degreeAllCheckBtn {
 }
 
 .classImageInfo-container {
-    width: 700px;
+    width: 758px;
     height: 700px;
 }
 
@@ -1505,6 +1509,11 @@ li.wbcTitleText p.firstP {
 
 .wbcClassDbDiv.classTotalColor {
     color: #29c7ca;
+}
+
+.classDetailInfoContainer {
+    width: 450px;
+    margin-left: 16px;
 }
 
 .classInfoWbc {
@@ -2301,6 +2310,22 @@ ul.wbcImgWrap > li {
     z-index: 999;
 }
 
+.databaseDetailLeft {
+    display: inline-block;
+    width: 26%;
+    vertical-align: top;
+    text-align: left;
+    padding: 0 10px 10px 10px;
+    margin-right: 10px;
+    margin-left: 14px;
+    border-radius: 4px;
+    height: 93%;
+}
+
+.databaseDetailLeft img {
+    width: 100%;
+}
+
 .databaseWbcRight {
     display: inline-block;
     width: 26%;
@@ -2324,7 +2349,7 @@ ul.wbcImgWrap > li {
     width: 70%;
 }
 
-.databaseMoRight {
+.databaseDetailRight {
     display: inline-block;
     vertical-align: top;
     width: 70%;
@@ -2334,26 +2359,8 @@ ul.wbcImgWrap > li {
 
 .classImageSliderContainer {
     display: flex;
-    gap: 4px;
-    overflow-x: auto;
     margin: 18px;
-    padding: 4px;
-    padding-bottom: 12px;
-
-}
-
-.classImageSliderContainer > img {
-    width: 112px;
-    height: 112px;
-    cursor: pointer;
-}
-
-.classImageSliderContainer::-webkit-scrollbar {
-    height: 8px; /* Scrollbar height */
-}
-
-.classImageSliderContainer::-webkit-scrollbar-track {
-    background: transparent; /* Scrollbar track (background) */
+    /*margin-top: 4px;*/
 }
 
 ul.cellImgBox {
@@ -2550,6 +2557,7 @@ button.searchClass:hover {
 
 .wbcDiv {
     width: 25%;
+    height: 83%;
     margin-right: 10px;
     border-radius: 4px;
     padding: 10px;
@@ -2616,11 +2624,6 @@ table.reportTable tr {
 .wbcLeft {
     width: 49%;
     display: inline-block;
-}
-
-.wbcLeftBm {
-    display: flex;
-    flex-direction: column;
 }
 
 .reportDivTop {
@@ -2835,6 +2838,7 @@ select.selectSizeTitle {
     padding-left: 1.7%;
     display: flex;
     padding-top: 10px;
+    height: 90vh;
 }
 
 .reportContent {
@@ -3642,6 +3646,7 @@ button.rollbackButton {
     top: 57%;
     left: 38%;
 }
+
 .databaseWbcRight.cbcLayer {
     width: 24%;
 }
@@ -3854,16 +3859,12 @@ table.cbcTable td {
     background-color: var(--white-color);
 }
 
-.grade-dot-wrapper.active {
-    background-color: #4CAF50;
-}
-
 .grade-dot-wrapper.active-before {
     background-color: var(--gray-bg-3-color);
 }
 
 .grade-dot-wrapper.active-after {
-    background-color: #4CAF50;
+    background-color: var(--coral-bg-0-color);
 }
 
 .grade-dot-wrapper.top-half {
@@ -3874,6 +3875,40 @@ table.cbcTable td {
 .grade-dot-wrapper.bottom-half {
     position: absolute;
     clip-path: inset(50% 0 0 0);
+}
+
+/* 네비게이션 버튼 스타일 */
+.swiper-button-prev,
+.swiper-button-next {
+    color: var(--green-bg-1-color); /* 버튼 색상 변경 */
+    opacity: 0.8;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after,
+.swiper-button-prev::before,
+.swiper-button-next::before {
+    font-size: 20px;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+    color: var(--green-bg-1-color); /* 호버 시 색상 변경 */
+    opacity: 1;
+}
+
+.swiper-container-horizontal > .swiper-scrollbar {
+    position: absolute;
+    background-color: #ddd;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    bottom: -20px; /* 슬라이더 바깥쪽으로 스크롤바를 이동 */
+}
+
+.swiper-scrollbar-drag {
+    background-color: var(--main-bg-7-color);
+    border-radius: 10px;
 }
 
 @media screen and (max-width: 1900px) {

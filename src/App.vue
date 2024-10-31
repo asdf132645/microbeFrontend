@@ -507,11 +507,11 @@ async function socketData(data: any) {
 
         const classElements = classArr.value.filter((element: any) => element?.slotId === completeSlot.slotId);
 
+        // store
+        // [{moinfo: ...}, {moInfo: ...}, ]...
         const matchedWbcInfo = classElements[0];
-        const newMoInfo = { wbcInfo: matchedWbcInfo?.MOInfo }
-
         const getDefaultMoInfo = () => { moInfo: [DEFAULT_MO_ARRAY] };
-        const updateWbcInfo = () => isObjectEmpty(newMoInfo) ? getDefaultMoInfo() : newMoInfo;
+        const updateWbcInfo = () => isObjectEmpty(matchedWbcInfo?.MOInfo) ? getDefaultMoInfo() : matchedWbcInfo?.MOInfo;
         const moInfoNewVal = updateWbcInfo();
 
         const cassetType = completeSlot.cassetId.split('_')[1].toUpperCase();
@@ -640,7 +640,7 @@ const sendSettingInfo = () => {
     pbiaRootDir: pbiaRootDir.value || '',
     oilCount: '1000',
     isOilReset: 'N',
-    deviceType: '01',
+    deviceType: '03',
   };
   store.dispatch('commonModule/setCommonInfo', {reqArr: req});
 }

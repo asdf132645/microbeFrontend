@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import {computed, defineProps, onMounted, ref, watch} from 'vue';
 import {useStore} from "vuex";
-import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import {filterImageFiles, isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItem']);
 const store = useStore();
@@ -42,7 +42,7 @@ const iaRootPath = ref<any>(store.state.commonModule.iaRootPath);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 
-const allImages = ref([]);
+const allImages = ref<any[]>([]);
 const hiddenImages = ref<{ [key: string]: boolean }>({});
 const selectedImage = ref('');
 
@@ -115,7 +115,8 @@ const getImageFolder = async () => {
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
   const folderPath = `${path}/${slotId}/13_LOW_Detection`;
   const result = await fetch(`${apiBaseUrl}/folders?folderPath=${folderPath}`);
-  allImages.value = await result.json();
+  const imageNames = await result.json()
+  allImages.value = filterImageFiles(imageNames);
 }
 
 const showImage = (imageName: string) => {

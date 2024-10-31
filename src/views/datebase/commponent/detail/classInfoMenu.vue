@@ -178,7 +178,9 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
   }, delay);
 };
 
-const pageGo = (path: string) => {
+const pageGo = async (path: string) => {
+  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   router.push(path);
   pageMoveDeleteStop.value = false;
 }

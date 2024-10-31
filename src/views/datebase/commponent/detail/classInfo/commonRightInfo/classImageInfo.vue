@@ -4,35 +4,23 @@
     <div class="flex-column-justify-center">
       <div class="flex-justify-center-align-start mt40">
         <div class="flex-center">
-          <span class="arrowBox leftArrow">
-          <font-awesome-icon :icon="['fas', 'arrow-left']" @click="handleImageArrow('left')" />
-        </span>
-
           <div class="classImageInfo-container">
-
             <div class="tiling-viewer_img_list-box_img_list">
               <div v-if="tileExist"
                    ref="tilingViewerLayer"
                    id="tiling-viewer_img_list" style="width: 100%;">
               </div>
-
               <div v-else>
                 <span>Tile does not exist.</span>
               </div>
-
             </div>
           </div>
-
-          <span class="arrowBox rightArrow">
-          <font-awesome-icon :icon="['fas', 'arrow-right']" @click="handleImageArrow('right')" />
-        </span>
         </div>
 
         <ClassDetailInfo :selectedImageName="selectedImageName" />
       </div>
 
-
-      <ClassImageSlider :allImages="allImages" :viewer="viewer" />
+      <ClassInfoImageSlider :allImages="allImages" @goToSelectImage="goToSelectImage" />
     </div>
 
   </div>
@@ -47,86 +35,100 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, defineProps, onMounted, ref, watch } from 'vue';
 import OpenSeadragon from 'openseadragon';
+import { computed, defineEmits, nextTick, onMounted, ref, watch } from 'vue';
 import { useStore } from "vuex";
+import { LocationQueryValue, useRoute } from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
-import ClassImageSlider from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageSlider.vue";
-import type { DirectionType, ImageSourceType } from "#/database/image";
-import { ARROW_DIRECTION, FOLDER_NAME } from "@/common/defines/constFile/dataBase";
-import {LocationQueryValue, useRoute} from "vue-router";
-import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
+import type { ImageSourceType } from "#/database/image";
+import {FOLDER_NAME, MO_CATEGORY, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
+import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
+import { filterImageFiles } from "@/common/lib/utils/checkUtils";
+import ClassInfoImageSlider
+  from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
+import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 
+
+const store = useStore();
+const route = useRoute();
+const props = defineProps(['checkedClassSet']);
 const emits = defineEmits();
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-
-const canvasOverlay = ref<any>(null);
+const canvasOverlay = ref<HTMLCanvasElement | null>(null);
 let viewer: any = ref<any>(null);
-const isMagnifyingGlass = ref(false);
 const tilingViewerLayer = ref(null);
 const tileExist = ref(true);
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
-
-const store = useStore();
-const route = useRoute();
+const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const allImages = ref<any>([]);
 const selectedImageName = ref('');
 const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
+const hiddenImages = ref<{ [key: string]: boolean }>({});
+const checkedClassArr = ref<string[]>([]);
+const classInfoPositionArr = ref<any>([]);
+const drawPath = ref<any>([]);
 
 onMounted(async () => {
-  await initElement();
   currentPowerType.value = route.query.pageType;
 })
 
 watch(() => route.query.pageType, async (newPageType) => {
+  await nextTick();
   currentPowerType.value = newPageType;
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
   if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = ''; // 기존 내용 삭제
+    tilingViewerLayer.innerHTML = '';
 
-    // OpenSeadragon 인스턴스가 존재하면 초기화하지 않고 캔버스만 업데이트
-    if (viewer.value) {
-      viewer.value.destroy(); // 기존 뷰어 인스턴스 파괴
-    }
+    if (viewer.value) viewer.value.destroy();
     await initElement();
   }
+  await fetchImageJsonData(currentImageName.value);
 })
 
-watch(() => selectItems.value, async () => {
-  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = ''; // 기존 내용 삭제
+watch(() => props.checkedClassSet, (newCheckedClassSet) => {
+  checkedClassArr.value = [...newCheckedClassSet];
 
-    // OpenSeadragon 인스턴스가 존재하면 초기화하지 않고 캔버스만 업데이트
-    if (viewer.value) {
-      viewer.value.destroy(); // 기존 뷰어 인스턴스 파괴
-    }
+  drawClassPosCanvas(checkedClassArr.value);
+}, { deep: true });
+
+watch(() => selectItems.value, async () => {
+  await nextTick();
+  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
+  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
+  if (tilingViewerLayer) {
+    tilingViewerLayer.innerHTML = '';
+    if (viewer.value) viewer.value.destroy();
     await initElement();
   }
+  await fetchImageJsonData(currentImageName.value);
+
 })
 
 const initElement = async () => {
 
-
   const rootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
-  const powerFolderName = currentPowerType.value === 'HP' ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
+  const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
   const folderPath = `${rootPath}/${selectItems.value.slotId}/${powerFolderName}`;
-  const path = `D:\\MO_IMAGE_TEST\\1`;
   const imageSources = await fetchImage(folderPath);
+
   allImages.value = imageSources.map((imageSource, index: number) => {
     return {
       url: imageSource.url,
-      width: imageSource.url,
+      width: imageSource.width,
       height: imageSource.height,
+      imageName: imageSource.imageName,
       index,
     }
   });
+
+  if (imageSources.length === 0) return;
 
   try {
 
@@ -138,7 +140,7 @@ const initElement = async () => {
       defaultZoomLevel: 1,
       prefixUrl: `${apiBaseUrl}/folders?folderPath=D:/UIMD_Data/Res/uimdFe/images/`,
       tileSources: imageSources,
-      showSequenceControl: false,
+      showSequenceControl: true,
       showReferenceStrip: false,
       gestureSettingsMouse: {clickToZoom: false},
       maxZoomLevel: 15,
@@ -149,72 +151,16 @@ const initElement = async () => {
       visibilityRatio: 1.0 // 이미지를 뷰포트에 맞추기 위한 비율 설정
     });
 
-    // 마그니파이어 설정 - 동그라미 줌기능
-    new OpenSeadragon.MouseTracker({
-      element: viewer.value.element,
-      moveHandler: function (event) {
-        const existingMagCanvas = document.getElementById('magCanvas');
-        if (existingMagCanvas) {
-          viewer.value.element.removeChild(existingMagCanvas);
-        }
-
-        if (!isMagnifyingGlass.value) {
-          return;
-        }
-
-        const { canvas } = viewer.value.drawer;
-        const magCanvas = document.createElement('canvas');
-        const magCtx = magCanvas.getContext('2d');
-        canvasOverlay.value = magCanvas;
-        if (magCtx) {
-          const magWidth = 200;
-          const magHeight = 200;
-          const zoomLevel = 5;
-
-          magCanvas.id = 'magCanvas';
-          magCanvas.width = magWidth;
-          magCanvas.height = magHeight;
-          magCanvas.style.position = 'absolute';
-          magCanvas.style.left = `${event.position.x - magWidth / 2}px`;
-          magCanvas.style.top = `${event.position.y - magHeight / 2}px`;
-          magCanvas.style.border = '1px solid';
-          magCanvas.style.borderRadius = '50%';
-          magCanvas.style.width = `${magWidth}px`;
-          magCanvas.style.height = `${magHeight}px`;
-          magCanvas.style.zIndex = '0';
-
-          viewer.value.element.appendChild(magCanvas);
-
-          // 줌을 위한 확대된 부분을 정확히 잘라내기 위해 drawImage 메서드 수정
-          magCtx.drawImage(
-              canvas,
-              event.position.x - (magWidth / 2 / zoomLevel),
-              event.position.y - (magHeight / 2 / zoomLevel),
-              magWidth / zoomLevel,
-              magHeight / zoomLevel,
-              0,
-              0,
-              magWidth,
-              magHeight
-          );
-
-          magCanvas.style.visibility = event.position.y <= 0 || event.position.x <= 0 ? 'hidden' : 'visible';
-        }
-      },
+    canvasOverlay.value = document.createElement('canvas');
+    canvasOverlay.value.id = 'myCanvas';
+    viewer.value.addOverlay({
+      element: canvasOverlay.value,
+      location: new OpenSeadragon.Rect(0, 0, 1, 1),
     });
 
+    viewer.value.addHandler('open', async (event: any) => {
 
-    // 캔버스 오버레이 생성 및 추가
-    const canvas = document.createElement('canvas');
-    const overlay = viewer.value.addOverlay({
-      element: canvas,
-      location: new OpenSeadragon.Rect(0, 0, 1, 1), // 캔버스가 뷰어 전체를 덮도록 설정
-    });
-    canvas.id = 'myCanvas';
-    canvasOverlay.value = canvas;
-
-    viewer.value.addHandler('open', function (event: any) {
-      const fullPageButton = viewer.value.buttons.buttons.find((button: any) => button.tooltip === 'Toggle full page');
+      const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
       if (fullPageButton) {
         fullPageButton.element.addEventListener('click', async () => {
           if (viewer.value.isFullPage()) {
@@ -226,20 +172,39 @@ const initElement = async () => {
         });
       }
 
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.source.imageName });
       selectedImageName.value = event.source.url;
-      // 캔버스 크기를 조정
-      canvas.width = event.source.width;
-      canvas.height = event.source.height;
+      canvasOverlay.value.width = event.source.width;
+      canvasOverlay.value.height = event.source.height;
     });
 
-    viewer.value.addHandler('page', function (event: any) {
-      // 페이지가 변경될 때 오버레이를 다시 추가
+    viewer.value.addHandler('page', async (event: any) => {
       selectedImageName.value = event.eventSource.tileSources[event.page].url;
-      if (canvas.parentElement !== viewer.value.container) {
-        viewer.value.addOverlay({
-          element: canvas,
-          location: new OpenSeadragon.Rect(0, 0, 1, 1),
-        });
+      await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: event.page });
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].imageName });
+
+      if (canvasOverlay.value) {
+        canvasOverlay.value.width = viewer.value.viewport.getContainerSize().x;
+        canvasOverlay.value.height = viewer.value.viewport.getContainerSize().y;
+        viewer.value.updateOverlay(canvasOverlay.value);
+      }
+    });
+
+    viewer.value.addHandler('resize', (event: any) => {
+      if (canvasOverlay.value) {
+        canvasOverlay.value.width = event.newContainerSize.x;
+        canvasOverlay.value.height = event.newContainerSize.y;
+        viewer.value.updateOverlay(canvasOverlay.value);
+      }
+    })
+
+    viewer.value.addHandler('zoom', function (event) {
+      if (canvasOverlay.value) {
+        const viewportZoom = viewer.value.viewport.getZoom();
+        const image = viewer.value.world.getItemAt(0);
+        canvasOverlay.value.width = image.getContentSize().x * viewportZoom;
+        canvasOverlay.value.height = image.getContentSize().y * viewportZoom;
+        viewer.value.updateOverlay(canvasOverlay.value);
       }
     });
 
@@ -251,8 +216,104 @@ const initElement = async () => {
         viewer.value.element.style.backgroundColor = 'black';
       }
     })
+
+
   } catch (err) {
     console.error('Error:', err);
+  }
+}
+
+const fetchImageWidthHeightData = async (fetchingImageName: string): Promise<{ width: number, height: number }> => {
+  const imageDriveRootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
+  const imageName = fetchingImageName.split('.')[0];
+  const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
+  const result = await readJsonFile({ fullPath: originJsonUrl });
+  const { orgHeight, orgWidth } = result.data;
+  return { width: orgWidth, height: orgHeight };
+}
+
+const fetchImageJsonData = async (curImageName: string) => {
+  const imageDriveRootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
+  const imageName = curImageName.split('.')[0];
+  const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
+  const result = await readJsonFile({ fullPath: originJsonUrl });
+  classInfoPositionArr.value = result.data.classList;
+}
+
+const removeClassPosCanvas = () => {
+  const canvas = canvasOverlay.value;
+  if (!canvas) {
+    console.log('Canvas element를 찾을 수 없습니다.');
+    return null;
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.log('2D context를 가져올 수 없습니다.');
+    return null;
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.beginPath();
+  drawPath.value = [];
+  return ctx;
+}
+
+const drawClassPosCanvas = (classInfoArr: any) => {
+  if (!canvasOverlay.value) {
+    console.error('Canvas 요소가 존재하지 않습니다.');
+    return;
+  }
+
+  const ctx = canvasOverlay.value.getContext('2d');
+  if (!ctx) {
+    console.error('Canvas의 2D 컨텍스트를 가져오지 못했습니다.');
+    return;
+  }
+
+  const COLORS = {
+    [MO_CATEGORY_CLASS_ID.WBC]: 'red',
+    [MO_CATEGORY_CLASS_ID.GNC]: 'orange',
+    [MO_CATEGORY_CLASS_ID.GNB]: 'navy',
+    [MO_CATEGORY_CLASS_ID.GPC]: 'purple',
+    [MO_CATEGORY_CLASS_ID.GPB]: '#1E90FF',
+    [MO_CATEGORY_CLASS_ID.YEAST]: '#FF6347',
+  }
+
+  for (const className of classInfoArr) {
+
+    for (const classPosItem of classInfoPositionArr.value) {
+      if (MO_CATEGORY_CLASS_ID[className] === classPosItem.classId) {
+        ctx.strokeStyle = COLORS[className] || 'black';
+        ctx.lineWidth = 2;
+        for (const detailPosItem of classPosItem.pos) {
+          const drawObj = {
+            classId: MO_CATEGORY_CLASS_ID[className],
+            className: className,
+            posX: Number(detailPosItem.x1),
+            posY: Number(detailPosItem.y1),
+            width: Number(detailPosItem.x2) - Number(detailPosItem.x1),
+            height: Number(detailPosItem.y2) - Number(detailPosItem.y1)
+          }
+
+          // 이미지 좌표를 뷰포트 좌표로 변환
+          const viewportRect = viewer.value.viewport.imageToViewportRectangle(
+              drawObj.posX,
+              drawObj.posY,
+              drawObj.width,
+              drawObj.height
+          );
+
+          // 뷰포트 좌표를 화면 좌표로 변환
+          const screenRect = viewer.value.viewport.viewportToViewerElementRectangle(viewportRect);
+
+          ctx.strokeRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
+          drawPath.value.push(drawObj);
+        }
+      }
+    }
   }
 }
 
@@ -264,28 +325,33 @@ const fetchImage = async (folderPath: string): Promise<ImageSourceType[]> => {
   }
 
   const imageNames = await response.json()
+  const imageSources = [];
 
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(imageNames)[0] });
 
+  for (const imageName of filterImageFiles(imageNames)) {
+    const { width, height } = await fetchImageWidthHeightData(imageName);
 
-  const imageSources = imageNames.map((imageName: string) => ({
-    type: 'image',
-    buildPyramid: false,
-    width: 1920,
-    height: 1080,
-    url: `${url}\\${imageName}`
-  }))
+    const imageSource = {
+      type: 'image',
+      buildPyramid: false,
+      width: width,
+      height: height,
+      url: `${url}\\${imageName}`,
+      imageName: imageName
+    }
+    imageSources.push(imageSource);
+  }
 
   return imageSources;
 }
 
-const handleImageArrow = (direction: DirectionType) => {
-  const currentImageIndex = viewer.value.currentPage()
-  const totalPages = viewer.value.tileSources.length;
-  if (direction === ARROW_DIRECTION.LEFT && currentImageIndex > 0) {
-    viewer.value.goToPage(currentImageIndex - 1);
-  } else if (direction === ARROW_DIRECTION.RIGHT && currentImageIndex < totalPages) {
-    viewer.value.goToPage(currentImageIndex + 1);
-  }
+const goToSelectImage = async (imageIndex: number) => {
+  viewer.value.goToPage(imageIndex);
+}
+
+const hideImage = (fileName: string) => {
+  hiddenImages.value[`${fileName}`] = true;
 }
 
 const showErrorAlert = (message: string) => {
@@ -297,5 +363,5 @@ const showErrorAlert = (message: string) => {
 const hideAlert = () => {
   showAlert.value = false;
 };
-</script>
 
+</script>

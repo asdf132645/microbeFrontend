@@ -11,7 +11,11 @@
     <tbody>
     <tr v-for="category in classInfo" :key="category?.classNm">
       <td></td>
-      <td>{{ category?.classNm }}</td>
+      <td class="flex-justify-center">
+        {{ category?.classNm }}
+<!--     TODO 여기서 클래스 눌렀을 시 박스 그려주는 코드   -->
+<!--        <input type="checkbox" @change="e => checkClassStatus(e, category?.classNm)" />-->
+      </td>
       <template v-for="grade in grades" :key="grade">
         <td class="text-center">
           <div class="grade-icon-container" @click="handleGradeClickFunc(moInfo, category.classNm, grades.includes(GRADE_TEXT.EXIST) ? category.afterGrade : grade)">
@@ -52,6 +56,11 @@ const checkGradeFunc = (beforeAfterGrade: string, gradeText: string) => {
     return checkGrade(gradeText, beforeAfterGrade);
   }
   return checkToggleGrade(beforeAfterGrade);
+}
+
+const checkClassStatus = (event: Event, className: string) => {
+  const isChecked = (event.target as HTMLInputElement).checked;
+  emits('classCheck', { className, isChecked});
 }
 
 const checkGrade = (gradeText: string, paramGrade: string) => {

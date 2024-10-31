@@ -2,9 +2,7 @@
   <img class="mt1" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
   <div class="mt1" v-else-if="barCodeImageShowError" style="height: 209.5px;"></div>
   <div class="mt1 mb2 flex-justify-between">
-    <h3 class="wbcClassInfoLeft">
-      Micro-organism Smear total Report
-    </h3>
+    <h3 class="wbcClassInfoLeft">{{ currentAnalysisType }} Classification</h3>
 
     <ul class="leftWbcInfo">
       <li @click="barcodeCopy">
@@ -41,13 +39,13 @@
     </div>
 
     <template v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD">
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
-      <GradeInputWithTitle :noHead="true" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle @classCheck="classCheck" :noHead="true" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
     </template>
 
     <template v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && moInfoTotal.classInfo">
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
+      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
     </template>
 
     <template v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM">
@@ -108,8 +106,8 @@
         </template>
       </div>
 
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.GPC || item.classNm === MO_CATEGORY.GNB || item.classNm === MO_CATEGORY.GPB || item.classNm === MO_CATEGORY.GNDC)" />
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST || item.classNm === MO_CATEGORY.HYPHAE)" />
+      <GradeInputWithTitle @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.GPC || item.classNm === MO_CATEGORY.GNB || item.classNm === MO_CATEGORY.GPB || item.classNm === MO_CATEGORY.GNDC)" />
+      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST || item.classNm === MO_CATEGORY.HYPHAE)" />
     </template>
 
   </div>
@@ -146,6 +144,7 @@ import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
 import {
+  FOLDER_NAME,
   FOUR_GRADES, GRADE_TEXT,
   MO_CATEGORY,
   MO_TEST_TYPE,
@@ -154,6 +153,7 @@ import {
 } from "@/common/defines/constFile/dataBase";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
+import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 
 const store = useStore();
 const route = useRoute();
@@ -163,6 +163,7 @@ const userModuleDataGet = computed(() => store.state.userModule);
 
 
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
+const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const memo = ref('');
@@ -180,20 +181,36 @@ const lisBtnColor = ref(false);
 const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
 const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>(POWER_MODE.LOW_POWER);
 const moInfoTotal = ref<any>([]);
-const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
+const classPositionArr = ref<any>([]);
+const checkedClassSet = ref<Set<string>>(new Set());
 
 onMounted(() => {
   currentPowerType.value = route.query.pageType;
-  testBarcodeImage();
+  setBarcodeImage();
+
+  if (!isObjectEmpty(selectItems.value)) {
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
+    selectTotalItems(selectItems.value);
+  }
 })
 
 // watch(() => props.isCommitChanged, () => {
 //   selectItems.value?.submitState = 'Submit';
 // })
 
-watch(() => route.query.pageType, async (newPageType) => {
+watch(() => currentImageName.value, async () => {
+  await getClassPosition();
+})
+
+const classCheck = ({ className, isChecked }: { className: string, isChecked: boolean }) => {
+  if (isChecked) checkedClassSet.value.add(className);
+  else checkedClassSet.value.delete(className);
+  emits('checkedClassSet', checkedClassSet.value);
+}
+
+watch(() => [route.query.pageType, route.name], async () => {
   await nextTick();
-  currentPowerType.value = newPageType;
+  currentPowerType.value = route.query.pageType;
   if (!isObjectEmpty(selectItems.value)) {
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
     selectTotalItems(selectItems.value);
@@ -225,14 +242,8 @@ const selectTotalItems = (newSelectItems: any) => {
   moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => item.id === '2');
 }
 
-const testBarcodeImage = () => {
-  const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
-  const iaRootPath = 'D:\\MOIA_proc';
-  const slotId = '20240906153702_02_MO-0036';
-  barcodeImg.value = `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + `/${slotId}/` + barcodeImgDir.barcodeDirName + '/'}&imageName=barcode_image.jpg`;
-}
-
-const testAfterBarcodeImage = (imgDriveRootPath: string) => {
+const setBarcodeImage = () => {
+  const imgDriveRootPath = selectItems.value?.img_drive_root_path
   const path = imgDriveRootPath !== '' && imgDriveRootPath ? imgDriveRootPath : iaRootPath.value;
   barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, selectItems.value?.slotId, barcodeImgDir.barcodeDirName);
 }
@@ -284,7 +295,6 @@ const onCommit = async () => {
   emits('submitStateChanged', 'Submit');
 }
 
-
 const memoChange = async () => {
   const enterAppliedMoMemo = memo.value.replaceAll('\r\n', '<br>');
   const updatedItem = { moMemo: enterAppliedMoMemo };
@@ -307,21 +317,11 @@ const checkGrade = (gradeText: string, paramGrade: string) => {
   return gradeText === paramGrade;
 }
 
-const checkToggleGrade = (currentGrade: string | boolean) => {
-  return currentGrade === 'Exist' || currentGrade === true;
-}
-
 const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
   updateGrade(updatingMoInfo, className, grade);
 }
 
-const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
-  const newGrade = grade === 'Exist' ? 'None' : 'Exist';
-  updateGrade(updatingMoInfo, className, newGrade);
-}
-
 const updateGrade = async (updatingMoInfo: any, className: string, grade: string) => {
-  console.log('updatingMoInfo', updatingMoInfo)
   const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classNm === className)
   updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
     if (item.classNm === className) {
@@ -342,6 +342,20 @@ const updateGrade = async (updatingMoInfo: any, className: string, grade: string
   }
 
   await resRunningItem(updatedSelectItems, true);
+}
+
+const getClassPosition = async () => {
+  const folderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
+  const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const positionUrl = `${path}/${selectItems.value.slotId}/${folderName}/${currentImageName.value}.json`;
+
+  const response = await readJsonFile({ fullPath: positionUrl });
+  if (response.data !== 'not file') {
+    const newJsonData = response.data;
+    console.log('newJsonData', newJsonData);
+  }
+
+  classPositionArr.value = null;
 }
 
 const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
@@ -390,11 +404,6 @@ const onImageError = () => {
 
 const onLoadImg = () => {
   barCodeImageShowError.value = false;
-}
-
-const changeBeforeAfterStatus = async (clickedStatus: string) => {
-  if (databaseDetailBeforeAfterStatus.value === clickedStatus) return;
-  await store.dispatch('commonModule/setCommonInfo', { databaseDetailBeforeAfterStatus: clickedStatus });
 }
 
 </script>

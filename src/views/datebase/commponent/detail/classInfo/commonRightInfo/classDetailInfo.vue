@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 450px;">
+  <div class="classDetailInfoContainer" style="width: 450px;">
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD)">
       <h1 class="fs12 classInfoClassTitle">{{ MO_CATEGORY.YEAST }}</h1>
       <div class="classInfoHorizontalRule"></div>
@@ -142,7 +142,6 @@ const currentAnalysisType = ref(MO_TEST_TYPE.BLOOD);
 const moInfo = ref<any>([]);
 const currentSelectedImageName = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
-const databaseDetailBeforeAfterStatus = computed(() => store.state.commonModule.databaseDetailBeforeAfterStatus);
 
 onMounted(() => {
   currentPowerType.value = route.query.pageType;

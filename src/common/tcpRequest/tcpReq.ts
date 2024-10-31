@@ -76,7 +76,7 @@ export const tcpReq:any = () => {
                 pbiaRootDir: 'D:/IA_Proc',
                 oilCount: '',
                 isOilReset: '',
-                deviceType: '01',
+                deviceType: '03',
                 // uiVersion: 'web',
             },
             oilPrime: {

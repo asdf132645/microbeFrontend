@@ -15,6 +15,14 @@
         <p class="mb1">Charge Remaining Count</p>
         <button type="button" class="defaultBtn" @click="onScan">Scan</button>
       </li>
+      <li class="mt22">
+        <p class="mb1">Auto Start</p>
+        <font-awesome-icon
+            :icon="autoStart ? ['fas', 'toggle-on'] : ['fas', 'toggle-off']"
+            class="iconSize"
+            @click="toggleAutoStart"
+        />
+      </li>
     </ul>
   </div>
   <Alert
@@ -50,6 +58,7 @@ const isBlinkingGripper = ref(false);
 const isBlinkCameraReset = ref(false);
 let blinkTimeout: ReturnType<typeof setTimeout> | null = null;
 let cameraResetTimeOut: ReturnType<typeof setTimeout> | null = null;
+const autoStart = ref(false);
 
 
 onMounted(async () => {
@@ -99,6 +108,12 @@ const onCameraReset = () => {
     isBlinkCameraReset.value = false;
     cameraResetTimeOut = null;
   }, 500);
+}
+
+const toggleAutoStart = async () => {
+  autoStart.value = !autoStart.value;
+  sessionStorage.setItem('autoStart', JSON.stringify(autoStart.value));
+  await updateDeviceInfo();
 }
 
 const showSuccessAlert = (message: string) => {
