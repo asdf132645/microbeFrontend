@@ -1,5 +1,5 @@
 <template>
-  <table class="no-css-table">
+  <table class="no-css-table" v-if="!isObjectEmpty(classInfo)">
     <thead v-if="!noHead">
       <th></th>
       <th></th>
@@ -9,16 +9,15 @@
       <col v-for="(colWidth, index) in colReturn(grades.length)" :key="index" :style="{ width: colWidth + '%' }" />
     </colgroup>
     <tbody>
-    <tr v-for="category in classInfo" :key="category?.classNm">
+    <tr v-for="category in classInfo" :key="category?.classId">
       <td></td>
       <td class="flex-justify-center">
-        {{ category?.classNm }}
-<!--     TODO 여기서 클래스 눌렀을 시 박스 그려주는 코드   -->
-<!--        <input type="checkbox" @change="e => checkClassStatus(e, category?.classNm)" />-->
+        {{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}
+        <input v-show="isCheckable" type="checkbox"  v-model="checkedClasses[category?.classId]" @change="e => checkClassStatus(e, category?.classId)" />
       </td>
       <template v-for="grade in grades" :key="grade">
         <td class="text-center">
-          <div class="grade-icon-container" @click="handleGradeClickFunc(moInfo, category.classNm, grades.includes(GRADE_TEXT.EXIST) ? category.afterGrade : grade)">
+          <div class="grade-icon-container" @click="handleGradeClickFunc(moInfo, category.classId, grades.includes(GRADE_TEXT.EXIST) ? category.afterGrade : grade)">
             <font-awesome-icon
                 class="grade-dot-wrapper top-half"
                 :icon="['fac', 'half-circle-down']"
@@ -43,12 +42,21 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import {defineProps, defineEmits, reactive, watch, computed, ref} from 'vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { GRADE_TEXT } from "@/common/defines/constFile/dataBase";
+import { GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import { useStore } from "vuex";
 
-const props = defineProps(['classInfo', 'grades', 'moInfo', 'noHead'])
+const store = useStore();
+const props = defineProps(['classInfo', 'grades', 'moInfo', 'noHead', 'isCheckable'])
 const emits = defineEmits();
+const currentImageName = computed(() => store.state.commonModule.currentImageName);
+const checkedClasses = ref({});
+
+watch(() => currentImageName.value, () => {
+  checkedClasses.value = {};
+})
 
 const checkGradeFunc = (beforeAfterGrade: string, gradeText: string) => {
 
@@ -58,9 +66,10 @@ const checkGradeFunc = (beforeAfterGrade: string, gradeText: string) => {
   return checkToggleGrade(beforeAfterGrade);
 }
 
-const checkClassStatus = (event: Event, className: string) => {
+const checkClassStatus = (event: Event, classId: string) => {
   const isChecked = (event.target as HTMLInputElement).checked;
-  emits('classCheck', { className, isChecked});
+  checkedClasses[classId] = isChecked;
+  emits('classCheck', { classId, isChecked});
 }
 
 const checkGrade = (gradeText: string, paramGrade: string) => {
@@ -71,21 +80,21 @@ const checkToggleGrade = (currentGrade: string | boolean) => {
   return currentGrade === 'Exist' || currentGrade === true;
 }
 
-const handleGradeClickFunc = (updatingMoInfo: any, className: string, grade: string) => {
+const handleGradeClickFunc = (updatingMoInfo: any, classId: string, grade: string) => {
   if (!props.grades.includes(GRADE_TEXT.EXIST)) {
-    return handleGradeClick(updatingMoInfo, className, grade);
+    return handleGradeClick(updatingMoInfo, classId, grade);
   }
 
-  return handleToggleGradeClick(updatingMoInfo, className, grade);
+  return handleToggleGradeClick(updatingMoInfo, classId, grade);
 }
 
 const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
   emits('updateGrade', updatingMoInfo, className, grade);
 }
 
-const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
+const handleToggleGradeClick = (updatingMoInfo: any, classId: string, grade: string) => {
   const newGrade = grade === 'Exist' ? 'None' : 'Exist';
-  emits('updateGrade', updatingMoInfo, className, newGrade);
+  emits('updateGrade', updatingMoInfo, classId, newGrade);
 }
 
 const colReturn = (col: number) => {

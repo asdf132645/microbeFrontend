@@ -18,6 +18,7 @@ import socketPlugin from '@/plugins/socketPlugin';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import { faHalfCircleUp, faHalfCircleDown } from './icons/customIcons';
 import { useProvideApolloClient } from '@/graphql/apollo';
+import VueSplide from '@splidejs/vue-splide';
 
 library.add(fas);
 library.add(faCircle);
@@ -32,6 +33,7 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 app.use(socketPlugin);
+app.use(VueSplide)
 
 
 app.component('font-awesome-icon', FontAwesomeIcon);

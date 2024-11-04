@@ -1,5 +1,5 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
-import {MO_CATEGORY_CLASS_ID, MO_TEST_TYPE, TEST_TYPE} from "@/common/defines/constFile/dataBase";
+import { MO_TEST_TYPE, TEST_TYPE } from "@/common/defines/constFile/dataBase";
 import {ClassInfoType} from "@/common/api/service/runningInfo/dto/runningInfoDto";
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
@@ -34,15 +34,16 @@ export const getBarcodeDetailImageUrl =  (imageName: string, iaRootPath: string,
     return `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + "/" + slotId + "/" + barcodeDirName + "/"}&imageName=${imageName}`;
 }
 
-export const getCurrentAnalysisType = (cassetId: string) => {
-    const splitedCassetId = cassetId.split('_');
-    switch (splitedCassetId[splitedCassetId.length - 1]) {
-        case 'S':
-            return MO_TEST_TYPE.SPUTUM;
-        case 'B':
-            return MO_TEST_TYPE.BLOOD;
-        case 'U':
+export const getCurrentAnalysisType = (testType: string) => {
+    switch (testType) {
+        case '00':
             return MO_TEST_TYPE.URINE;
+        case '01':
+            return MO_TEST_TYPE.SPUTUM;
+        case '02':
+            return MO_TEST_TYPE.BLOOD;
+        case '03':
+            return MO_TEST_TYPE.BODY_FLUID;
         default:
             return MO_TEST_TYPE.URINE
     }

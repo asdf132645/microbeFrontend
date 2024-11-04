@@ -48,13 +48,11 @@ const selectedImage = ref('');
 
 onMounted(() => {
   allImages.value = [];
-  createAllImages();
   getImageFolder();
 });
 
 watch(() => props.selectedItem, () => {
   allImages.value = [];
-  createAllImages();
   getImageFolder();
 },{deep: true});
 
@@ -70,40 +68,6 @@ const clickImage = (selectImageText: string) => {
 const isSelectedImage = (selectImageText: string) => {
   return selectedImage.value === selectImageText;
 }
-
-function createAllImages(): void {
-  if (!props.selectedItem?.wbcInfo) {
-    return;
-  }
-
-  if (isObjectEmpty(props.selectedItem?.wbcInfo)) {
-    return;
-  }
-  allImages.value = props.selectedItem?.wbcInfo?.wbcInfo[0]?.reduce((acc: any, item: any) => {
-    if (item.images && item.images.length > 0) {
-      acc.push({
-        id: item.id,
-        images: item.images,
-        title: item.title,
-      });
-    }
-    return acc;
-  }, []) || [];
-
-}
-
-// function getImageUrl(imageName: any, id: string, title: string): string {
-//   const { selectedItem } = props;
-//   // 이미지 정보가 없다면 빈 문자열 반환
-//   if (!selectedItem?.wbcInfo?.wbcInfo || selectedItem?.wbcInfo?.wbcInfo.length === 0) {
-//     return '';
-//   }
-//
-//   const slotId = selectedItem.slotId || '';
-//   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
-//   const folderPath = `${path}/${slotId}/01_WBC_Classification/${id}_${title}`;
-//   return `${apiBaseUrl}/images/getImageRealTime?folder=${folderPath}&imageName=${imageName}`;
-// }
 
 const getImageFolder = async () => {
   const { selectedItem } = props;

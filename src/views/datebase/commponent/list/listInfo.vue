@@ -11,7 +11,7 @@
           </li>
           <li class="flexColumn">
             <span class="mb1">Cassette ID:</span>
-            <span class="mb2">{{ selectedItem?.cassetId }}</span>
+            <span class="mb2">{{ selectedItem?.cassetId.split('_')[0] }}</span>
           </li>
           <li class="flexColumn">
             <span class="mb1">Patient ID:</span>

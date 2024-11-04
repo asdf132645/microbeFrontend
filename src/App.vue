@@ -55,10 +55,41 @@ import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import axios from "axios";
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
-import { DEFAULT_MO_ARRAY } from "@/common/defines/constFile/analysis";
 import { DEFAULT_GRAM_RANGE } from "@/common/defines/constFile/settings/settings";
 import type { GramRange } from "@/common/defines/constFile/settings/settings.dto";
-import { MO_CATEGORY, MO_TEST_TYPE } from "@/common/defines/constFile/dataBase";
+import {
+  MO_CATEGORY_NAME,
+  MO_TEST_TYPE,
+  CLASS_INFO_ID,
+  MAP_TEST_TYPE_TO_TEST_NAME,
+  CATEGORY_ID_ARRAYS,
+  URINE_HIGH_POWER_CLASS_IDS,
+  URINE_LOW_POWER_CLASS_IDS,
+  URINE_TOTAL_CLASS_IDS,
+  BLOOD_LOW_POWER_CLASS_IDS,
+  BLOOD_TOTAL_CLASS_IDS,
+  BLOOD_HIGH_POWER_CLASS_IDS,
+  SPUTUM_TOTAL_CLASS_IDS,
+  SPUTUM_HIGH_POWER_CLASS_IDS, SPUTUM_LOW_POWER_CLASS_IDS
+} from "@/common/defines/constFile/dataBase";
+import {DEFAULT_SLOT_INFO} from "@/common/defines/constFile/analysis";
+
+interface SlotInfoType {
+  userId: string;
+  cassetId: string;
+  testType: string;
+  slotNo: string;
+  barcodeNo: string;
+  patientId: string;
+  patientNm: string;
+  gender: string;
+  birthday: string;
+  slotId: string;
+  orderDttm: string;
+  analyzedDttm: string;
+  tactTime: string;
+  isNormal: boolean,
+}
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -85,7 +116,7 @@ const classArr = ref<any>([]);
 const viewerCheckApp = ref('');
 const parsedDataProps = ref<any>({});
 const startStatus = ref(false);
-const microbeVersion = ref<any>('100a');
+const machineVersion = ref('12a');
 const pb100aCassette = ref<any>('');
 const deleteData = ref(false);
 let socketTimeoutId: number | undefined = undefined; // 타이머 ID 저장
@@ -94,11 +125,11 @@ let intervalId: any;
 const stataasdasd = ref(false);
 const ipMatches = ref(false);
 const barcodeNum = ref('');
-const slotInfo = ref<any>({});
+const slotInfo = ref<SlotInfoType>(DEFAULT_SLOT_INFO);
 
-const wbcConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.WBC)[0]);
-const epCellConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.EP_CELL)[0]);
-const gramConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY.GRAM)[0]);
+const wbcConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.WBC)[0]);
+const epCellConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.EP_CELL)[0]);
+const gramConvertSetting = ref<GramRange>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.GRAM)[0]);
 
 instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async (isTcpConnected) => {
   console.log('isTcpConnected', isTcpConnected);
@@ -238,6 +269,7 @@ const isIpMatching = (url: any, ip: any) => {
 };
 
 onMounted(async () => {
+  machineVersion.value = window.MACHINE_VERSION;
   await nextTick();
   await cellImgGet();
   await getGramRange();
@@ -404,7 +436,7 @@ async function socketData(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
       await store.dispatch('runningInfoModule/setChangeSlide', {key: 'changeSlide', value: 'stop'});// 슬라이드가 끝났으므로 stop을 넣어서 끝낸다.
       await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: false});
-      await saveTestHistory(data, data?.slotInfo?.slotNo);
+      await saveTestHistory(data);
       runningInfoBoolen.value = false;
       startStatus.value = false;
     }
@@ -439,7 +471,7 @@ async function socketData(data: any) {
           await store.dispatch('commonModule/setCommonInfo', {slideProceeding: data?.iCasStat.indexOf("2")});
         }
 
-        if (microbeVersion.value === '100a') {
+        if (machineVersion.value === '100a') {
           if (data?.iCasChange === '1') {
             pb100aCassette.value = 'reset';
           } else {
@@ -450,7 +482,7 @@ async function socketData(data: any) {
         // iCasStat (0 - 없음, 1 - 있음, 2 - 진행중, 3 - 완료, 4 - 에러, 9 - 스캔)
         if ((dataICasStat.search(regex) < 0) || data?.oCasStat === '111111111111' && !commonDataGet.value.runningInfoStop) {
           tcpReq().embedStatus.runIngComp.reqUserId = userModuleDataGet.value.userId;
-          if (microbeVersion.value !== '100a') {
+          if (machineVersion.value !== '100a') {
             await store.dispatch('commonModule/setCommonInfo', {reqArr: tcpReq().embedStatus.runIngComp});
             await store.dispatch('commonModule/setCommonInfo', {runningInfoStop: true});
           } else {
@@ -474,7 +506,7 @@ async function socketData(data: any) {
             orderDttm: data?.slotInfo.orderDttm,
             analyzedDttm: data?.slotInfo.analyzedDttm,
             tactTime: data?.slotInfo.tactTime,
-            isNormal: 'Y',
+            isNormal: true,
           }
           // await saveTestHistory(data, data?.slotInfo?.slotNo);
           return;
@@ -505,7 +537,7 @@ async function socketData(data: any) {
 
     }
 
-    async function saveTestHistory(data: any, slotNo: string, slotId?: any, lastCompleteIndex?: any) {
+    async function saveTestHistory(data: any) {
 
       /** TODO MO Normal 조건 추가 필요 */
 
@@ -515,16 +547,13 @@ async function socketData(data: any) {
       }
 
       const moInfoNewVal = data?.MOInfo;
-      const splitedCassetId = slotInfo.value.cassetId.split('_');
-      const cassetType = splitedCassetId[splitedCassetId.length - 1].toUpperCase();
-
-      const convertedMoInfo = convertMoInfo(cassetType, moInfoNewVal);
+      const convertedMoInfo = convertMoInfo(MAP_TEST_TYPE_TO_TEST_NAME[slotInfo.value.testType], moInfoNewVal);
 
       const newObj = {
 
         slotNo: slotInfo.value.slotNo,
         lock_status: false,
-        traySlot: '1-' + slotNo,
+        traySlot: '1-' + slotInfo.value.slotNo,
         barcodeNo: slotInfo.value.barcodeNo,
         patientId: slotInfo.value.patientId,
         patientNm: slotInfo.value.patientNm,
@@ -543,7 +572,7 @@ async function socketData(data: any) {
         submitUserId: '',
         memo: '',
       }
-      await saveRunningInfo(newObj, slotId, lastCompleteIndex);
+      await saveRunningInfo(newObj, slotInfo.value.slotId);
     }
 
     async function saveDeviceInfo(deviceInfo: any) {
@@ -564,7 +593,7 @@ async function socketData(data: any) {
       }
     }
 
-    async function saveRunningInfo(runningInfo: any, slotId: any, last: any) {
+    async function saveRunningInfo(runningInfo: any, slotId: any) {
       try {
         let result: ApiResponse<void>;
         result = await createRunningApi({userId: Number(userId.value), runingInfoDtoItems: runningInfo});
@@ -678,23 +707,29 @@ const convertMoInfo = (cassetType: string, moInfo: any) => {
   const convertedMoInfo = [];
 
   for (const moItem of moInfo) {
+    const validClassIds = getValidClassIds(cassetType, moItem.id);
+    console.log('validClassIds', moItem.id);
+    const updatingClassInfo = moItem.classInfo
+        .filter((moClassInfoItem: {classId: string; count: number }) => validClassIds.includes(moClassInfoItem.classId))
+        .map((moClassInfoItem: { classId: string; count: number }) => ({
+          count: moClassInfoItem.count,
+          classId: moClassInfoItem.classId,
+          beforeGrade: setMoInfoGrade(cassetType, moClassInfoItem.classId, moClassInfoItem.count),
+          afterGrade: setMoInfoGrade(cassetType, moClassInfoItem.classId, moClassInfoItem.count)
+        }))
 
-    // Sputum Gram 계산을 위한 WBC, EP Cell Count 추출
-    const wbcItem = moItem.classInfo.find((item: any) => item.classId === MO_CATEGORY.WBC);
-    const epCellItem = moItem.classInfo.find((item: any) => item.classId === MO_CATEGORY.EP_CELL);
-    const [wbcCount, epCellCount] = [wbcItem.count, epCellItem.count];
-
-    const updatingClassInfo = [];
-    for (const moClassInfoItem of moItem.classInfo) {
-      const gradeText = setMoInfoGrade(cassetType, moClassInfoItem.classNm, moClassInfoItem.count, wbcCount, epCellCount)
-      const convertMoItem = {
-        count: moClassInfoItem.count,
-        classNm: moClassInfoItem.classId,
+    if (cassetType === 'SPUTUM') {
+      // Sputum Gram 계산을 위한 WBC, EP Cell Count 추출
+      const wbcCount = moItem.classInfo.find((item: any) => item.classId === CLASS_INFO_ID.WBC)?.count || 0;
+      const epCellCount = moItem.classInfo.find((item: any) => item.classId === CLASS_INFO_ID.EP_CELL)?.count || 0;
+      const gradeText = getSputumGrade(wbcCount, epCellCount);
+      const sputumItem = {
+        count: 0,
+        classId: '15',
         beforeGrade: gradeText,
-        afterGrade: gradeText
+        afterGrade: gradeText,
       }
-
-      updatingClassInfo.push(convertMoItem);
+      updatingClassInfo.push(sputumItem);
     }
 
     const updatedMoInfoItem = {
@@ -703,28 +738,65 @@ const convertMoInfo = (cassetType: string, moInfo: any) => {
       classInfo: updatingClassInfo
     }
     convertedMoInfo.push(updatedMoInfoItem);
+    console.log('convertedMoInfo', convertedMoInfo);
   }
   return convertedMoInfo;
 };
 
-const setMoInfoGrade = (cassetType: string, classNm: string, count: number, wbcCountForSputumGrade: number, epCellCountForSputumGrade: number) => {
+const getValidClassIds = (cassetType: string, classId: string) => {
+  switch (cassetType) {
+    case MO_TEST_TYPE.URINE:
+      switch (classId) {
+        case '0':
+          return URINE_LOW_POWER_CLASS_IDS;
+        case '1':
+          return URINE_HIGH_POWER_CLASS_IDS;
+        case '2':
+          return URINE_TOTAL_CLASS_IDS;
+        default:
+          return [];
+      }
+    case MO_TEST_TYPE.BLOOD:
+      switch (classId) {
+        case '0':
+          return BLOOD_LOW_POWER_CLASS_IDS;
+        case '1':
+          return BLOOD_HIGH_POWER_CLASS_IDS;
+        case '2':
+          return BLOOD_TOTAL_CLASS_IDS;
+        default:
+          return [];
+      }
+    case MO_TEST_TYPE.SPUTUM:
+      switch (classId) {
+        case '0':
+          return SPUTUM_LOW_POWER_CLASS_IDS;
+        case '1':
+          return SPUTUM_HIGH_POWER_CLASS_IDS;
+        case '2':
+          return SPUTUM_TOTAL_CLASS_IDS;
+        default:
+          return [];
+      }
+    default:
+      return [];
+  }
+}
+
+const setMoInfoGrade = (cassetType: string, classId: string, count: number) => {
 
   switch (cassetType) {
-    case MO_TEST_TYPE.BLOOD.toUpperCase():
+    case MO_TEST_TYPE.BLOOD:
       return existOrNone(count);
 
-    case MO_TEST_TYPE.URINE.toUpperCase():
-      if (classNm === MO_CATEGORY.YEAST) return existOrNone(count);
-      return getGradeByRange(classNm === MO_CATEGORY.WBC ? wbcConvertSetting.value : gramConvertSetting.value, count);
+    case MO_TEST_TYPE.URINE:
 
-    case MO_TEST_TYPE.SPUTUM.toUpperCase():
-      if ([MO_CATEGORY.YEAST, MO_CATEGORY.HYPHAE].includes(classNm)) return existOrNone(count);
-      else if (classNm !== MO_CATEGORY.SPUTUM) {
-        return getGradeByRange(gramConvertSetting.value, count);
-      } else {
-        return getSputumGrade(wbcCountForSputumGrade, epCellCountForSputumGrade);
-      }
+      if (classId === CLASS_INFO_ID.YEAST) return existOrNone(count);
+      return getGradeByRange(classId === CLASS_INFO_ID.WBC ? wbcConvertSetting.value : gramConvertSetting.value, count);
 
+    case MO_TEST_TYPE.SPUTUM:
+      if ([CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE].includes(classId)) return existOrNone(count);
+      else return getGradeByRange(gramConvertSetting.value, count);
   }
 }
 

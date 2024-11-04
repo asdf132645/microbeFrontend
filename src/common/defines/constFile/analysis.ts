@@ -1,4 +1,4 @@
-import {MO_CATEGORY} from "@/common/defines/constFile/dataBase";
+import {CLASS_INFO_ID} from "@/common/defines/constFile/dataBase";
 
 export const LP_CAPTURE_OPTIONS = [
     { value: "10", text: "10 LP Capture" },
@@ -66,8 +66,19 @@ export const SLIDE_CARD_100A = {
     ]
 };
 
-export const DEFAULT_MO_ARRAY = [
-    {
-        id: '0', name: '', classInfo: [],
-    },
-]
+export const DEFAULT_SLOT_INFO = {
+    userId: '1',
+    cassetId: '1',
+    testType: '00',
+    slotNo: '01',
+    barcodeNo: '12312432',
+    patientId: '',
+    patientNm: '',
+    gender: '',
+    birthday: '',
+    slotId: '',
+    orderDttm: '',
+    analyzedDttm: '',
+    tactTime: '',
+    isNormal: true,
+};

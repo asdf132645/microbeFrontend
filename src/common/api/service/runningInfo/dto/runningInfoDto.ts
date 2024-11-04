@@ -17,7 +17,7 @@ interface RunningInfoRequest {
     tactTime: string;
     totalMoCount: string;
     cassetId: string;
-    isNormal: string;
+    isNormal: boolean;
     moInfo: MoInfo[];
     submitState: string;
     submitOfDate: Date;
@@ -48,7 +48,7 @@ interface RunningInfoResponse {
     tactTime: string;
     totalMoCount: string;
     cassetId: string;
-    isNormal: string;
+    isNormal: boolean;
     moInfo: MoInfo[];
     submitState: string;
     submitOfDate: Date;

@@ -7,10 +7,10 @@
       <col v-for="(colWidth, index) in colReturn(grades.length)" :key="index" :style="{ width: colWidth + '%' }" />
     </colgroup>
     <tbody>
-    <tr v-for="category in classInfo" :key="category?.classNm">
+    <tr v-for="category in classInfo" :key="category?.classId">
       <template v-for="grade in grades" :key="grade">
         <td class="text-center">
-          <div class="grade-icon-container" @click="handleGradeClickFunc(moInfo, category.classNm, grades.includes(GRADE_TEXT.EXIST) ? category.afterGrade : grade)">
+          <div class="grade-icon-container" @click="handleGradeClickFunc(moInfo, category.classId, grades.includes(GRADE_TEXT.EXIST) ? category.afterGrade : grade)">
             <font-awesome-icon
                 class="grade-dot-wrapper top-half"
                 :icon="['fac', 'half-circle-down']"
@@ -58,21 +58,21 @@ const checkToggleGrade = (currentGrade: string | boolean) => {
   return currentGrade === 'Exist' || currentGrade === true;
 }
 
-const handleGradeClickFunc = (updatingMoInfo: any, className: string, grade: string) => {
+const handleGradeClickFunc = (updatingMoInfo: any, classId: string, grade: string) => {
   if (!props.grades.includes(GRADE_TEXT.EXIST)) {
-    return handleGradeClick(updatingMoInfo, className, grade);
+    return handleGradeClick(updatingMoInfo, classId, grade);
   }
 
-  return handleToggleGradeClick(updatingMoInfo, className, grade);
+  return handleToggleGradeClick(updatingMoInfo, classId, grade);
 }
 
-const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
-  emits('updateGrade', updatingMoInfo, className, grade);
+const handleGradeClick = (updatingMoInfo: any, classId: string, grade: string) => {
+  emits('updateGrade', updatingMoInfo, classId, grade);
 }
 
-const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
+const handleToggleGradeClick = (updatingMoInfo: any, classId: string, grade: string) => {
   const newGrade = grade === 'Exist' ? 'None' : 'Exist';
-  emits('updateGrade', updatingMoInfo, className, newGrade);
+  emits('updateGrade', updatingMoInfo, classId, newGrade);
 }
 
 const colReturn = (col: number) => {

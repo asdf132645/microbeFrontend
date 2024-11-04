@@ -32,7 +32,7 @@
       <p> {{ timeDataGet.totalSlideTime }} </p>
 
     </div>
-    <div class='slideCardWrap' v-if="microbeVersion === '12a'">
+    <div class='slideCardWrap' v-if="machineVersion === '12a'">
       <!-- input -->
       <ul class='slideContent'>
         <li v-for="item in slideCardData.input" :key="item.slotNo"
@@ -97,7 +97,7 @@ let elapsedTimeCount = ref(0);
 const isBlinking = ref(false);
 let interval: any = ref(null);
 const fixEqStatCd = ref(false);
-const microbeVersion = ref<any>('100a');
+const machineVersion = ref<any>('100a');
 const iCasExist = ref<any>('0');
 const oCasExist = ref<any>('0');
 
@@ -218,9 +218,9 @@ watch(
 );
 
 onBeforeMount(() => {
-  microbeVersion.value = window.MICROBE_VERSION;
+  machineVersion.value = window.MACHINE_VERSION;
   // slideCard100a
-  slideCardData.value = microbeVersion.value === '100a' ? SLIDE_CARD_100A : SLIDE_CARD;
+  slideCardData.value = machineVersion.value === '100a' ? SLIDE_CARD_100A : SLIDE_CARD;
 })
 
 onMounted(() => {

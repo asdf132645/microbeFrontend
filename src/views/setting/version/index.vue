@@ -49,7 +49,7 @@ const getEngineVersion = () => {
     { key: 'DeepNet Version', name: deepNetVersion.value },
     { key: 'Web Frontend Version', name: window.WEB_FRONTEND_VERSION as string},
     { key: 'Web Backend Version', name: window.WEB_BACKEND_VERSION as string},
-    { key: 'MICROBE Version', name: window.MICROBE_VERSION as string}
+    { key: 'MICROBE Version', name: window.MACHINE_VERSION as string}
   ];
 
   // Engine Versions

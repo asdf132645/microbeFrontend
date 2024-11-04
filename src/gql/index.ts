@@ -59,7 +59,7 @@ export type RuningInfoDtoItems = {
     orderDttm: Scalars['String']['input'];
     gender: Scalars['String']['input'];
     birthDay: Scalars['String']['input'];
-    isNormal: Scalars['String']['input'];
+    isNormal: Scalars['Boolean']['input'];
     classInfo: Array<Scalars['String']['input']>
     submitUserId?: InputMaybe<Scalars['String']['input']>;
     memo?: InputMaybe<Scalars['String']['input']>;
@@ -90,7 +90,7 @@ export type RuningInfoEntity = {
     orderDttm: Scalars['String']['input'];
     gender: Scalars['String']['input'];
     birthDay: Scalars['String']['input'];
-    isNormal: Scalars['String']['input'];
+    isNormal: Scalars['Boolean']['input'];
     classInfo: Array<Scalars['String']['input']>
     submitUserId?: InputMaybe<Scalars['String']['input']>;
     memo?: InputMaybe<Scalars['String']['input']>;
@@ -139,7 +139,7 @@ export const GetRunningInfoByIdDocument = gql`
               name
               classInfo {
                   count
-                  classNm
+                  classId
                   afterGrade
                   beforeGrade
               }          

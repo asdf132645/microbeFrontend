@@ -14,12 +14,12 @@
     />
     <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
     <div :class="'databaseDetailLeft shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
-        <ClassInfo @checkedClassSet="checkedClassSetFunc" type='listTable' @nextPage="nextPage" />
+        <ClassInfo type='listTable' @nextPage="nextPage" />
     </div>
 
 
     <div :class="'databaseDetailRight' + (cbcLayer ? ' cbcLayer' : '')">
-      <ClassImageInfo :checkedClassSet="checkedClassSetForProps" />
+      <ClassImageInfo />
     </div>
   </div>
 
@@ -66,7 +66,6 @@ const isNext = ref(false);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const checkedClassSetForProps = ref(new Set<string>());
 
 onMounted(async () => {
   await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
@@ -103,8 +102,6 @@ const nextPage = () => {
 const isNextFalse = () => {
   isNext.value = false;
 }
-
-const checkedClassSetFunc = (checkedClassSet: Set<string>) => checkedClassSetForProps.value = checkedClassSet;
 
 watch(userModuleDataGet.value, (newUserId, oldUserId) => {
   userId.value = newUserId.id;

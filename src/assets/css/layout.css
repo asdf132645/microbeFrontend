@@ -1129,8 +1129,8 @@ button.degreeAllCheckBtn {
 }
 
 .classImageInfo-container {
-    width: 758px;
-    height: 700px;
+    width: 750px;
+    height: 750px;
 }
 
 .loader {
@@ -1251,8 +1251,8 @@ p.loadingText {
 
 #tiling-viewer_img_list {
     position: relative;
-    width: 100%;
-    height: 65vh;
+    width: 750px;
+    height: 750px;
 }
 
 .btn-container_img_list {
@@ -2300,7 +2300,7 @@ ul.wbcImgWrap > li {
 }
 
 .selected-image {
-    outline: solid var(--green-bg-1-color) !important;
+    outline: 4px solid var(--green-bg-1-color) !important;
 }
 
 .context-menu.detail {
@@ -2360,6 +2360,7 @@ ul.wbcImgWrap > li {
 .classImageSliderContainer {
     display: flex;
     margin: 18px;
+    overflow-x: hidden;
     /*margin-top: 4px;*/
 }
 
@@ -3877,38 +3878,12 @@ table.cbcTable td {
     clip-path: inset(50% 0 0 0);
 }
 
-/* 네비게이션 버튼 스타일 */
-.swiper-button-prev,
-.swiper-button-next {
-    color: var(--green-bg-1-color); /* 버튼 색상 변경 */
-    opacity: 0.8;
-}
-
-.swiper-button-prev::after,
-.swiper-button-next::after,
-.swiper-button-prev::before,
-.swiper-button-next::before {
-    font-size: 20px;
-}
-
-.swiper-button-prev:hover,
-.swiper-button-next:hover {
-    color: var(--green-bg-1-color); /* 호버 시 색상 변경 */
-    opacity: 1;
-}
-
-.swiper-container-horizontal > .swiper-scrollbar {
-    position: absolute;
-    background-color: #ddd;
-    left: 0;
+.splide.is-initialized, .splide.is-rendered {
     width: 100%;
-    height: 8px;
-    bottom: -20px; /* 슬라이더 바깥쪽으로 스크롤바를 이동 */
 }
 
-.swiper-scrollbar-drag {
-    background-color: var(--main-bg-7-color);
-    border-radius: 10px;
+.splide__track {
+    padding-bottom: 4px;
 }
 
 @media screen and (max-width: 1900px) {

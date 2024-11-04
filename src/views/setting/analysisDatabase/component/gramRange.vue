@@ -106,7 +106,7 @@ import Confirm from "@/components/commonUi/Confirm.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { gramRangeValidate } from "@/common/lib/utils/validate";
-import { MO_CATEGORY } from "@/common/defines/constFile/dataBase";
+import { MO_CATEGORY_NAME } from "@/common/defines/constFile/dataBase";
 import {GramRangeItems} from "@/common/api/service/setting/dto/gramRangeDto";
 
 
@@ -257,7 +257,7 @@ const getGramRange = async () => {
 }
 
 const getUnit = (classNm: string) => {
-  if (classNm === MO_CATEGORY.GRAM) return GRAM_RANGE_UNIT.HPF;
+  if (classNm === MO_CATEGORY_NAME.GRAM) return GRAM_RANGE_UNIT.HPF;
   return GRAM_RANGE_UNIT.LPF;
 }
 

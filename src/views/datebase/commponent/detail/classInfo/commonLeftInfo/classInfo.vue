@@ -38,20 +38,21 @@
       <h3>Grade</h3>
     </div>
 
-    <template v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD">
-      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
-      <GradeInputWithTitle @classCheck="classCheck" :noHead="true" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+    <template v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD && !isObjectEmpty(moInfoTotal)">
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
     </template>
 
-    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && moInfoTotal.classInfo">
-      <GradeInputWithTitle @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm !== MO_CATEGORY.YEAST)" />
-      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+
+    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && !isObjectEmpty(moInfoTotal)">
+      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
     </template>
 
-    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM">
-      <div class="w-full flex-align-center-justify-start" v-for="category in moInfoTotal.classInfo" :key="category.classNm">
-        <template v-if="category.classNm === MO_CATEGORY.SPUTUM">
-          <div class="classDetailInfoWrapper w-full" v-for="category in moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.SPUTUM)" :key="category.classNm">
+    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM && !isObjectEmpty(moInfoTotal)">
+      <div class="w-full flex-align-center-justify-start" v-for="category in moInfoTotal" :key="category.classId">
+        <template v-if="category.classId === '15'">
+          <div class="classDetailInfoWrapper w-full" v-for="category in moInfoTotal?.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
             <table class="no-css-table">
               <thead>
                 <th></th>
@@ -71,7 +72,7 @@
               <tr>
                 <td class="text-left">Sputum</td>
                 <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
-                  <td @click="handleGradeClick(moInfoTotal, category.classNm, grade)">
+                  <td @click="handleGradeClick(moInfoTotal, category.classId, grade)">
                     <font-awesome-icon
                         class="grade-dot-wrapper top-half"
                         :icon="['fac', 'half-circle-down']"
@@ -106,8 +107,8 @@
         </template>
       </div>
 
-      <GradeInputWithTitle @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.GPC || item.classNm === MO_CATEGORY.GNB || item.classNm === MO_CATEGORY.GPB || item.classNm === MO_CATEGORY.GNDC)" />
-      <GradeInputWithTitle @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST || item.classNm === MO_CATEGORY.HYPHAE)" />
+      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.GPC || item.classId === CLASS_INFO_ID.GNB || item.classId === CLASS_INFO_ID.GPB || item.classId === CLASS_INFO_ID.GNDC)" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST || item.classId === CLASS_INFO_ID.HYPHAE)" />
     </template>
 
   </div>
@@ -144,9 +145,9 @@ import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
 import {
+  CLASS_INFO_ID,
   FOLDER_NAME,
   FOUR_GRADES, GRADE_TEXT,
-  MO_CATEGORY,
   MO_TEST_TYPE,
   POWER_MODE,
   SPUTUM_GRADES
@@ -184,13 +185,14 @@ const moInfoTotal = ref<any>([]);
 const classPositionArr = ref<any>([]);
 const checkedClassSet = ref<Set<string>>(new Set());
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick();
   currentPowerType.value = route.query.pageType;
   setBarcodeImage();
 
   if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
-    selectTotalItems(selectItems.value);
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
+    getTotalMoInfo(selectItems.value);
   }
 })
 
@@ -202,18 +204,12 @@ watch(() => currentImageName.value, async () => {
   await getClassPosition();
 })
 
-const classCheck = ({ className, isChecked }: { className: string, isChecked: boolean }) => {
-  if (isChecked) checkedClassSet.value.add(className);
-  else checkedClassSet.value.delete(className);
-  emits('checkedClassSet', checkedClassSet.value);
-}
-
 watch(() => [route.query.pageType, route.name], async () => {
   await nextTick();
   currentPowerType.value = route.query.pageType;
   if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
-    selectTotalItems(selectItems.value);
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
+    getTotalMoInfo(selectItems.value);
   }
 })
 
@@ -221,8 +217,8 @@ watch(() => selectItems.value, async (newSelectItems) => {
   await nextTick();
 
   if (!isObjectEmpty(newSelectItems)) {
-    currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.cassetId);
-    selectTotalItems(newSelectItems);
+    currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
+    getTotalMoInfo(newSelectItems);
     memo.value = selectItems.value?.moMemo;
     /** TODO 바코드 이미지 */
     // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
@@ -238,7 +234,7 @@ watch(() => selectItems.value, async (newSelectItems) => {
   }
 }, { deep: true });
 
-const selectTotalItems = (newSelectItems: any) => {
+const getTotalMoInfo = (newSelectItems: any) => {
   moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => item.id === '2');
 }
 
@@ -317,14 +313,14 @@ const checkGrade = (gradeText: string, paramGrade: string) => {
   return gradeText === paramGrade;
 }
 
-const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
-  updateGrade(updatingMoInfo, className, grade);
+const handleGradeClick = (updatingMoInfo: any, classId: string, grade: string) => {
+  updateGrade(updatingMoInfo, classId, grade);
 }
 
-const updateGrade = async (updatingMoInfo: any, className: string, grade: string) => {
-  const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classNm === className)
+const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) => {
+  const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classId === classId)
   updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
-    if (item.classNm === className) {
+    if (item.classId === classId) {
       return { ...item, afterGrade: grade };
     }
     return item;
@@ -352,7 +348,6 @@ const getClassPosition = async () => {
   const response = await readJsonFile({ fullPath: positionUrl });
   if (response.data !== 'not file') {
     const newJsonData = response.data;
-    console.log('newJsonData', newJsonData);
   }
 
   classPositionArr.value = null;

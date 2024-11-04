@@ -67,19 +67,15 @@
               <thead>
               <tr class="reportWbcclassificationSmallTitle">
                 <th>Class</th>
-                <th>Count</th>
+                <th>Grade</th>
               </tr>
               </thead>
               <tbody>
               <tr v-for="(item) in moInfo" :key="item.id" class="wbcClassDbDiv">
                 <template v-if="shouldRenderCategory(item.title)">
-                  <td>{{ item?.classNm }}</td>
-                  <td>{{ item?.count }}</td>
+                  <td>{{ MAP_CLASS_ID_TO_CLASS_NM[item?.classId] }}</td>
+                  <td>{{ item?.afterGrade }}</td>
                 </template>
-              </tr>
-              <tr>
-                <td>Total</td>
-                <td>{{ totalCount }}</td>
               </tr>
               </tbody>
             </table>
@@ -98,11 +94,7 @@
 
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
 import { computed, getCurrentInstance, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
-import {
-  getCurrentAnalysisType,
-  getTestTypeText,
-  getTotalCountOfClassInfo
-} from "@/common/lib/utils/conversionDataUtils";
+import {getTestTypeText, getTotalCountOfClassInfo} from "@/common/lib/utils/conversionDataUtils";
 import { defaultWbcClassList, WbcInfo } from "@/store/modules/analysis/wbcclassification";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
 import router from "@/router";
@@ -113,7 +105,7 @@ import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 import {ClassInfoType} from "@/common/api/service/runningInfo/dto/runningInfoDto";
-import {MO_TEST_TYPE} from "@/common/defines/constFile/dataBase";
+import {MAP_CLASS_ID_TO_CLASS_NM, MO_TEST_TYPE} from "@/common/defines/constFile/dataBase";
 
 const getCategoryName = (category: WbcInfo) => category?.name;
 const store = useStore();

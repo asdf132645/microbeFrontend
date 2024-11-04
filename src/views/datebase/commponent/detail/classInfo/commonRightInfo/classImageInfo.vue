@@ -17,7 +17,7 @@
           </div>
         </div>
 
-        <ClassDetailInfo :selectedImageName="selectedImageName" />
+        <ClassDetailInfo @checkedClassSet="checkedClassSetFunc" />
       </div>
 
       <ClassInfoImageSlider :allImages="allImages" @goToSelectImage="goToSelectImage" />
@@ -41,13 +41,12 @@ import { useStore } from "vuex";
 import { LocationQueryValue, useRoute } from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
-import type { ImageSourceType } from "#/database/image";
-import {FOLDER_NAME, MO_CATEGORY, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
+import {FOLDER_NAME, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
 import { filterImageFiles } from "@/common/lib/utils/checkUtils";
 import ClassInfoImageSlider
   from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
-import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
+import { readDziFile, readJsonFile } from "@/common/api/service/fileReader/fileReaderApi";
 
 
 const store = useStore();
@@ -67,12 +66,12 @@ const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const allImages = ref<any>([]);
-const selectedImageName = ref('');
 const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
 const hiddenImages = ref<{ [key: string]: boolean }>({});
-const checkedClassArr = ref<string[]>([]);
+const checkedClassIdArr = ref<string[]>([]);
 const classInfoPositionArr = ref<any>([]);
 const drawPath = ref<any>([]);
+const zoomLevel = ref(0);
 
 onMounted(async () => {
   currentPowerType.value = route.query.pageType;
@@ -88,19 +87,25 @@ watch(() => route.query.pageType, async (newPageType) => {
     if (viewer.value) viewer.value.destroy();
     await initElement();
   }
+
   await fetchImageJsonData(currentImageName.value);
 })
 
-watch(() => props.checkedClassSet, (newCheckedClassSet) => {
-  checkedClassArr.value = [...newCheckedClassSet];
+watch(() => currentImageName.value, async (curImgName) => {
+  await fetchImageJsonData(curImgName);
+})
 
-  drawClassPosCanvas(checkedClassArr.value);
+watch(() => props.checkedClassSet, (newCheckedClassSet) => {
+  removeClassPosCanvas();
+  checkedClassIdArr.value = [...newCheckedClassSet];
+
+  drawClassPosCanvas(checkedClassIdArr.value);
 }, { deep: true });
 
 watch(() => selectItems.value, async () => {
   await nextTick();
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || 0 });
   await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
   if (tilingViewerLayer) {
     tilingViewerLayer.innerHTML = '';
@@ -116,19 +121,9 @@ const initElement = async () => {
   const rootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
   const folderPath = `${rootPath}/${selectItems.value.slotId}/${powerFolderName}`;
-  const imageSources = await fetchImage(folderPath);
+  const tilesInfo = await fetchTileImagesInfo(folderPath);
 
-  allImages.value = imageSources.map((imageSource, index: number) => {
-    return {
-      url: imageSource.url,
-      width: imageSource.width,
-      height: imageSource.height,
-      imageName: imageSource.imageName,
-      index,
-    }
-  });
-
-  if (imageSources.length === 0) return;
+  if (tilesInfo.length === 0) return;
 
   try {
 
@@ -139,7 +134,7 @@ const initElement = async () => {
       sequenceMode: true,
       defaultZoomLevel: 1,
       prefixUrl: `${apiBaseUrl}/folders?folderPath=D:/UIMD_Data/Res/uimdFe/images/`,
-      tileSources: imageSources,
+      tileSources: tilesInfo,
       showSequenceControl: true,
       showReferenceStrip: false,
       gestureSettingsMouse: {clickToZoom: false},
@@ -151,16 +146,18 @@ const initElement = async () => {
       visibilityRatio: 1.0 // 이미지를 뷰포트에 맞추기 위한 비율 설정
     });
 
-    canvasOverlay.value = document.createElement('canvas');
-    canvasOverlay.value.id = 'myCanvas';
-    viewer.value.addOverlay({
-      element: canvasOverlay.value,
-      location: new OpenSeadragon.Rect(0, 0, 1, 1),
+    // 캔버스 오버레이 생성 및 추가
+    const canvas = document.createElement('canvas');
+    const overlay = viewer.value.addOverlay({
+      element: canvas,
+      location: new OpenSeadragon.Rect(0, 0, 1, 1), // 캔버스가 뷰어 전체를 덮도록 설정
     });
+    canvas.id = 'myCanvas';
+    canvasOverlay.value = canvas;
 
-    viewer.value.addHandler('open', async (event: any) => {
+    viewer.value.addHandler('open', function (event: any) {
+      const fullPageButton = viewer.value.buttons.buttons.find((button: any) => button.tooltip === 'Toggle full page');
 
-      const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
       if (fullPageButton) {
         fullPageButton.element.addEventListener('click', async () => {
           if (viewer.value.isFullPage()) {
@@ -172,40 +169,9 @@ const initElement = async () => {
         });
       }
 
-      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.source.imageName });
-      selectedImageName.value = event.source.url;
-      canvasOverlay.value.width = event.source.width;
-      canvasOverlay.value.height = event.source.height;
-    });
-
-    viewer.value.addHandler('page', async (event: any) => {
-      selectedImageName.value = event.eventSource.tileSources[event.page].url;
-      await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: event.page });
-      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].imageName });
-
-      if (canvasOverlay.value) {
-        canvasOverlay.value.width = viewer.value.viewport.getContainerSize().x;
-        canvasOverlay.value.height = viewer.value.viewport.getContainerSize().y;
-        viewer.value.updateOverlay(canvasOverlay.value);
-      }
-    });
-
-    viewer.value.addHandler('resize', (event: any) => {
-      if (canvasOverlay.value) {
-        canvasOverlay.value.width = event.newContainerSize.x;
-        canvasOverlay.value.height = event.newContainerSize.y;
-        viewer.value.updateOverlay(canvasOverlay.value);
-      }
-    })
-
-    viewer.value.addHandler('zoom', function (event) {
-      if (canvasOverlay.value) {
-        const viewportZoom = viewer.value.viewport.getZoom();
-        const image = viewer.value.world.getItemAt(0);
-        canvasOverlay.value.width = image.getContentSize().x * viewportZoom;
-        canvasOverlay.value.height = image.getContentSize().y * viewportZoom;
-        viewer.value.updateOverlay(canvasOverlay.value);
-      }
+      // 캔버스 크기를 조정
+      canvas.width = event.source.Image.Size.Width;
+      canvas.height = event.source.Image.Size.Height;
     });
 
     viewer.value.addHandler('full-page', async (event: any) => {
@@ -217,29 +183,36 @@ const initElement = async () => {
       }
     })
 
+    viewer.value.addHandler('page', async (event: any) => {
+      await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: event.page });
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].imageName });
 
+      if (canvas.parentElement !== viewer.value.container) {
+        viewer.value.addOverlay({
+          element: canvas,
+          location: new OpenSeadragon.Rect(0, 0, 1, 1),
+        });
+      }
+    });
   } catch (err) {
     console.error('Error:', err);
   }
 }
 
-const fetchImageWidthHeightData = async (fetchingImageName: string): Promise<{ width: number, height: number }> => {
-  const imageDriveRootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
-  const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
-  const imageName = fetchingImageName.split('.')[0];
-  const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
-  const result = await readJsonFile({ fullPath: originJsonUrl });
-  const { orgHeight, orgWidth } = result.data;
-  return { width: orgWidth, height: orgHeight };
-}
-
 const fetchImageJsonData = async (curImageName: string) => {
+  if (!curImageName) return;
+
   const imageDriveRootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
   const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
   const imageName = curImageName.split('.')[0];
   const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
   const result = await readJsonFile({ fullPath: originJsonUrl });
   classInfoPositionArr.value = result.data.classList;
+}
+
+const checkedClassSetFunc = (checkedClassSet: Set<string>) => {
+  checkedClassIdArr.value = [...checkedClassSet];
+  drawClassPosCanvas(checkedClassIdArr.value);
 }
 
 const removeClassPosCanvas = () => {
@@ -262,88 +235,115 @@ const removeClassPosCanvas = () => {
 }
 
 const drawClassPosCanvas = (classInfoArr: any) => {
-  if (!canvasOverlay.value) {
-    console.error('Canvas 요소가 존재하지 않습니다.');
-    return;
-  }
 
-  const ctx = canvasOverlay.value.getContext('2d');
+  const ctx = removeClassPosCanvas();
   if (!ctx) {
-    console.error('Canvas의 2D 컨텍스트를 가져오지 못했습니다.');
+    console.error('Canvas context 초기화 실패');
     return;
   }
 
   const COLORS = {
-    [MO_CATEGORY_CLASS_ID.WBC]: 'red',
+    [MO_CATEGORY_CLASS_ID.WBC]: 'navy',
     [MO_CATEGORY_CLASS_ID.GNC]: 'orange',
-    [MO_CATEGORY_CLASS_ID.GNB]: 'navy',
+    [MO_CATEGORY_CLASS_ID.GNB]: 'black',
     [MO_CATEGORY_CLASS_ID.GPC]: 'purple',
     [MO_CATEGORY_CLASS_ID.GPB]: '#1E90FF',
     [MO_CATEGORY_CLASS_ID.YEAST]: '#FF6347',
   }
 
-  for (const className of classInfoArr) {
-
+  for (const classId of classInfoArr) {
     for (const classPosItem of classInfoPositionArr.value) {
-      if (MO_CATEGORY_CLASS_ID[className] === classPosItem.classId) {
-        ctx.strokeStyle = COLORS[className] || 'black';
+      if (classId === classPosItem.classId) {
+        ctx.strokeStyle = COLORS[classId] || 'black';
         ctx.lineWidth = 2;
         for (const detailPosItem of classPosItem.pos) {
+          const rectPath = new Path2D();
           const drawObj = {
-            classId: MO_CATEGORY_CLASS_ID[className],
-            className: className,
+            classId: classId,
             posX: Number(detailPosItem.x1),
             posY: Number(detailPosItem.y1),
             width: Number(detailPosItem.x2) - Number(detailPosItem.x1),
             height: Number(detailPosItem.y2) - Number(detailPosItem.y1)
           }
 
-          // 이미지 좌표를 뷰포트 좌표로 변환
-          const viewportRect = viewer.value.viewport.imageToViewportRectangle(
-              drawObj.posX,
-              drawObj.posY,
-              drawObj.width,
-              drawObj.height
-          );
-
-          // 뷰포트 좌표를 화면 좌표로 변환
-          const screenRect = viewer.value.viewport.viewportToViewerElementRectangle(viewportRect);
-
-          ctx.strokeRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
+          rectPath.rect(drawObj.posX, drawObj.posY, drawObj.width, drawObj.height);
           drawPath.value.push(drawObj);
+          ctx.stroke(rectPath);
         }
       }
     }
   }
 }
 
-const fetchImage = async (folderPath: string): Promise<ImageSourceType[]> => {
+const dziWidthHeight = async (imageFileName: any): Promise<any> => {
+  const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
+  const urlImage = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;
+  const imageResponse = await readDziFile({filePath: urlImage});
+  return await extractWidthHeightFromDzi(`${imageFileName}`, imageResponse);
+}
+
+const extractWidthHeightFromDzi = (fileName: string, xmlString: any): any => {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+  const sizeElement = xmlDoc.getElementsByTagName("Size")[0];
+  const tileSizeEl = xmlDoc.getElementsByTagName('Image')[0];
+  const tileSize = tileSizeEl.getAttribute("TileSize");
+  const width = sizeElement.getAttribute("Width");
+  const height = sizeElement.getAttribute("Height");
+  return {fileName, width: Number(width), height: Number(height), tileSize: Number(tileSize)}
+}
+
+const extractSubStringBeforeFiles = (str: string) => {
+  const searchString = '_files';
+  const endIndex = str.indexOf(searchString);
+
+  if (endIndex !== -1) {
+    return str.substring(0, endIndex);
+  }
+
+  return str;
+}
+
+const fetchTileImagesInfo = async (folderPath: string) => {
   const url = `${apiBaseUrl}/folders?folderPath=${folderPath}`;
   const response = await fetch(url);
-  if (response.statusText === 'Not Found') {
-    console.log('response', response);
-  }
+  if (!response.ok) return;
 
-  const imageNames = await response.json()
-  const imageSources = [];
+  const fileNames = await response.json();
+  console.log('filterImageFiles(fileNames)[0]', filterImageFiles(fileNames)[0]);
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(fileNames)[0] });
 
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(imageNames)[0] });
-
-  for (const imageName of filterImageFiles(imageNames)) {
-    const { width, height } = await fetchImageWidthHeightData(imageName);
-
-    const imageSource = {
-      type: 'image',
-      buildPyramid: false,
-      width: width,
-      height: height,
-      url: `${url}\\${imageName}`,
-      imageName: imageName
+  allImages.value = filterImageFiles(fileNames).map((imageSource, index: number) => {
+    return {
+      url: `${url}\\${imageSource}`,
+      imageName: imageSource,
+      index,
     }
-    imageSources.push(imageSource);
-  }
+  })
 
-  return imageSources;
+  const tilesInfo = [];
+  for (const fileName of fileNames) {
+    if (!fileName.endsWith('_files')) continue;
+
+    const fileNameResult = extractSubStringBeforeFiles(fileName);
+    const { width, height, tileSize } = await dziWidthHeight(fileNameResult);
+
+    tilesInfo.push({
+      Image: {
+        xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+        Url: `${apiBaseUrl}/folders?folderPath=${folderPath}/${fileName}/`,
+        Format: "jpg",
+        Overlap: "1",
+        TileSize: tileSize,
+        Size: {
+          Width: width,
+          Height: height
+        }
+      }
+    })
+  }
+  return tilesInfo;
 }
 
 const goToSelectImage = async (imageIndex: number) => {

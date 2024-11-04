@@ -1,7 +1,7 @@
 <template>
   <div class="classDetailInfoContainer" style="width: 450px;">
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD)">
-      <h1 class="fs12 classInfoClassTitle">{{ MO_CATEGORY.YEAST }}</h1>
+      <h1 class="fs12 classInfoClassTitle">{{ MO_CATEGORY_NAME.YEAST }}</h1>
       <div class="classInfoHorizontalRule"></div>
       <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
     </template>
@@ -15,14 +15,14 @@
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE)">
-      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo" :key="category.classNm">
-        <h1 class="fs12 classInfoClassTitle">{{ category.classNm }}</h1>
+      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo" :key="category.classId">
+        <h1 class="fs12 classInfoClassTitle">{{ MAP_CLASS_ID_TO_CLASS_NM[category.classId] }}</h1>
         <div class="classInfoHorizontalRule"></div>
-        <template v-if="category.classNm === MO_CATEGORY.WBC">
-          <GradeInputNoTitle :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classNm === MO_CATEGORY.WBC)" />
+        <template v-if="category.classId === CLASS_INFO_ID.WBC">
+          <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.WBC)" />
         </template>
-        <template v-if="category.classNm === MO_CATEGORY.YEAST">
-          <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classNm === MO_CATEGORY.YEAST)" />
+        <template v-if="category.classId === CLASS_INFO_ID.YEAST">
+          <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST)" />
         </template>
       </div>
     </template>
@@ -32,7 +32,7 @@
         <h1 class="fs12 classInfoClassTitle">Gram</h1>
         <div class="classInfoHorizontalRule"></div>
       </div>
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
+      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
     </template>
 
 
@@ -40,7 +40,7 @@
       <h1 class="fs12 classInfoClassTitle mt24">Sputum</h1>
       <div class="classInfoHorizontalRule"></div>
 
-      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo.filter((item: any) => item.classNm === 'Sputum')" :key="category.classNm">
+      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
         <table class="no-css-table">
             <thead>
               <th></th>
@@ -60,7 +60,7 @@
               <tr>
                 <td class="text-left">Sputum</td>
                 <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
-                  <td @click="handleGradeClick(moInfo, category.classNm, grade)">
+                  <td @click="handleGradeClick(moInfo, category.classId, grade)">
                     <font-awesome-icon
                         class="grade-dot-wrapper top-half"
                         :icon="['fac', 'half-circle-down']"
@@ -95,11 +95,11 @@
 
       <h1 class="fs12 classInfoClassTitle mt24">Yeast</h1>
       <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.YEAST)" />
+      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
 
       <h1 class="fs12 classInfoClassTitle">Hyphae</h1>
       <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classNm === MO_CATEGORY.HYPHAE)" />
+      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.HYPHAE)" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM)">
@@ -117,10 +117,10 @@
 <script setup lang="ts">
 
 import { LocationQueryValue, useRoute } from "vue-router";
-import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, ref, watch, watchEffect} from "vue";
 import {
-  FOUR_GRADES, GRADE_TEXT,
-  MO_CATEGORY,
+  FOUR_GRADES, GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM, CLASS_INFO_ID,
+  MO_CATEGORY_NAME,
   MO_TEST_TYPE,
   POWER_MODE,
   SPUTUM_GRADES
@@ -135,13 +135,14 @@ import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/comm
 
 const store = useStore();
 const route = useRoute();
-const props = defineProps(['selectedImageName']);
+const emits = defineEmits();
 const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentAnalysisType = ref(MO_TEST_TYPE.BLOOD);
 const moInfo = ref<any>([]);
-const currentSelectedImageName = ref('');
+const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const userModuleDataGet = computed(() => store.state.userModule);
+const checkedClassSet = ref<Set<string>>(new Set());
 
 onMounted(() => {
   currentPowerType.value = route.query.pageType;
@@ -150,8 +151,8 @@ onMounted(() => {
 watch(() => selectItems.value, async (newSelectItems) => {
   await nextTick();
   if (!isObjectEmpty(newSelectItems)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value?.cassetId);
-    getMoInfo(newSelectItems);
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
+    getMoInfo(newSelectItems, String(currentPowerType.value));
   }
 }, { deep: true });
 
@@ -160,25 +161,43 @@ watch(() => route.query.pageType, async (newPageType) => {
   await nextTick();
   currentPowerType.value = newPageType;
   if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.cassetId);
-    getMoInfo(selectItems.value);
-  }
-})
 
-watch(() => props.selectedImageName, async (newSelectedImageName) => {
+    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
+    getMoInfo(selectItems.value, String(newPageType));
+  }
+});
+
+watch(() => currentImageName.value, async (newSelectedImageName) => {
   await nextTick();
-  currentSelectedImageName.value = newSelectedImageName;
+  currentImageName.value = newSelectedImageName;
   if (!isObjectEmpty(selectItems.value)) {
-    getMoInfo(selectItems.value);
+    getMoInfo(selectItems.value, String(currentPowerType.value));
   }
 })
 
-const getMoInfo = (selectItems: any) => {
-  if (currentPowerType.value === POWER_MODE.LOW_POWER) {
-    moInfo.value = selectItems.classInfo.filter((item: any) => currentSelectedImageName.value.includes(item.name) && item.id === '0')[0];
-  } else if (currentPowerType.value === POWER_MODE.HIGH_POWER) {
-    moInfo.value = selectItems.classInfo.filter((item: any) => currentSelectedImageName.value.includes(item.name) && item.id === '1')[0];
+const getMoInfo = (selectItems: any, pageType: string) => {
+  if (currentImageName.value === '' || !currentImageName.value || !selectItems) return;
+
+  const imageName = currentImageName.value.split('.')[0];
+  if (pageType === POWER_MODE.LOW_POWER) {
+    moInfo.value = selectItems.classInfo.filter((item: any) => {
+      if (item.id === '0') {
+        return item.name.includes(imageName)
+      }
+    })[0];
+  } else if (pageType === POWER_MODE.HIGH_POWER) {
+    moInfo.value = selectItems.classInfo.filter((item: any) => {
+      if (item.id === '1') {
+        return item.name.includes(imageName);
+      }
+    })[0];
   }
+}
+
+const classCheck = ({ classId, isChecked }: { classId: string, isChecked: boolean }) => {
+  if (isChecked) checkedClassSet.value.add(classId);
+  else checkedClassSet.value.delete(classId);
+  emits('checkedClassSet', checkedClassSet.value);
 }
 
 const showingByPowerAndAnalysisType = (powerType: string, analysisType: string) => {
@@ -202,10 +221,10 @@ const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: s
   updateGrade(updatingMoInfo, className, newGrade);
 }
 
-const updateGrade = async (updatingMoInfo: any, className: string, grade: string) => {
-  const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classNm === className)
+const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) => {
+  const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classId === classId)
   updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
-    if (item.classNm === className) {
+    if (item.classId === classId) {
       return { ...item, afterGrade: grade };
     }
     return item;

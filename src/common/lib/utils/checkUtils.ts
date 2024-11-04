@@ -4,5 +4,6 @@ export const isObjectEmpty = <T extends object | undefined | null>(object: T) =>
 }
 
 export const filterImageFiles = (files: string[]) => {
-    return files.filter((item: string) => item.includes('.bmp'));
-}
+    const regex = /^\d*\.(jpg|bmp|jpeg)$/i;
+    return files.filter((item: string) => regex.test(item));
+};

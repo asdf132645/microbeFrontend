@@ -59,12 +59,12 @@
           @contextmenu.prevent="rowRightClick(item, $event)"
           title="Double click the row"
       >
-        <td><font-awesome-icon class="red" :icon="['fas', 'triangle-exclamation']" v-if="item.isNormal === 'N'" /> {{ idx + 1 }}</td>
+        <td><font-awesome-icon class="red" :icon="['fas', 'triangle-exclamation']" v-if="!item.isNormal" /> {{ idx + 1 }}</td>
         <td @click="handleCheckboxChange(item)">
           <input type="checkbox" v-model="item.checked" :checked="item.checked"/>
         </td>
         <td> {{ getTestTypeText(item?.testType) }}</td>
-        <td>{{ item?.cassetId }}</td>
+        <td>{{ item?.cassetId.split('_')[0] }}</td>
 
         <td>
           <font-awesome-icon
