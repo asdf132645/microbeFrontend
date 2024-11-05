@@ -43,7 +43,7 @@ import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
 import {FOLDER_NAME, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
-import { filterImageFiles } from "@/common/lib/utils/checkUtils";
+import {filterAvailableImageItems, filterImageFiles} from "@/common/lib/utils/checkUtils";
 import ClassInfoImageSlider
   from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
 import { readDziFile, readJsonFile } from "@/common/api/service/fileReader/fileReaderApi";
@@ -105,8 +105,7 @@ watch(() => props.checkedClassSet, (newCheckedClassSet) => {
 watch(() => selectItems.value, async () => {
   await nextTick();
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || 0 });
-  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || '' });
   if (tilingViewerLayer) {
     tilingViewerLayer.innerHTML = '';
     if (viewer.value) viewer.value.destroy();
@@ -184,8 +183,8 @@ const initElement = async () => {
     })
 
     viewer.value.addHandler('page', async (event: any) => {
-      await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: event.page });
-      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].imageName });
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].Image.imageName });
+      console.log('event.eventSource.tileSources[event.page].Image.imageName', event.eventSource.tileSources[event.page].Image.imageName);
 
       if (canvas.parentElement !== viewer.value.container) {
         viewer.value.addOverlay({
@@ -280,7 +279,7 @@ const dziWidthHeight = async (imageFileName: any): Promise<any> => {
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
   const urlImage = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;
   const imageResponse = await readDziFile({filePath: urlImage});
-  return await extractWidthHeightFromDzi(`${imageFileName}`, imageResponse);
+  return await extractWidthHeightFromDzi(`${imageFileName}.jpg`, imageResponse);
 }
 
 const extractWidthHeightFromDzi = (fileName: string, xmlString: any): any => {
@@ -311,38 +310,44 @@ const fetchTileImagesInfo = async (folderPath: string) => {
   if (!response.ok) return;
 
   const fileNames = await response.json();
-  console.log('filterImageFiles(fileNames)[0]', filterImageFiles(fileNames)[0]);
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(fileNames)[0] });
+  fileNames.sort((a,b) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
 
-  allImages.value = filterImageFiles(fileNames).map((imageSource, index: number) => {
-    return {
-      url: `${url}\\${imageSource}`,
-      imageName: imageSource,
-      index,
-    }
-  })
+  const availableFileNames = filterAvailableImageItems(fileNames);
 
-  const tilesInfo = [];
-  for (const fileName of fileNames) {
-    if (!fileName.endsWith('_files')) continue;
+  const fileNamesEndsWithFiles = availableFileNames.filter((fileName: string) => fileName.endsWith('_files'));
+  const fileNamesEndsWithJpg = availableFileNames.filter((fileName: string) => fileName.endsWith('jpg'));
 
-    const fileNameResult = extractSubStringBeforeFiles(fileName);
-    const { width, height, tileSize } = await dziWidthHeight(fileNameResult);
+  allImages.value = fileNamesEndsWithJpg
+      .map((imageSource, index) => ({
+        url: `${url}\\${imageSource}`,
+        imageName: imageSource,
+        index,
+      }))
 
-    tilesInfo.push({
-      Image: {
-        xmlns: "http://schemas.microsoft.com/deepzoom/2009",
-        Url: `${apiBaseUrl}/folders?folderPath=${folderPath}/${fileName}/`,
-        Format: "jpg",
-        Overlap: "1",
-        TileSize: tileSize,
-        Size: {
-          Width: width,
-          Height: height
-        }
-      }
-    })
-  }
+  const tilesInfo = await Promise.all(
+      fileNamesEndsWithFiles
+          .map(async (fileName: string) => {
+            const fileNameResult = extractSubStringBeforeFiles(fileName);
+            const { width, height, tileSize, fileName: imageFileName } = await dziWidthHeight(fileNameResult);
+
+            return {
+              Image: {
+                xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+                Url: `${apiBaseUrl}/folders?folderPath=${folderPath}/${fileName}/`,
+                Format: "jpg",
+                Overlap: "1",
+                TileSize: tileSize,
+                imageName: imageFileName,
+                Size: {
+                  Width: width,
+                  Height: height
+                }
+              }
+            }
+          })
+  )
+
   return tilesInfo;
 }
 

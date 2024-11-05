@@ -31,8 +31,6 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue';
 import {DEFAULT_CBC_LIST, SETTING_NAME} from "@/common/defines/constFile/settings/settings";
-import { ApiResponse } from "@/common/api/httpClient";
-import { createCbcCodeRbcApi, getCbcCodeRbcApi, updateCbcCodeRbcApi } from "@/common/api/service/setting/settingApi";
 import Alert from "@/components/commonUi/Alert.vue";
 import {cbcCodeItem} from "@/common/api/service/setting/dto/lisCodeDto";
 import {MESSAGES} from '@/common/defines/constFile/constantMessageText';
@@ -77,41 +75,41 @@ const checkIsMovingWhenSettingNotSaved = () => {
   confirmMessage.value = `${settingType.value} ${MESSAGES.SETTING_NOT_SAVED}`;
 }
 
-const saveCbcCode = async () => {
-  try {
-    let result: ApiResponse<void>;
-
-    if (saveHttpType.value === 'post') {
-      result = await createCbcCodeRbcApi({ cbcCodeItems: cbcCodeArr.value });
-    } else {
-      const updateResult = await updateCbcCodeRbcApi({ cbcCodeItems: cbcCodeArr.value });
-
-      if (updateResult.data) {
-        showSuccessAlert(MESSAGES.UPDATE_SUCCESSFULLY);
-        await getImagePrintData();
-      } else {
-        showErrorAlert(MESSAGES.SETTING_UPDATE_FAILURE);
-      }
-      await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
-      await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
-      return;
-    }
-
-    if (result) {
-      showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
-      saveHttpType.value = 'put';
-      await getImagePrintData();
-      await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
-      await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
-    }
-  } catch (e) {
-    console.error(e);
-  }
-};
+// const saveCbcCode = async () => {
+//   try {
+//     let result: ApiResponse<void>;
+//
+//     if (saveHttpType.value === 'post') {
+          // createCBCRBC
+//     } else {
+          // updateRBC
+//
+//       if (updateResult.data) {
+//         showSuccessAlert(MESSAGES.UPDATE_SUCCESSFULLY);
+//         await getImagePrintData();
+//       } else {
+//         showErrorAlert(MESSAGES.SETTING_UPDATE_FAILURE);
+//       }
+//       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
+//       await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
+//       return;
+//     }
+//
+//     if (result) {
+//       showSuccessAlert(MESSAGES.SETTING_SAVE_SUCCESS);
+//       saveHttpType.value = 'put';
+//       await getImagePrintData();
+//       await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
+//       await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
+//     }
+//   } catch (e) {
+//     console.error(e);
+//   }
+// };
 
 const getImagePrintData = async () => {
   try {
-    const result = await getCbcCodeRbcApi();
+    const result = await { data: 'cbc' };
 
     if (result && result.data) {
       const data = result.data;

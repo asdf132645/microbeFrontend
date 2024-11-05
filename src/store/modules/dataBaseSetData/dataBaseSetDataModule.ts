@@ -19,12 +19,6 @@ interface WbcInfo {
     images: Image[];
 }
 
-interface RbcInfo {
-    categoryId: string;
-    categoryNm: string;
-    classInfo: ClassInfo[];
-}
-
 export interface SlotInfo {
     slotNo: string;
     barcodeNo: string;
@@ -50,7 +44,6 @@ export interface SlotInfo {
     path: string;
     isHighPowerScan: string;
     wbcInfo: WbcInfo[];
-    rbcInfo: RbcInfo[];
 }
 
 export interface DataBaseSetData {

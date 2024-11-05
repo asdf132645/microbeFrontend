@@ -5,7 +5,6 @@ import JoinView from '@/views/join/index.vue';
 import loginView from '@/views/login/index.vue';
 import setting from '@/views/setting/index.vue'
 import Database from '@/views/datebase/index.vue';
-import DatabaseRbc from '@/views/datebase/commponent/detail/rbc/listDetailRbc.vue';
 import Report from '@/views/datebase/commponent/detail/report/report.vue';
 import databaseDetail from '@/views/datebase/commponent/detail/classInfo/databaseDetail.vue';
 
@@ -49,11 +48,6 @@ const router = createRouter({
             path: '/databaseDetail/:id',
             name: 'databaseDetail',
             component: databaseDetail,
-        },
-        {
-            path: '/databaseRbc',
-            name: 'databaseRbc',
-            component: DatabaseRbc,
         },
         {
             path: '/report',

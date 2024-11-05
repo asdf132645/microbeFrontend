@@ -10,7 +10,6 @@ export interface CommonState {
     totalCount: string;
     embeddedNumber: string;
     isAlarm: boolean;
-    bfSelectFiles: any[];
     slideProceeding: string;
     totalSlideTime: string;
     iaRootPath: string;
@@ -25,17 +24,11 @@ export interface CommonState {
     slotIndex: number;
     viewerCheck: string;
     runningArr: any;
-    classArr: any[];
-    rbcArr: any[];
     processInfo: any[];
     orderList: any[];
     loginSetData: string;
     siteCd: string;
     deviceSerialNm: string;
-    cbcLayer: boolean;
-    rbcReData: boolean;
-    rbcInfoAfterData: any[];
-    resetRbcArr: boolean;
     selectedSampleId: string;
     classInfoArr: any[];
     dataBasePageReset: boolean;
@@ -54,7 +47,6 @@ export interface CommonState {
     isDownloadOrUploading: boolean;
     cellImageAnalyzedSetting: CellImgAnalyzedResponse;
     currentSelectItems: any;
-    currentImageIndex: number;
     currentImageName: string;
 }
 
@@ -68,7 +60,6 @@ interface CommonModule {
         setTotalCount: (state: CommonState, value: string) => void;
         setEmbeddedNumber: (state: CommonState, value: string) => void;
         setIsAlarm: (state: CommonState, value: boolean) => void;
-        setBfSelectFiles: (state: CommonState, value: []) => void;
         setSlideProceeding: (state: CommonState, value: string) => void;
         setTotalSlideTime: (state: CommonState, value: string) => void;
         setIaRootPath: (state: CommonState, value: string) => void;
@@ -85,17 +76,11 @@ interface CommonModule {
         setSlotIndex: (state: CommonState, value: number) => void;
         setViewerCheck: (state: CommonState, value: string) => void;
         setRunningArr: (state: CommonState, value: any) => void;
-        setClassArr: (state: CommonState, value: any[]) => void;
-        setRbcArr: (state: CommonState, value: any[]) => void;
         setProcessInfo: (state: CommonState, value: any[]) => void;
         setOrderList: (state: CommonState, value: any[]) => void;
         setLoginSetData: (state: CommonState, value: string) => void;
         setSiteCd: (state: CommonState, value: string) => void;
         setDeviceSerialNm: (state: CommonState, value: string) => void;
-        setCbcLayer: (state: CommonState, value: boolean) => void;
-        setRbcReData: (state: CommonState, value: boolean) => void;
-        setRbcInfoAfterData: (state: CommonState, value: any[]) => void;
-        setResetRbcArr: (state: CommonState, value: boolean) => void;
         setSelectedSampleId: (state: CommonState, value: string) => void;
         setClassInfoArr: (state: CommonState, value: any[]) => void;
         setDataBasePageReset: (state: CommonState, value: boolean) => void;
@@ -114,7 +99,6 @@ interface CommonModule {
         setIsDownloadOrUploading: (state: CommonState, value: boolean) => void;
         setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
         setCurrentSelectItems: (state: CommonState, value: any) => void;
-        setCurrentImageIndex: (state: CommonState, value: number) => void;
         setCurrentImageName: (state: CommonState, value: string) => void;
     };
     actions: {
@@ -131,7 +115,6 @@ export const commonModule: CommonModule = {
         totalCount: '',
         embeddedNumber: '',
         isAlarm: false,
-        bfSelectFiles: [],
         slideProceeding: '',
         totalSlideTime: '00:00:00',
         iaRootPath: 'D:\\MOIA_proc',
@@ -146,17 +129,11 @@ export const commonModule: CommonModule = {
         slotIndex: 0,
         viewerCheck: '',
         runningArr: [],
-        classArr: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-        rbcArr: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
         processInfo: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
         orderList: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
         loginSetData: '',
         siteCd: '',
         deviceSerialNm: '',
-        cbcLayer: false,
-        rbcReData: false,
-        rbcInfoAfterData: [],
-        resetRbcArr: false,
         selectedSampleId: '',
         classInfoArr:[],
         dataBasePageReset: false,
@@ -175,7 +152,6 @@ export const commonModule: CommonModule = {
         isDownloadOrUploading: false,
         cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
-        currentImageIndex: 0,
         currentImageName: '',
     }),
     mutations: {
@@ -196,9 +172,6 @@ export const commonModule: CommonModule = {
         },
         setIsAlarm(state: CommonState, value: boolean): void {
             state.isAlarm = value;
-        },
-        setBfSelectFiles(state: CommonState, value: any[]): void {
-            state.bfSelectFiles = value;
         },
         setSlideProceeding(state: CommonState, value: string): void {
             state.slideProceeding = value;
@@ -251,12 +224,6 @@ export const commonModule: CommonModule = {
         setRunningArr(state: CommonState, value: any[]): void {
             state.runningArr = value;
         },
-        setClassArr(state: CommonState, value: any[]): void {
-            state.classArr = value;
-        },
-        setRbcArr(state: CommonState, value: any[]): void {
-            state.rbcArr = value;
-        },
         setProcessInfo(state: CommonState, value: any[]): void {
             state.processInfo = value;
         },
@@ -274,18 +241,6 @@ export const commonModule: CommonModule = {
         },
         setSelectedSampleId(state: CommonState, value: string): void {
             state.selectedSampleId = value;
-        },
-        setCbcLayer(state: CommonState, value: boolean): void {
-            state.cbcLayer = value;
-        },
-        setRbcReData(state: CommonState, value: boolean): void {
-            state.rbcReData = value;
-        },
-        setResetRbcArr(state: CommonState, value: boolean): void {
-            state.resetRbcArr = value;
-        },
-        setRbcInfoAfterData(state: CommonState, value: any[]): void {
-            state.rbcInfoAfterData = value;
         },
         // classInfoArr
         setClassInfoArr(state: CommonState, value: any[]): void {
@@ -339,9 +294,6 @@ export const commonModule: CommonModule = {
         setCurrentSelectItems(state: CommonState, value: any): void {
             state.currentSelectItems = value;
         },
-        setCurrentImageIndex(state: CommonState, value: number): void {
-            state.currentImageIndex = value;
-        },
         setCurrentImageName(state: CommonState, value: string): void {
             state.currentImageName = value;
         }
@@ -368,9 +320,6 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('isAlarm')) {
                 commit('setIsAlarm', payload.isAlarm);
-            }
-            if (payload.hasOwnProperty('bfSelectFiles')) {
-                commit('setBfSelectFiles', payload.bfSelectFiles);
             }
             if (payload.hasOwnProperty('slideProceeding')) {
                 commit('setSlideProceeding', payload.slideProceeding);
@@ -420,12 +369,6 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('runningArr')) {
                 commit('setRunningArr', payload.runningArr);
             }
-            if (payload.hasOwnProperty('classArr')) {
-                commit('setClassArr', payload.classArr);
-            }
-            if (payload.hasOwnProperty('rbcArr')) {
-                commit('setRbcArr', payload.rbcArr);
-            }
             if (payload.hasOwnProperty('processInfo')) {
                 commit('setProcessInfo', payload.processInfo);
             }
@@ -443,18 +386,6 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('selectedSampleId')) {
                 commit('setSelectedSampleId', payload.selectedSampleId)
-            }
-            if (payload.hasOwnProperty('cbcLayer')) {
-                commit('setCbcLayer', payload.cbcLayer)
-            }
-            if (payload.hasOwnProperty('rbcReData')) {
-                commit('setRbcReData', payload.rbcReData)
-            }
-            if (payload.hasOwnProperty('rbcInfoAfterData')) {
-                commit('setRbcInfoAfterData', payload.rbcInfoAfterData)
-            }
-            if(payload.hasOwnProperty('resetRbcArr')) {
-                commit('setResetRbcArr', payload.resetRbcArr)
             }
             if(payload.hasOwnProperty('classInfoArr')) {
                 commit('setClassInfoArr', payload.classInfoArr)
@@ -506,9 +437,6 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('currentSelectItems')) {
                 commit('setCurrentSelectItems', payload.currentSelectItems);
-            }
-            if (payload.hasOwnProperty('currentImageIndex')) {
-                commit('setCurrentImageIndex', payload.currentImageIndex);
             }
             if (payload.hasOwnProperty('currentImageName')) {
                 commit('setCurrentImageName', payload.currentImageName);

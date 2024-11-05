@@ -3,7 +3,6 @@ import { Commit } from 'vuex';
 
 interface ExecuteState {
     analysisType: string;
-    wbcDiffVal: string;
     stitchCount: string;
 }
 
@@ -26,7 +25,6 @@ export const executeModule: ExecuteModule = {
     namespaced: true, // 네임스페이스 추가
     state: () => ({
         analysisType: '',
-        wbcDiffVal: '100',
         stitchCount: '',
     }),
     mutations: {

@@ -1,8 +1,7 @@
 <template>
 
   <ClassInfoMenu @refreshClass="refreshClass"/>
-  <div :class="'reportSection' + (cbcLayer ? ' cbcLayer' : '')">
-    <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
+  <div class="reportSection">
     <div class="reportDiv">
       <div class="databaseDetailLeft shadowBox">
         <ClassInfo type='report' @submitStateChanged="submitStateChanged" :isCommitChanged="isCommitChanged"/>
@@ -95,25 +94,18 @@
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
 import { computed, getCurrentInstance, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import {getTestTypeText, getTotalCountOfClassInfo} from "@/common/lib/utils/conversionDataUtils";
-import { defaultWbcClassList, WbcInfo } from "@/store/modules/analysis/wbcclassification";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
 import router from "@/router";
 import {useStore} from "vuex";
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
-import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
-import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
-import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
-import {ClassInfoType} from "@/common/api/service/runningInfo/dto/runningInfoDto";
 import {MAP_CLASS_ID_TO_CLASS_NM, MO_TEST_TYPE} from "@/common/defines/constFile/dataBase";
 
-const getCategoryName = (category: WbcInfo) => category?.name;
 const store = useStore();
 
 const moInfo = ref<any>(null);
 const printOnOff = ref(false);
 const siteCd = computed(() => store.state.commonModule.siteCd);
-const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId)
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);

@@ -219,7 +219,7 @@ watch(() => selectItems.value, async (newSelectItems) => {
   if (!isObjectEmpty(newSelectItems)) {
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
     getTotalMoInfo(newSelectItems);
-    memo.value = selectItems.value?.moMemo;
+    memo.value = selectItems.value?.memo;
     /** TODO 바코드 이미지 */
     // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
 
@@ -292,8 +292,8 @@ const onCommit = async () => {
 }
 
 const memoChange = async () => {
-  const enterAppliedMoMemo = memo.value.replaceAll('\r\n', '<br>');
-  const updatedItem = { moMemo: enterAppliedMoMemo };
+  const enterAppliedmemo = memo.value.replaceAll('\r\n', '<br>');
+  const updatedItem = { memo: enterAppliedmemo };
   const result: any = await detailRunningApi(String(selectItems.value?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
 
@@ -367,7 +367,7 @@ const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
       if (!noAlert) {
         showSuccessAlert(MESSAGES.SUCCESS_ALERT);
       }
-      memo.value = updatedRuningInfo.moMemo;
+      memo.value = updatedRuningInfo.memo;
     } else {
       console.error('백엔드가 디비에 저장 실패함');
     }

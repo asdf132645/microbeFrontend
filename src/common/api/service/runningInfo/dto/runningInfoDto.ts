@@ -15,14 +15,13 @@ interface RunningInfoRequest {
     testType: string;
     analyzedDttm: string;
     tactTime: string;
-    totalMoCount: string;
     cassetId: string;
     isNormal: boolean;
-    moInfo: MoInfo[];
+    classInfo: ClassInfo[];
     submitState: string;
     submitOfDate: Date;
     submitUserId: string;
-    moMemo: string;
+    memo: string;
     pcIp: string;
     cbcPatientNo: string;
     cbcPatientNm: string;
@@ -46,14 +45,13 @@ interface RunningInfoResponse {
     testType: string;
     analyzedDttm: string;
     tactTime: string;
-    totalMoCount: string;
     cassetId: string;
     isNormal: boolean;
-    moInfo: MoInfo[];
+    classInfo: ClassInfo[];
     submitState: string;
     submitOfDate: Date;
     submitUserId: string;
-    moMemo: string;
+    memo: string;
     pcIp: string;
     cbcPatientNo: string;
     cbcPatientNm: string;
@@ -62,7 +60,7 @@ interface RunningInfoResponse {
     img_drive_root_path: string;
 }
 
-interface MoInfo {
+interface ClassInfo {
     id: string;
     name?: string;
     classInfo: ClassInfoType[];

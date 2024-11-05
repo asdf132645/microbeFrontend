@@ -70,7 +70,7 @@ import {
   BLOOD_TOTAL_CLASS_IDS,
   BLOOD_HIGH_POWER_CLASS_IDS,
   SPUTUM_TOTAL_CLASS_IDS,
-  SPUTUM_HIGH_POWER_CLASS_IDS, SPUTUM_LOW_POWER_CLASS_IDS
+  SPUTUM_HIGH_POWER_CLASS_IDS, SPUTUM_LOW_POWER_CLASS_IDS, LOW_POWER_CLASS_IDS, HIGH_POWER_CLASS_IDS
 } from "@/common/defines/constFile/dataBase";
 import {DEFAULT_SLOT_INFO} from "@/common/defines/constFile/analysis";
 
@@ -112,7 +112,6 @@ const siteCd = computed(() => store.state.commonModule.siteCd);
 const isDownloadOrUploading = computed(() => store.state.commonModule.isDownloadOrUploading);
 
 const runningArr: any = ref<any>([]);
-const classArr = ref<any>([]);
 const viewerCheckApp = ref('');
 const parsedDataProps = ref<any>({});
 const startStatus = ref(false);
@@ -703,22 +702,21 @@ const sendMessage = async (payload: any) => {
   deleteData.value = true;
 };
 
-const convertMoInfo = (cassetType: string, moInfo: any) => {
+const convertMoInfo = (cassetteType: string, moInfo: any) => {
   const convertedMoInfo = [];
 
   for (const moItem of moInfo) {
-    const validClassIds = getValidClassIds(cassetType, moItem.id);
-    console.log('validClassIds', moItem.id);
+    const validClassIds = getValidClassIds(cassetteType, moItem.id);
     const updatingClassInfo = moItem.classInfo
         .filter((moClassInfoItem: {classId: string; count: number }) => validClassIds.includes(moClassInfoItem.classId))
         .map((moClassInfoItem: { classId: string; count: number }) => ({
-          count: moClassInfoItem.count,
+          count: calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType),
           classId: moClassInfoItem.classId,
-          beforeGrade: setMoInfoGrade(cassetType, moClassInfoItem.classId, moClassInfoItem.count),
-          afterGrade: setMoInfoGrade(cassetType, moClassInfoItem.classId, moClassInfoItem.count)
+          beforeGrade: setMoInfoGrade(cassetteType, moClassInfoItem.classId, calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType)),
+          afterGrade: setMoInfoGrade(cassetteType, moClassInfoItem.classId, calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType))
         }))
 
-    if (cassetType === 'SPUTUM') {
+    if (cassetteType === MO_TEST_TYPE.SPUTUM) {
       // Sputum Gram 계산을 위한 WBC, EP Cell Count 추출
       const wbcCount = moItem.classInfo.find((item: any) => item.classId === CLASS_INFO_ID.WBC)?.count || 0;
       const epCellCount = moItem.classInfo.find((item: any) => item.classId === CLASS_INFO_ID.EP_CELL)?.count || 0;
@@ -738,10 +736,32 @@ const convertMoInfo = (cassetType: string, moInfo: any) => {
       classInfo: updatingClassInfo
     }
     convertedMoInfo.push(updatedMoInfoItem);
-    console.log('convertedMoInfo', convertedMoInfo);
   }
   return convertedMoInfo;
 };
+
+const calcCount = (totalLPCount: number, totalHPCount: number, count: number, id: string, classId: string, cassetteType: string) => {
+  if (id === '2') {
+    switch (cassetteType) {
+      case MO_TEST_TYPE.URINE:
+        if (URINE_LOW_POWER_CLASS_IDS.includes(classId)) {
+          return Number(count / totalLPCount);
+        }
+        return Number(count / totalHPCount);
+      case MO_TEST_TYPE.SPUTUM:
+        if (SPUTUM_LOW_POWER_CLASS_IDS.includes(classId)) {
+          return Number(count / totalLPCount);
+        }
+        return Number(count / totalHPCount);
+      case MO_TEST_TYPE.BLOOD:
+        if (BLOOD_LOW_POWER_CLASS_IDS.includes(classId)) {
+          return Number(count / totalLPCount);
+        }
+        return Number(count / totalHPCount);
+    }
+  }
+  return Number(count);
+}
 
 const getValidClassIds = (cassetType: string, classId: string) => {
   switch (cassetType) {

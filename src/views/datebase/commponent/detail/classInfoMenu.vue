@@ -22,10 +22,6 @@
         <p>REPORT</p>
       </li>
     </ul>
-<!--    <div @click="lisCbcClick" :class='{ "onRight": cbcLayer, "cbcLi": true }'>-->
-<!--      <font-awesome-icon :icon="['fas', 'desktop']"/>-->
-<!--      <p>LIS-CBC</p>-->
-<!--    </div>-->
     <div class="wbcMenuBottom">
       <button @click="moveWbc('up')" :disabled="isButtonDisabled">
         <font-awesome-icon :icon="['fas', 'circle-up']"/>
@@ -80,9 +76,7 @@ const alertType = ref('');
 const alertMessage = ref('');
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const resData = ref<any>([]);
-const wbcInfo = ref<any>([]);
 
-const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const isButtonDisabled = ref(false);
 let timeoutId: number | undefined = undefined;
 const pageMoveDeleteStop = ref(false);
@@ -109,7 +103,6 @@ onUnmounted(async () => {
   if (pageMoveDeleteStop.value) {
     await deleteConnectionStatus();
   }
-  await store.dispatch('commonModule/setCommonInfo', {cbcLayer: false});
 })
 
 watch(props.isNext, (newVal) => {
@@ -179,7 +172,6 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
 };
 
 const pageGo = async (path: string) => {
-  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   router.push(path);
   pageMoveDeleteStop.value = false;
@@ -219,7 +211,6 @@ const moveWbc = async (direction: any) => {
     }
   }
 
-  store.dispatch('commonModule/setCommonInfo', {cbcLayer: false});
   if (timeoutId !== undefined) {
     clearTimeout(timeoutId);
   }
@@ -260,10 +251,5 @@ const updateUpDown = async (selectItemsNewVal: any) => {
 const isActive = (path: string) => {
   return route.fullPath.includes(path);
 };
-
-const lisCbcClick = () => {
-  //
-  store.dispatch('commonModule/setCommonInfo', {cbcLayer: !cbcLayer.value});
-}
 
 </script>

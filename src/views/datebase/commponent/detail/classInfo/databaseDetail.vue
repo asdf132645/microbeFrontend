@@ -12,13 +12,12 @@
         :cbcSex="selectItems?.cbcSex"
         :cbcAge="selectItems?.cbcAge"
     />
-    <LisCbc v-if="cbcLayer" :selectItems="selectItems"/>
-    <div :class="'databaseDetailLeft shadowBox' + (cbcLayer ? ' cbcLayer' : '')">
+    <div class="databaseDetailLeft shadowBox">
         <ClassInfo type='listTable' @nextPage="nextPage" />
     </div>
 
 
-    <div :class="'databaseDetailRight' + (cbcLayer ? ' cbcLayer' : '')">
+    <div class="databaseDetailRight">
       <ClassImageInfo />
     </div>
   </div>
@@ -44,7 +43,6 @@ import { useQuery } from "@vue/apollo-composable";
 import { GetRunningInfoByIdDocument } from "@/gql";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
-import LisCbc from "@/views/datebase/commponent/detail/lisCbc.vue";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassImageInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classImageInfo.vue";
 import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
@@ -58,7 +56,6 @@ const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
-const cbcLayer = computed(() => store.state.commonModule.cbcLayer);
 const iaRootPath = ref<string>(store.state.commonModule.iaRootPath);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const instance = getCurrentInstance();
@@ -68,7 +65,6 @@ const alertType = ref('');
 const alertMessage = ref('');
 
 onMounted(async () => {
-  await store.dispatch('commonModule/setCommonInfo', { currentImageIndex: 0 });
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   await getDetailRunningInfo();
   wbcInfo.value = [];
