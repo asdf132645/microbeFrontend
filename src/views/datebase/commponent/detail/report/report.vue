@@ -56,7 +56,7 @@
         </div>
         <div :class="['reportDivBottom', selectItems.testType !== '04' && 'reportDiff']">
           <div class="wbcLeft">
-            <h3 class="reportH3 mb1 pl0">{{ classTileChange() }} result</h3>
+            <h3 class="reportH3 mb10 pl0">{{ classTileChange() }} result</h3>
             <table class="tableClass mt22">
               <colgroup>
                 <col width="40%">

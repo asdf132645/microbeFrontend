@@ -1,22 +1,17 @@
 // commonModule.ts
-import {Commit} from 'vuex';
-import {CellImgAnalyzedResponse} from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
-import {DEFAULT_CELL_IMAGE_ANALYZED} from "@/common/defines/constFile/settings/settings";
+import { Commit } from 'vuex';
+import { CellImgAnalyzedResponse } from "@/common/api/service/setting/dto/cellImgAnalyzedDto";
+import { DEFAULT_CELL_IMAGE_ANALYZED } from "@/common/defines/constFile/settings/settings";
 
 export interface CommonState {
     startEmbedded: boolean;
     eqStatCd: number;
     isRunningState: boolean;
     totalCount: string;
-    embeddedNumber: string;
     isAlarm: boolean;
-    slideProceeding: string;
     totalSlideTime: string;
     iaRootPath: string;
     runningSlotId: string;
-    isRequestInProgress: boolean;
-    startInfoBoolen: boolean;
-    runningInfoBoolen: boolean;
     runningInfoStop: boolean;
     reqArr: any[];
     resFlag: boolean;
@@ -58,15 +53,10 @@ interface CommonModule {
         setEqStatCd: (state: CommonState, value: number) => void;
         setIsRunningState: (state: CommonState, value: boolean) => void;
         setTotalCount: (state: CommonState, value: string) => void;
-        setEmbeddedNumber: (state: CommonState, value: string) => void;
         setIsAlarm: (state: CommonState, value: boolean) => void;
-        setSlideProceeding: (state: CommonState, value: string) => void;
         setTotalSlideTime: (state: CommonState, value: string) => void;
         setIaRootPath: (state: CommonState, value: string) => void;
         setRunningSlotId: (state: CommonState, value: string) => void;
-        setIsRequestInProgress: (state: CommonState, value: boolean) => void;
-        setStartInfoBoolen: (state: CommonState, value: boolean) => void;
-        setRunningInfoBoolen: (state: CommonState, value: boolean) => void;
         setRunningInfoStop: (state: CommonState, value: boolean) => void;
         setReqArr: (state: CommonState, value: string[]) => void;
         shiftReqArr: (state: CommonState) => void;
@@ -113,15 +103,10 @@ export const commonModule: CommonModule = {
         eqStatCd: 0,
         isRunningState: false,
         totalCount: '',
-        embeddedNumber: '',
         isAlarm: false,
-        slideProceeding: '',
         totalSlideTime: '00:00:00',
         iaRootPath: 'D:\\MOIA_proc',
         runningSlotId: '',
-        isRequestInProgress: false,
-        startInfoBoolen: false,
-        runningInfoBoolen: false,
         runningInfoStop: false,
         reqArr: [],
         resFlag: true,
@@ -167,14 +152,8 @@ export const commonModule: CommonModule = {
         setTotalCount(state: CommonState, value: string): void {
             state.totalCount = value;
         },
-        setEmbeddedNumber(state: CommonState, value: string): void {
-            state.embeddedNumber = value;
-        },
         setIsAlarm(state: CommonState, value: boolean): void {
             state.isAlarm = value;
-        },
-        setSlideProceeding(state: CommonState, value: string): void {
-            state.slideProceeding = value;
         },
         setTotalSlideTime(state: CommonState, value: string): void {
             state.totalSlideTime = value;
@@ -184,15 +163,6 @@ export const commonModule: CommonModule = {
         },
         setRunningSlotId(state: CommonState, value: string): void {
             state.runningSlotId = value;
-        },
-        setIsRequestInProgress(state: CommonState, value: boolean): void {
-            state.isRequestInProgress = value;
-        },
-        setStartInfoBoolen(state: CommonState, value: boolean): void {
-            state.startInfoBoolen = value;
-        },
-        setRunningInfoBoolen(state: CommonState, value: boolean): void {
-            state.runningInfoBoolen = value;
         },
         setRunningInfoStop(state: CommonState, value: boolean): void {
             state.runningInfoStop = value;
@@ -315,14 +285,8 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('totalCount')) {
                 commit('setTotalCount', payload.totalCount);
             }
-            if (payload.hasOwnProperty('embeddedNumber')) {
-                commit('setEmbeddedNumber', payload.embeddedNumber);
-            }
             if (payload.hasOwnProperty('isAlarm')) {
                 commit('setIsAlarm', payload.isAlarm);
-            }
-            if (payload.hasOwnProperty('slideProceeding')) {
-                commit('setSlideProceeding', payload.slideProceeding);
             }
             if (payload.hasOwnProperty('totalSlideTime')) {
                 commit('setTotalSlideTime', payload.totalSlideTime);
@@ -332,15 +296,6 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('runningSlotId')) {
                 commit('setRunningSlotId', payload.runningSlotId);
-            }
-            if (payload.hasOwnProperty('isRequestInProgress')) {
-                commit('setIsRequestInProgress', payload.isRequestInProgress);
-            }
-            if (payload.hasOwnProperty('startInfoBoolen')) {
-                commit('setStartInfoBoolen', payload.startInfoBoolen);
-            }
-            if (payload.hasOwnProperty('runningInfoBoolen')) {
-                commit('setRunningInfoBoolen', payload.runningInfoBoolen);
             }
             if (payload.hasOwnProperty('runningInfoStop')) {
                 commit('setRunningInfoStop', payload.runningInfoStop);

@@ -7,20 +7,16 @@
     width: 100%;
 }
 
-.mt1 {
+.mt10 {
     margin-top: 10px;
-}
-
-.mt2 {
-    margin-top: 20px;
-}
-
-.mt4 {
-    margin-top: 4px;
 }
 
 .mt12 {
     margin-top: 12px;
+}
+
+.mt20 {
+    margin-top: 20px;
 }
 
 .mt22 {
@@ -55,7 +51,7 @@
     margin-left: 320px;
 }
 
-.mb1 {
+.mb10 {
     margin-bottom: 10px;
 }
 
@@ -63,12 +59,8 @@
     margin-bottom: 14px;
 }
 
-.mb2 {
+.mb20 {
     margin-bottom: 20px;
-}
-
-.mb3 {
-    margin-bottom: 30px;
 }
 
 .mb4 {
@@ -387,13 +379,6 @@ main.bmComponent {
     background: var(--main-bg-5-color);
 }
 
-.toggleHeadBtn {
-    background: var(--coral-bg-5-color);
-    color: var(--white-color);
-    padding: 10px;
-    cursor: pointer;
-}
-
 .appHeaderLeft {
     height: 100%;
     background: var(--main-bg-2-color);
@@ -416,17 +401,6 @@ main.bmComponent {
 
 .openDriveIcon:hover {
     transform: scale(1.2);
-}
-
-.arrowBox {
-    border: 1px solid var(--white-color);
-    padding: 4px;
-    cursor: pointer;
-}
-
-.arrowBox:hover {
-    background: black;
-    color: white;
 }
 
 .loadingBackground {
@@ -1006,10 +980,6 @@ ul.degree.analysis {
     width: 22%;
 }
 
-.categories.rbcClass > .degree > li > span > svg {
-    margin-right: 5px;
-}
-
 button.degreeAllCheckBtn {
     background: none;
     color: var(--main-bg-5-color);
@@ -1025,14 +995,6 @@ button.degreeAllCheckBtn {
 
 .analysisWbc .categories > ul > li {
     height: 14px;
-}
-
-.categories.rbcClass > .degree > li > span {
-    font-size: 0.9rem;
-}
-
-.categories.rbcClass ul.degree.analysis {
-    width: 32%;
 }
 
 .defaultText {
@@ -1261,20 +1223,6 @@ p.loadingText {
     padding-bottom: 10px;
 }
 
-.categories.rbcClass > .degree > li > .rbcSapn {
-    position: absolute;
-    top: 4px;
-    height: 8px;
-    z-index: 80;
-    overflow: hidden;
-}
-
-.classNmRbc {
-    display: inline-block;
-    text-align: left;
-    min-width: 128px;
-}
-
 .degree {
     display: inline-block;
     width: 9%;
@@ -1418,21 +1366,6 @@ ul.nth1Child > :nth-child(3) {
     cursor: pointer;
 }
 
-span.rbcSapnDown {
-    position: absolute;
-    left: 0;
-    top: 6px;
-
-}
-
-
-.databaseWbcRight.cbcLayer ul.leftWbcInfo.rbcClass {
-    width: 58%;
-}
-
-.databaseWbcRight.cbcLayer ul.leftWbcInfo {
-    width: 54%;
-}
 
 .sensitivityDiv .slider-container {
     /*width: 45%;*/
@@ -1460,26 +1393,11 @@ span.rbcSapnDown {
     margin-top: 5px;
 }
 
-ul.leftWbcInfo.rbcClass {
-    width: 65%;
-}
-
-span.rbcSapnDown .degreeActive {
-    color: var(--blue-bg-0-color);
-}
-
 .categories > ul > li > span {
     display: inline-block;
     vertical-align: middle;
     min-width: 56%;
     font-size: 0.7rem;
-}
-
-.categories.rbcClass > ul > li > span {
-    min-width: 74%;
-    font-size: 0.8rem;
-    vertical-align: sub;
-    cursor: pointer;
 }
 
 .categories > ul > li > div > input {
@@ -1531,14 +1449,6 @@ button.degreeBtn {
     cursor: pointer;
 }
 
-.categories.rbcClass > ul > li {
-    height: 20px;
-}
-
-.categories.rbcClass .categoryNm {
-    width: 20%;
-}
-
 .overlay-element {
     background: none transparent;
     border: none;
@@ -1562,7 +1472,7 @@ ul.slideContent.pb100a {
     margin-right: 2px;
 }
 
-li.mb1.liTitle {
+li.mb10.liTitle {
     font-weight: 600;
     margin-top: 20px;
 }
@@ -1990,14 +1900,6 @@ input.alarmInput {
     margin: 0px 5px;
 }
 
-.rbcClassListArr {
-    vertical-align: top;
-    font-size: 1rem;
-    /* display: flex; */
-    justify-content: space-between;
-    align-items: center;
-}
-
 .settingTabSubButtons {
     display: flex;
     justify-content: center;
@@ -2413,21 +2315,6 @@ ul.cellImgBox input {
     width: 13px;
 }
 
-.reportSection.cbcLayer {
-    display: inline-flex;
-}
-
-.reportSection.cbcLayer .reportDiv {
-    width: 82.5%;
-    padding-left: 8px;
-}
-
-.reportSection.cbcLayer .cbcDiv {
-    margin-top: 10px;
-    height: 91vh;
-    margin-left: 30px;
-}
-
 .customImgSet.rgb > input {
     width: 17%;
 }
@@ -2458,10 +2345,6 @@ ul.cellImgBox input {
     width: 23%;
     display: inline-block;
     vertical-align: middle;
-}
-
-.reportSection.cbcLayer ul.leftWbcInfo {
-    width: 50%;
 }
 
 ul.leftWbcInfo li {
@@ -2577,13 +2460,6 @@ button.searchClass:hover {
 
 li.onRight {
     color: var(--coral-bg-0-color);
-}
-
-.rbcRight {
-    display: inline-block;
-    vertical-align: top;
-    width: 49%;
-    margin-left: 10px;
 }
 
 table.reportTable {
@@ -3096,11 +2972,6 @@ table.tableClass {
     padding-top: 10px;
 }
 
-/*.downloadDeleteContainer p {*/
-/*    font-weight: bold;*/
-/*    margin-bottom: 10px;*/
-/*}*/
-
 .memoModal {
     position: absolute;
     left: 0;
@@ -3157,55 +3028,6 @@ ul.editOrder li input {
 
 .alignDiv > label > input, .alignDiv > ul > li > input {
     width: 200px;
-}
-
-.rbcDiv {
-    width: 28%;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-ul.normalItems {
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-ul.normalItems li {
-    display: inline-block;
-    margin: 10px;
-    max-width: 584px;
-    font-size: 0.8rem;
-    width: 100%;
-}
-
-ul.normalItems li div {
-    display: block;
-    width: 100%;
-}
-
-ul.normalItems li div span {
-    display: inline-block;
-    width: 41%;
-    margin-right: 21px;
-}
-
-ul.normalItems li div span:last-child {
-    width: 5%;
-}
-
-.bmclass {
-    width: 74% !important;
-    min-height: 67vh;
-    text-align: left;
-    justify-content: flex-start;
-    padding: 4px 0;
-}
-
-
-.bmclass > div {
-    width: 600px;
 }
 
 .titleText {
@@ -3628,91 +3450,10 @@ button.rollbackButton {
     overflow: hidden;
 }
 
-.cbcDiv {
-    display: inline-block;
-    width: 15%;
-    margin-left: 8px;
-    background: var(--main-bg-2-color);
-    border: 1px solid var(--white-color);
-    height: 94%;
-    margin-right: 4px;
-    position: relative;
-}
-.loaderBackground.cbc .loader {
-    width: 50px;
-    height: 50px;
-    left: 36%;
-}
-.loaderBackground.cbc p.loadingText {
-    top: 57%;
-    left: 38%;
-}
-
-.databaseWbcRight.cbcLayer {
-    width: 24%;
-}
-
-.databaseWbcLeft.cbcLayer {
-    width: 56%;
-}
-
-h1.titleCbc {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    font-size: 1.3rem;
-}
-
-li.cbcLi {
-    margin-top: 40px;
-}
-
-.cbcLi {
-    position: absolute;
-    bottom: 100px;
-    left: 36px;
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-.cbcLi svg {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
 p.menuIco {
     font-size: 1.2rem;
     margin-bottom: 10px;
 }
-
-.onRight.cbcLi {
-    color: var(--coral-bg-0-color);
-}
-
-.rbc-select-box {
-    position: absolute;
-    z-index: 99999;
-    background: var(--white-color);
-    color: var(--black-color);
-    min-width: 195px;
-    height: 300px;
-    overflow-y: scroll;
-}
-
-table.cbcTable {
-    text-align: left;
-}
-
-.cbcDivWarp {
-    overflow-y: scroll;
-    height: 82vh;
-}
-
-table.cbcTable td {
-    padding: 9px;
-    font-size: 0.8rem;
-    border-bottom: 1px solid #dedede;
-}
-
 
 .half-circle {
     clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
@@ -3739,24 +3480,6 @@ table.cbcTable td {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.rbcPercent {
-    width: 13%;
-}
-
-.createdRbc {
-    position: absolute;
-    z-index: 99999;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    padding-top: 28%;
-    background: var(--main-bg-3-color);
-    font-size: 2rem;
-    margin: auto;
-    text-align: center;
-}
-
 .layer-header {
     display: flex;
     justify-content: space-between;
@@ -3774,46 +3497,6 @@ table.cbcTable td {
     flex-direction: column;
     color: var(--white-color);
     font-size: 0.8rem;
-}
-
-.printRbcCategory {
-    width: 21%;
-}
-
-.printRbcClass {
-    width: 27%;
-}
-
-.printRbcDegree {
-    width: 10%;
-}
-
-.printRbcCount {
-    width: 10%;
-}
-
-.printRbcPercent {
-    width: 10%;
-}
-
-.printTotalText {
-    font-weight: bold;
-}
-
-.malariaTitle {
-    font-weight: 600;
-    font-size: 17px;
-    margin: 20px 0px 8px 4px;
-    text-align: left;
-    width: fit-content;
-}
-
-.malariaWrapper {
-    text-align: left;
-    overflow: auto;
-    height: 400px;
-    /*box-shadow: 2px 2px 2px var(--black-color);*/
-    border: 1px solid var(--gray-bg-8-color);
 }
 
 .classDetailInfoWrapper {

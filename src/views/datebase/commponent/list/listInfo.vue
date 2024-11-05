@@ -6,20 +6,20 @@
       <div class="orderListWrapper" style="padding: 0;">
         <ul class="orderListUi">
           <li class="flexColumn">
-            <span class="mb1">Order ID:</span>
-            <span class="mb2">{{ selectedItem?.slotId }}</span>
+            <span class="mb10">Order ID:</span>
+            <span class="mb20">{{ selectedItem?.slotId }}</span>
           </li>
           <li class="flexColumn">
-            <span class="mb1">Cassette ID:</span>
-            <span class="mb2">{{ selectedItem?.cassetId.split('_')[0] }}</span>
+            <span class="mb10">Cassette ID:</span>
+            <span class="mb20">{{ selectedItem?.cassetId.split('_')[0] }}</span>
           </li>
           <li class="flexColumn">
-            <span class="mb1">Patient ID:</span>
-            <span class="mb2">{{ selectedItem?.patientId }}</span>
+            <span class="mb10">Patient ID:</span>
+            <span class="mb20">{{ selectedItem?.patientId }}</span>
           </li>
           <li class="flexColumn">
-            <span class="mb1">Patient Name:</span>
-            <span class="mb2">{{ selectedItem?.patientNm }}</span>
+            <span class="mb10">Patient Name:</span>
+            <span class="mb20">{{ selectedItem?.patientNm }}</span>
           </li>
         </ul>
         <div>

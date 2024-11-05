@@ -1,7 +1,7 @@
 <template>
-  <img class="mt1" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
-  <div class="mt1" v-else-if="barCodeImageShowError" style="height: 209.5px;"></div>
-  <div class="mt1 mb2 flex-justify-between">
+  <img class="mt10" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
+  <div class="mt10" v-else-if="barCodeImageShowError" style="height: 209.5px;"></div>
+  <div class="mt10 mb20 flex-justify-between">
     <h3 class="wbcClassInfoLeft">{{ currentAnalysisType }} Classification</h3>
 
     <ul class="leftWbcInfo">

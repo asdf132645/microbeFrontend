@@ -426,7 +426,6 @@ async function socketData(data: any) {
 
     async function runnComp(data: any) {
       await store.dispatch('commonModule/setCommonInfo', {runningInfoStop: true});
-      await store.dispatch('commonModule/setCommonInfo', {embeddedNumber: String(data?.iCasStat)});
       await store.dispatch('commonModule/setCommonInfo', {startEmbedded: false});
       await store.dispatch('commonModule/setCommonInfo', {isRunningState: false}); // 시스템이 돌아가는 상태를 알려준다.
       await store.dispatch('commonModule/setCommonInfo', {isAlarm: true}); // 알람을 킨다.
@@ -465,9 +464,6 @@ async function socketData(data: any) {
 
         if (iCasStatArr.lastIndexOf("2") !== -1) {
           await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: true});
-        }
-        if (data?.iCasStat.indexOf("2") !== -1) {
-          await store.dispatch('commonModule/setCommonInfo', {slideProceeding: data?.iCasStat.indexOf("2")});
         }
 
         if (machineVersion.value === '100a') {

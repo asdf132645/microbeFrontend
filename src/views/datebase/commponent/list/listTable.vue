@@ -3,7 +3,7 @@
 <!--    <div class="loader"></div>-->
 <!--    <p class="loadingText">Loading...</p>-->
 <!--  </div>-->
-  <table class='defaultTable mt2 dbDataTable' ref="scrollableDiv">
+  <table class='defaultTable mt20 dbDataTable' ref="scrollableDiv">
     <colgroup>
       <col width="3%"/>
       <col width="3%"/>
@@ -147,7 +147,7 @@
           </li>
           <li v-if="!barCodeImageShowError">
             <p>Barcode Image</p>
-            <img class="mt1" :src="barcodeImg" @error="onImageError"/>
+            <img class="mt10" :src="barcodeImg" @error="onImageError"/>
           </li>
         </ul>
 <!--      </div>-->

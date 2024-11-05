@@ -2,13 +2,13 @@
   <div class="alignDiv" style="text-align: center">
     <ul>
       <li>
-        <p class="mb2 mt2">CBC File Path</p>
+        <p class="mb20 mt20">CBC File Path</p>
         <input type="text" :value="filePathSetArr[0] ? filePathSetArr[0].cbcFilePath : ''"
                @input="updateCbcFilePath($event, 0)">
       </li>
     </ul>
   </div>
-  <div class="mt1">
+  <div class="mt10">
     <button class="saveBtn" type="button" @click="saveFilePathSet()">Save</button>
   </div>
 

@@ -81,9 +81,9 @@
     <!-- 컨텐츠 슬롯에 들어갈 내용 -->
     <template #content>
       <div class="immersionOilContainer">
-        <h5 class="modalTitle mb1">Immersion Oil count Reset</h5>
+        <h5 class="modalTitle mb10">Immersion Oil count Reset</h5>
         <span class="grayText">Reset Immersion Oil count after changing Oil pack</span>
-        <div class="flex-justify-between flex-align-center mt1">
+        <div class="flex-justify-between flex-align-center mt10">
           <span>Estimated number of slides left</span>
           <span class="f18">{{ oilCount }}</span>
         </div>
@@ -98,9 +98,9 @@
         </div>
       </div>
 
-      <div class='mt2'>
-        <h5 class="modalTitle mb1">Prime Immersion Oil</h5>
-        <span class="grayText mt1">Prime oil to remove air from the oil hose</span>
+      <div class='mt20'>
+        <h5 class="modalTitle mb10">Prime Immersion Oil</h5>
+        <span class="grayText mt10">Prime oil to remove air from the oil hose</span>
         <div class="flex-column-align-end">
           <div class="statusBarWrapper">
           </div>
