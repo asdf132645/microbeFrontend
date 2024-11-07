@@ -44,24 +44,25 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
-
-import {useStore} from "vuex";
-import { LP_CAPTURE_OPTIONS } from '@/common/defines/constFile/analysis';
+import { useStore } from "vuex";
+import { LP_CAPTURE_OPTIONS } from '@/common/defines/constFile/analysis/analysis';
 import { MESSAGES } from '@/common/defines/constFile/constantMessageText';
 import { tcpReq } from '@/common/tcpRequest/tcpReq';
 import { getCellImgApi } from "@/common/api/service/setting/settingApi";
 import EventBus from "@/eventBus/eventBus";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
-import {getDeviceInfoApi} from "@/common/api/service/device/deviceApi";
+import { getDeviceInfoApi } from "@/common/api/service/device/deviceApi";
 
 
 const store = useStore();
+const emits = defineEmits();
 const embeddedStatusJobCmd = computed(() => store.state.embeddedStatusModule);
 const userModuleDataGet = computed(() => store.state.userModule);
-
+const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const runInfo = computed(() => store.state.commonModule);
 const executeState = computed(() => store.state.executeModule);
+const commonDataGet = computed(() => store.state.commonModule);
 const isPause = ref(runInfo.value?.isPause);
 const isRunningState = ref(executeState.value?.isRunningState);
 const userStop = ref(embeddedStatusJobCmd.value?.userStop);
@@ -69,48 +70,29 @@ const isRecoveryRun = ref(embeddedStatusJobCmd.value?.isRecoveryRun);
 const isInit = ref(embeddedStatusJobCmd.value?.isInit);
 const userId = ref('');
 const analysisType = ref();
-const commonDataGet = computed(() => store.state.commonModule);
 const showStopBtn = ref(false);
 const btnStatus = ref('');
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const testTypeArr = ref<any>([]);
-const emits = defineEmits();
 const showConfirm = ref(false);
 const confirmType = ref('');
 const confirmMessage = ref('');
 const siteCd = ref('');
 const lpCaptureCount = ref('20');
-const lpCaptureCountType = ref<any>([]);
+const lpCaptureCountType = LP_CAPTURE_OPTIONS;
 
-watch(userModuleDataGet.value, async (newUserId, oldUserId) => {
+onMounted(async () => {
+  await initDataExecute();
+});
+
+watch(userModuleDataGet.value, async (newUserId) => {
   if (newUserId.id === '') {
     return;
   }
   userId.value = newUserId.id;
   await initDataExecute();
 });
-
-onMounted(async () => {
-  await initDataExecute();
-});
-
-const initDataExecute = async () => {
-  lpCaptureCountType.value = LP_CAPTURE_OPTIONS;
-
-  await nextTick();
-  await cellImgGet();
-  await getDeviceInfo();
-  await initData();
-  if (isRunningState.value) {
-    btnStatus.value = 'isRunning';
-    showStopBtn.value = false;
-  } else {
-    btnStatus.value = 'start';
-    showStopBtn.value = true;
-  }
-}
 
 watch(commonDataGet.value, (value) => {
   if (value.loginSetData === '') {
@@ -168,18 +150,33 @@ watch([embeddedStatusJobCmd.value, executeState.value], async (newVals) => {
   }
 });
 
+const initDataExecute = async () => {
+  await nextTick();
+  await cellImgGet();
+  await getDeviceInfo();
+  await initData();
+  if (isRunningState.value) {
+    btnStatus.value = 'isRunning';
+    showStopBtn.value = false;
+  } else {
+    btnStatus.value = 'start';
+    showStopBtn.value = true;
+  }
+}
 
 //웹소켓으로 백엔드에 전송
-const emitSocketData = async (type: string, payload: any) => {
+const emitSocketData = async (payload: any) => {
   EventBus.publish('childEmitSocketData', payload);
 };
 
 const toggleStartStop = (action: 'start' | 'stop') => {
+  if (viewerCheck.value !== 'main' && window.FORCE_VIEWER !== 'main') return;
+
   if (action === 'start') {
     if (isPause.value) { // 일시정지인 상태일 경우 임베디드에게 상태값을 알려준다.
 
       tcpReq().embedStatus.restart.reqUserId = userId.value;
-      emitSocketData('SEND_DATA', tcpReq().embedStatus.restart);
+      emitSocketData(tcpReq().embedStatus.restart);
       return;
     }
     // 실행 여부 체크
@@ -201,7 +198,7 @@ const toggleStartStop = (action: 'start' | 'stop') => {
 
     if (isInit.value === 'Y') { // 초기화 여부 체크 초기화가 되어있는 상태이면 실행
       // 웹소켓으로 백엔드에 전송
-      emitSocketData('SEND_DATA', startAction);
+      emitSocketData(startAction);
       const InfoData = {
         startEmbedded: true,
       }
@@ -216,7 +213,7 @@ const toggleStartStop = (action: 'start' | 'stop') => {
     }
     store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', {userStop: true});
     tcpReq().embedStatus.stop.reqUserId = userId.value;
-    emitSocketData('SEND_DATA', tcpReq().embedStatus.stop);
+    emitSocketData(tcpReq().embedStatus.stop);
 
   }
 
@@ -245,26 +242,19 @@ const hideConfirm = () => {
 const handleOkConfirm = () => {
   showConfirm.value = false;
   tcpReq().embedStatus.recovery.reqUserId = userId.value;
-  emitSocketData('SEND_DATA', tcpReq().embedStatus.recovery);
+  emitSocketData(tcpReq().embedStatus.recovery);
 }
 
 const sendInit = () => { // 장비 초기화 진행
-  // if (isInitializing.value) {
-  //   if (isInit.value === 'Y' || btnStatus.value === "isRunning" || isRunningState.value) {
-  //     showSuccessAlert(messages.alreadyInitialized);
-  //   }
-  //     showErrorALert('Program is already running');
-  //     return;
-  // }
+  if (viewerCheck.value !== 'main' && window.FORCE_VIEWER !== 'main') return;
+  if (isInit.value === 'Y') {
+    showSuccessAlert(MESSAGES.alreadyInitialized);
+    return;
+  }
 
-  // if (isInit.value === 'Y' || btnStatus.value === "isRunning" || isRunningState.value) {
-  //   showSuccessAlert(messages.alreadyInitialized);
-  //   return;
-  // }
   tcpReq().embedStatus.init.reqUserId = userId.value;
-  emitSocketData('SEND_DATA', tcpReq().embedStatus.init);
+  emitSocketData(tcpReq().embedStatus.init);
   emits('initDataChangeText', true);
-  // isInitializing.value = true;
 }
 
 const initData = async () => {

@@ -35,29 +35,28 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { login } from "@/common/api/service/user/userApi";
 import { getDeviceIpApi } from "@/common/api/service/device/deviceApi";
 import router from "@/router";
-import { UserResponse  } from '@/common/api/service/user/dto/userDto'
+import { UserResponse  } from '@/common/api/service/user/user.dto'
 import {ApiResponse} from "@/common/api/httpClient";
 import {useStore} from "vuex";
 import Alert from "@/components/commonUi/Alert.vue";
 import { initializeAllSettings } from "@/common/lib/commonfunction/settingFunctions";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
-// 스토어
 const store = useStore();
 const password = ref('');
 const idVal = ref('');
-const instance = getCurrentInstance();
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
 const isAutoLoginEnabled = ref(false);
-const isTcpConnected = computed(() => store.state.commonModule.isTcpConnected);
 const isViewer = ref(false);
 const forceViewer = ref('');
+const isTcpConnected = computed(() => store.state.commonModule.isTcpConnected);
+
 
 //
 onMounted(async () => {
@@ -103,7 +102,7 @@ const loginUser = async () => {
       if (isAutoLoginEnabled.value) {
         localStorage.setItem('user', JSON.stringify((result.data.user)))
       }
-      await getIpAddress(result?.data?.user.userId);
+      await getIpAddress();
 
     }else{
       showSuccessAlert('Login failed.');
@@ -117,6 +116,7 @@ const loginUser = async () => {
 const checkIsViewer = async () => {
   try {
     const result = await getDeviceIpApi();
+
     if((result.data === '1' || (window.APP_API_BASE_URL && window.APP_API_BASE_URL.includes(result.data)))) {
       isViewer.value = false;
     } else {
@@ -127,7 +127,7 @@ const checkIsViewer = async () => {
   }
 }
 
-const getIpAddress = async (userId: string) => {
+const getIpAddress = async () => {
   try {
     const result = await getDeviceIpApi();
     if((result.data === '1' || (window.APP_API_BASE_URL && window.APP_API_BASE_URL.includes(result.data))) && window.FORCE_VIEWER !== 'viewer'){

@@ -5,11 +5,8 @@
     <orderList :parsedData="props.parsedData" :startStatus="props.startStatus" :pb100aCassette="pb100aCassette"/>
   </div>
   <div class="contentRight" v-show="props.isClass">
-    <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild" />
+    <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild workingView" />
     <RealTimeProcess  class="contentRightChild realtime"/>
-    <div class="contentBottom">
-      <FoundingCells :parsedData="props.parsedData" :pb100aCassette="pb100aCassette"/>
-    </div>
   </div>
 </template>
 
@@ -18,7 +15,6 @@ import ProcessInfo from '@/views/analysis/commponent/processInfo.vue';
 import Execute from '@/views/analysis/commponent/execute.vue';
 import workingView from '@/views/analysis/commponent/workingView.vue';
 import orderList from './commponent/orderList.vue';
-import FoundingCells from "@/views/analysis/commponent/foundingCells.vue";
 import { defineEmits, defineProps, ref, onBeforeMount, computed } from "vue";
 import router from "@/router";
 import { useStore } from "vuex";

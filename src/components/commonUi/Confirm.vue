@@ -10,7 +10,7 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, computed } from 'vue';
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
 

@@ -1,12 +1,12 @@
 <template>
   <div class="classDetailInfoContainer" style="width: 450px;">
-    <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD)">
+    <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <h1 class="fs12 classInfoClassTitle">{{ MO_CATEGORY_NAME.YEAST }}</h1>
       <div class="classInfoHorizontalRule"></div>
       <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
     </template>
 
-    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.BLOOD)">
+    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper">
         <h1 class="fs12 classInfoClassTitle">Gram</h1>
         <div class="classInfoHorizontalRule"></div>
@@ -14,29 +14,28 @@
       <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
     </template>
 
-    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE)">
+    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo" :key="category.classId">
         <h1 class="fs12 classInfoClassTitle">{{ MAP_CLASS_ID_TO_CLASS_NM[category.classId] }}</h1>
         <div class="classInfoHorizontalRule"></div>
         <template v-if="category.classId === CLASS_INFO_ID.WBC">
           <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.WBC)" />
         </template>
-        <template v-if="category.classId === CLASS_INFO_ID.YEAST">
-          <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST)" />
-        </template>
       </div>
     </template>
 
-    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.URINE)">
-      <div class="classDetailInfoWrapper">
-        <h1 class="fs12 classInfoClassTitle">Gram</h1>
-        <div class="classInfoHorizontalRule"></div>
-      </div>
-      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
+    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
+      <h1 class="fs12 classInfoClassTitle">Yeast</h1>
+      <div class="classInfoHorizontalRule"></div>
+      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST)" />
+
+      <h1 class="fs12 classInfoClassTitle">Gram</h1>
+      <div class="classInfoHorizontalRule"></div>
+      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
     </template>
 
 
-    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.SPUTUM)">
+    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.SPUTUM)  && !isObjectEmpty(moInfo)">
       <h1 class="fs12 classInfoClassTitle mt24">Sputum</h1>
       <div class="classInfoHorizontalRule"></div>
 
@@ -102,7 +101,7 @@
       <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.HYPHAE)" />
     </template>
 
-    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM)">
+    <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper">
         <h1 class="fs12 classInfoClassTitle">Gram</h1>
         <div class="classInfoHorizontalRule"></div>

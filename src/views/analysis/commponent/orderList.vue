@@ -19,7 +19,7 @@
               slot?.analyzedDttm ? formatDateString(slot?.analyzedDttm) : formatDateString(slot?.orderDate)
             }}
           </td>
-          <td>{{ getCommonCode('14', slot?.state) }}</td>
+          <td>{{ slot?.state }}</td>
         </tr>
       </tbody>
       <tbody v-else>
@@ -32,45 +32,38 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, ref, watch} from "vue";
-import {getCommonCode, stringToDateTime} from "@/common/lib/utils/conversionDataUtils";
-import {formatDateString} from "@/common/lib/utils/dateUtils";
+import { defineProps, ref, watch } from "vue";
+import { stringToDateTime } from "@/common/lib/utils/conversionDataUtils";
+import { formatDateString } from "@/common/lib/utils/dateUtils";
+import { RUNNING_INFO_INTERFACE_CODE } from "@/common/defines/constFile/commonCodeList";
 
-// 스토어
+interface OrderListInterface {
+  barcodeId: string;
+  patientName: string;
+  orderDate: string;
+  analyzedDttm: string;
+  state: string | undefined;
+}
+
 const props = defineProps(['parsedData', 'startStatus', 'pb100aCassette']);
+const dspOrderList = ref<OrderListInterface[]>([]);
 
-// end 스토어
-const dspOrderList = ref<any>([]);
-
-watch(
-    () => props.parsedData,
-    (newVal) => {
+watch(() => props.parsedData, (newVal) => {
       runningInfoGet(newVal);
-    },
-    {deep: true}
-);
+    },{deep: true});
 
-watch(
-    () => props.pb100aCassette,
-    (newVal) => {
+watch(() => props.pb100aCassette, (newVal) => {
       if (newVal === 'reset') {
         dspOrderList.value = [];
         console.log('pb100aCassette 초기화', dspOrderList.value)
       }
-    },
-    {deep: true}
-);
+    }, {deep: true});
 
 
-watch(
-    () => props.startStatus,
-    (newVal) => {
-      if (newVal === true) {
-        dspOrderList.value = [];
-      }
-    },
-    {deep: true}
-);
+watch(() => props.startStatus, (newVal) => {
+      if (newVal === true) dspOrderList.value = [];
+    }, {deep: true});
+
 const runningInfoGet = async (data: any) => {
   const parsedData = data
   if (parsedData.jobCmd === 'RUNNING_INFO') {
@@ -78,6 +71,7 @@ const runningInfoGet = async (data: any) => {
     if (currentSlot) {
       const barcodeNo = currentSlot.barcodeNo;
       const existingItemIndex = dspOrderList.value.findIndex((item: any) => item.barcodeId === barcodeNo);
+      const inputCassetteArr = [...parsedData?.iCasStat].filter((id: string) => id !== '0');
       if (existingItemIndex === -1 && barcodeNo !== '') {
 
         /** 만약 오류가 발생해서 OrderList가 10개 초과일 경우 화면에서 보여주는 OrderList를 10개까지만 보여주는 코드 */
@@ -87,21 +81,29 @@ const runningInfoGet = async (data: any) => {
         }
         // End
 
+        // Core에서 받는 stateCd가 저장되는 타이밍을 잡기 어려워 추가한 stateCd 변경 코드
+        const completedCassetteIndex = inputCassetteArr.lastIndexOf('3');
+        dspOrderList.value[completedCassetteIndex].state = RUNNING_INFO_INTERFACE_CODE.I_CAS_STAT_ID_LIST[3].cdNm;
+
+        const stateCdObj = RUNNING_INFO_INTERFACE_CODE.I_CAS_STAT_ID_LIST.find((code: {cd: string; cdNm: string}) => code.cd === inputCassetteArr[dspOrderList.value.length]);
+
         dspOrderList.value.push({
           barcodeId: barcodeNo,
           patientName: currentSlot.patientNm,
           orderDate: stringToDateTime(currentSlot.orderDttm),
           analyzedDttm: stringToDateTime(currentSlot.analyzedDttm),
-          state: currentSlot.stateCd,
+          state: stateCdObj?.cdNm,
         });
       } else {
+        const stateCdObj = RUNNING_INFO_INTERFACE_CODE.I_CAS_STAT_ID_LIST.find((code: {cd: string; cdNm: string}) => code.cd === inputCassetteArr[existingItemIndex]);
+
         dspOrderList.value[existingItemIndex] = {
           barcodeId: barcodeNo,
           patientName: currentSlot.patientNm,
           orderDate: stringToDateTime(currentSlot.orderDttm),
           analyzedDttm: stringToDateTime(currentSlot.analyzedDttm),
-          state: currentSlot.stateCd,
-        }
+          state: stateCdObj?.cdNm,
+        };
       }
     }
   }

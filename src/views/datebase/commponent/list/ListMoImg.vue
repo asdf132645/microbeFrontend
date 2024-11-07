@@ -1,20 +1,6 @@
 <template>
-  <div class="mt10 listTableImageContainer">
+  <div v-show="!isObjectEmpty(selectedItem)" class="listTableImageContainer">
     <h3 class="mb10 hh3title infoImageTitle">Images</h3>
-<!--    <div v-if="allImages.length > 0" class="dbImageContainer">-->
-<!--      <template v-for="imageSet in allImages" :key="imageSet.id">-->
-<!--        <img-->
-<!--            v-for="image in imageSet.images"-->
-<!--            :key="image.fileName"-->
-<!--            class="dbRightImages"-->
-<!--            :class="['dbRightImages', {'selected-image': isSelectedImage(`${imageSet.id}-${image.fileName}`)}]"-->
-<!--            :src="getImageUrl(image.fileName, imageSet.id, imageSet.title)"-->
-<!--            @error="hideImage(imageSet.id, image.fileName)"-->
-<!--            v-show="!hiddenImages[`${imageSet.id}-${image.fileName}`]"-->
-<!--            @click="clickImage(`${imageSet.id}-${image.fileName}`)"-->
-<!--        />-->
-<!--      </template>-->
-<!--    </div>-->
     <div v-if="allImages.length > 0" class="dbImageContainer">
       <template v-for="imageName in allImages" :key="imageName">
         <img
@@ -56,19 +42,6 @@ watch(() => props.selectedItem, () => {
   getImageFolder();
 },{deep: true});
 
-
-const clickImage = (selectImageText: string) => {
-  if (selectedImage.value === selectImageText) {
-    selectedImage.value = '';
-  } else {
-    selectedImage.value = selectImageText
-  }
-}
-
-const isSelectedImage = (selectImageText: string) => {
-  return selectedImage.value === selectImageText;
-}
-
 const getImageFolder = async () => {
   const { selectedItem } = props;
   if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) {
@@ -85,9 +58,7 @@ const getImageFolder = async () => {
 
 const showImage = (imageName: string) => {
   const { selectedItem } = props;
-  if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) {
-    return '';
-  }
+  if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) return '';
 
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;

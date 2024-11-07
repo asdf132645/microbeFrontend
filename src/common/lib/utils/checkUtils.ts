@@ -24,8 +24,6 @@ export const filterAvailableImageItems = (files: string[]) => {
         ) {
             // 모든 조건에 맞으면 해당 파일들을 추가
             validImageFileNames.add(`${baseName}.jpg`);
-            validImageFileNames.add(`${baseName}.dzi`);
-            validImageFileNames.add(`${baseName}.json`);
             validImageFileNames.add(`${baseName}_files`);
         }
     }

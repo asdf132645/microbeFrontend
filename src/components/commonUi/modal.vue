@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, defineEmits } from 'vue';
 
 const visible = ref(false);

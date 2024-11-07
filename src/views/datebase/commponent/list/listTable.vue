@@ -1,8 +1,8 @@
 <template>
-<!--  <div class="loaderBackground" v-if="loadingDelay">-->
-<!--    <div class="loader"></div>-->
-<!--    <p class="loadingText">Loading...</p>-->
-<!--  </div>-->
+  <div class="loaderBackground" v-if="loadingDelay">
+    <div class="loader"></div>
+    <p class="loadingText">Loading...</p>
+  </div>
   <table class='defaultTable mt20 dbDataTable' ref="scrollableDiv">
     <colgroup>
       <col width="3%"/>
@@ -64,7 +64,8 @@
           <input type="checkbox" v-model="item.checked" :checked="item.checked"/>
         </td>
         <td> {{ getTestTypeText(item?.testType) }}</td>
-        <td>{{ item?.cassetId.split('_')[0] }}</td>
+        <td v-if="item?.cassetId">{{ item?.cassetId.split('_')[0] }}</td>
+        <td v-else></td>
 
         <td>
           <font-awesome-icon
@@ -168,7 +169,7 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {getBarcodeDetailImageUrl, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
 import {
   ref,
@@ -260,7 +261,7 @@ onMounted(async () => {
   window.addEventListener("keyup", handleKeyUp);
 })
 
-async function handleKeyDown(event) {
+async function handleKeyDown(event: KeyboardEvent) {
   // 컨트롤 키가 눌렸는지 확인
   if (event.ctrlKey) {
     isCtrlKeyPressed.value = true;
@@ -272,7 +273,7 @@ async function handleKeyDown(event) {
 }
 
 
-function handleKeyUp(event) {
+function handleKeyUp(event: KeyboardEvent) {
   // Ctrl 키가 떼어졌는지 확인
   if (!event.ctrlKey) {
     isCtrlKeyPressed.value = false;
@@ -288,17 +289,9 @@ onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick);
 });
 
-watch(
-    () => props.loadingDelayParents,
-    (newVal) => {
-      if (newVal) {
-        loadingDelay.value = true;
-      } else {
-        loadingDelay.value = false;
-      }
-    },
-    {deep: true}
-);
+watch(() => props.loadingDelayParents, (newVal) => {
+      loadingDelay.value = newVal ? true : false;
+    }, {deep: true});
 
 watchEffect(async () => {
   if (props.dbData.length > 0) {
@@ -441,13 +434,13 @@ const handleIntersection = (entries, observer) => {
   });
 };
 
-const showSuccessAlert = (message) => {
+const showSuccessAlert = (message: string) => {
   showAlert.value = true;
   alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
 
-const showErrorAlert = (message) => {
+const showErrorAlert = (message: string) => {
   showAlert.value = true;
   alertType.value = MESSAGES.ALERT_TYPE_ERROR;
   alertMessage.value = message;
@@ -471,9 +464,7 @@ const selectItem = async (item) => {
     handleCheckboxChange(item);
   }
   // 부모로 전달
-  if (!item) {
-    return;
-  }
+  if (!item) return;
 
   firstShiftKeyStr.value = item.id;
   emits('selectItem', item);

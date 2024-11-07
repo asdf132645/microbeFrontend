@@ -106,7 +106,7 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
 import {deleteUserApi, getAllUsersApi, getUserApi, putUserDataApi} from "@/common/api/service/user/userApi";
-import { User } from '@/common/api/service/user/dto/userDto'
+import { User } from '@/common/api/service/user/user.dto'
 import Modal from "@/components/commonUi/modal.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import router from "@/router";

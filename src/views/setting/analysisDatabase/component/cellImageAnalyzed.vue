@@ -28,7 +28,7 @@
       <tr>
         <th :style="viewerCheck === 'viewer' && 'width: 214px;'">
           IA Root Path
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_IA_ROOT_PATH_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.IA_ROOT_PATH_KOR" />
         </th>
         <td colspan="2">
           <select v-model='iaRootPath'>
@@ -39,7 +39,7 @@
       <tr v-if="viewerCheck !== 'viewer'">
         <th>
           Alarm Timer (sec)
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_ALARM_TIME_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.ALARM_TIME_KOR" />
         </th>
         <td>
           <font-awesome-icon
@@ -55,7 +55,7 @@
       <tr v-if="viewerCheck !== 'viewer'">
         <th>
           Keep Page
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_KEEP_PAGE_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.KEEP_PAGE_KOR" />
         </th>
         <td>
           <font-awesome-icon
@@ -77,7 +77,7 @@
       <tr>
         <th>
           Download Save Path
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_DOWNLOAD_SAVE_PATH_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.DOWNLOAD_SAVE_PATH_KOR" />
         </th>
 
         <td>
@@ -92,7 +92,7 @@
       <tr>
         <th title="Download data from start to end date">
           Download
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_DOWNLOAD_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.DOWNLOAD_KOR" />
         </th>
         <td>
           <div class="backupDatePickers">
@@ -105,7 +105,7 @@
       <tr>
         <th>
           Upload
-          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MESSAGES.SETTING_INFO_UPLOAD_KO" />
+          <font-awesome-icon :icon="['fas', 'circle-info']" :title="MSG.INFO.UPLOAD_KOR" />
         </th>
         <td colspan="2">
           <div class="settingUploadContainer">
@@ -238,7 +238,7 @@ import { computed, nextTick, onMounted, ref, watch, getCurrentInstance } from "v
 import { SETTING_NAME, LOW_POWER_CAPTURE_COUNT_LIST } from "@/common/defines/constFile/settings/settings";
 import Alert from "@/components/commonUi/Alert.vue";
 import { useStore } from "vuex";
-import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES, MSG} from "@/common/defines/constFile/constantMessageText";
 import moment from "moment";
 import {
   backUpDateApi,
@@ -251,7 +251,7 @@ import {
 import Confirm from "@/components/commonUi/Confirm.vue";
 import { useRouter } from "vue-router";
 import ConfirmThreeBtn from "@/components/commonUi/ConfirmThreeBtn.vue";
-
+import {IntervalType} from "@/common/type/generalTypes";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -308,7 +308,7 @@ const downloadDto = ref<any>({});
 const totalFileCount = ref(1);
 const successFileCount = ref(0);
 const downloadUploadType = ref('copy');
-const intervalId = ref<any>(null);
+const intervalId = ref<IntervalType>(null);
 const deletableDownloadFiles = ref({});
 const loadingState = ref('');
 const showUploadSelectModal = ref(false);
@@ -317,7 +317,7 @@ const selectedUploadFile = ref('');
 
 instance?.appContext.config.globalProperties.$socket.on('downloadUploadFinished', async (downloadUploadObj: { type: 'download' | 'upload'; isFinished: boolean }) => {
   if (downloadUploadObj?.isFinished) {
-    clearInterval(intervalId.value);
+    if (intervalId.value !== null) clearInterval(intervalId.value);
     successFileCount.value = totalFileCount.value;
     downloadUploadStopWebSocket(false);
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false});
@@ -554,9 +554,7 @@ const handlePolling = async () => {
   const duration = String(totalFileCount.value).length
   intervalId.value = setInterval(async () => {
     successFileCount.value += 1;
-    if (successFileCount.value === totalFileCount.value - 1) {
-      clearInterval(intervalId.value);
-    }
+    if (successFileCount.value === totalFileCount.value - 1 && intervalId.value !== null) clearInterval(intervalId.value);
   }, duration *  3000);
 }
 

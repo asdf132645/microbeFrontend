@@ -2,6 +2,16 @@
 
   <ClassInfoMenu @refreshClass="refreshClass"/>
   <div class="reportSection">
+    <DetailHeader
+        :testType="getTestTypeText(selectItems?.testType)"
+        :barcodeNo="selectItems?.barcodeNo"
+        :cbcPatientNo="selectItems?.cbcPatientNo"
+        :patientName="selectItems?.patientName"
+        :hospitalName="selectItems?.hosName"
+        :cbcPatientName="selectItems?.cbcPatientNm"
+        :cbcSex="selectItems?.cbcSex"
+        :cbcAge="selectItems?.cbcAge"
+    />
     <div class="reportDiv">
       <div class="databaseDetailLeft shadowBox">
         <ClassInfo type='report' @submitStateChanged="submitStateChanged" :isCommitChanged="isCommitChanged"/>
@@ -92,21 +102,21 @@
 
 
 import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftInfo/classInfo.vue";
-import { computed, getCurrentInstance, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { computed, getCurrentInstance, onMounted, onUnmounted, ref } from "vue";
 import {getTestTypeText, getTotalCountOfClassInfo} from "@/common/lib/utils/conversionDataUtils";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
 import router from "@/router";
 import {useStore} from "vuex";
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
-import {MAP_CLASS_ID_TO_CLASS_NM, MO_TEST_TYPE} from "@/common/defines/constFile/dataBase";
+import { MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
+import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
 
 const store = useStore();
 
 const moInfo = ref<any>(null);
 const printOnOff = ref(false);
 const siteCd = computed(() => store.state.commonModule.siteCd);
-const selectedSampleId = computed(() => store.state.commonModule.selectedSampleId)
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const instance = getCurrentInstance();

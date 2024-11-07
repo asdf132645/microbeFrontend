@@ -1,6 +1,6 @@
 import { useHttpClient, ApiResponse } from '@/common/api/httpClient';
 import { apiConstants } from '@/common/api/apiConstants';
-import { CreateUser, loginUser, UserResponse } from '@/common/api/service/user/dto/userDto'
+import { CreateUser, loginUser, UserResponse } from '@/common/api/service/user/user.dto'
 
 // Create an instance of the http client
 const httpClient = useHttpClient();

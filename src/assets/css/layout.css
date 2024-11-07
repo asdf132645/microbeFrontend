@@ -51,6 +51,10 @@
     margin-left: 320px;
 }
 
+.mb4 {
+    margin-bottom: 4px;
+}
+
 .mb10 {
     margin-bottom: 10px;
 }
@@ -63,7 +67,7 @@
     margin-bottom: 20px;
 }
 
-.mb4 {
+.mb40 {
     margin-bottom: 40px;
 }
 
@@ -652,10 +656,6 @@ span.icoText {
     margin: 0px 10px 10px 0px;
 }
 
-.contentRight > div:first-child {
-    width: 21%;
-}
-
 h3.titleText {
     font-size: 1.2rem;
     font-weight: 600;
@@ -750,10 +750,29 @@ ul.customClass li {
 }
 
 .circular-progress-bar {
-    width: 130px;
-    height: 130px;
+    height: 300px;
     position: relative;
     width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.workingView-analysisTime-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.workingView-progressBar-color {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: #000000a8;
+    z-index: 999999999;
 }
 
 .backupDiv {
@@ -851,34 +870,6 @@ button.saveBtn, .defaultBtn {
     background: var(--white-color);
     color: var(--black-color);
 }
-
-/*동그라미*/
-
-/*.progress-ring-circle {*/
-/*    fill: transparent;*/
-/*    stroke-width: 4px;*/
-/*    stroke: var(--gray-bg-14-color);*/
-/*    stroke-dasharray: 200;*/
-/*    stroke-dashoffset: 0;*/
-/*    transition: stroke-dashoffset 0.5s ease;*/
-/*    transform: rotate(-90deg);*/
-/*    transform-origin: 50% 50%;*/
-/*    border-radius: 50%;*/
-/*    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);*/
-/*}*/
-
-/*.rotate-animation {*/
-/*    animation: rotate 1s linear infinite;*/
-/*}*/
-
-/*@keyframes rotate {*/
-/*    from {*/
-/*        transform: rotate(0deg);*/
-/*    }*/
-/*    to {*/
-/*        transform: rotate(360deg);*/
-/*    }*/
-/*}*/
 
 .classTitle {
     font-weight: bold;
@@ -1494,7 +1485,7 @@ li.mb10.liTitle {
     padding-top: 15px;
 }
 
-ul.slideContent li {
+ul.slideContent li.cassette {
     width: 100%;
     height: 20px;
     background: var(--gray-1-color);
@@ -1554,7 +1545,10 @@ ul.slideContent .outClassDefault {
 }
 
 .orderListWrapper {
+    width: 100%;
     display: flex;
+    justify-content: flex-start;
+    padding: 0;
 }
 
 .orderListTableContainer {
@@ -1585,10 +1579,9 @@ li.flexColumn span {
 }
 
 p.slideTime {
-    position: absolute;
-    top: 53px;
-    left: 40%;
-    font-size: 0.9rem;
+    position: relative;
+    top: 50%;
+    font-size: 1rem;
 }
 
 .startDiv {
@@ -1617,17 +1610,11 @@ ul.processInfoUl > li {
 }
 
 .contentRightChild {
-    height: 68vh;
+    height: 937px;
 }
 
 span.proSpan {
     font-weight: 600;
-}
-
-.contentBottom {
-    width: 97.5% !important;
-    min-height: 176px;
-    margin-top: 10px !important;
 }
 
 .uimdLogin {
@@ -1982,7 +1969,7 @@ table.defaultTable tbody td {
 }
 
 .listBox div {
-    padding: 10px;
+    padding: 0 10px;
 }
 
 .listBoxTable {
@@ -2412,13 +2399,14 @@ ul.leftWbcInfo {
 
 }
 
-ul.orderListUi > li {
-    margin-bottom: 5px;
+.orderListUi {
+    width: 100%;
 }
 
-ul.orderListUi > li > img {
+.orderListBarcodeImg {
     border: 1px solid var(--gray-bg-3-color);
     border-radius: 3px;
+    width: 200px;
 }
 
 button.searchClass {
@@ -2712,9 +2700,9 @@ select.selectSizeTitle {
 }
 
 .reportDiv {
-    padding-left: 1.7%;
+    margin-left: 14px;
+    /*padding-left: 1.7%;*/
     display: flex;
-    padding-top: 10px;
     height: 90vh;
 }
 
@@ -3032,7 +3020,6 @@ ul.editOrder li input {
 
 .titleText {
     padding-top: 10px;
-    margin-left: 10px;
 }
 
 .wrap-whole {
@@ -3054,6 +3041,7 @@ ul.editOrder li input {
 
 .listTableImageContainer {
     overflow-y: hidden;
+    height: 48%;
 }
 
 .resInfoTopContainer {
@@ -3098,13 +3086,15 @@ ul.editOrder li input {
 
 .dbImageContainer {
     overflow-y: auto;
-    max-height: 54vh;
+    height: 100%;
+    /*max-height: 54vh;*/
 
 }
 
 .dbRightImages {
-    width: 24%;
-    margin: 0 5px 1px 0;
+    width: 100%;
+    height: 100%;
+    margin: 0 5px 10px 0;
 }
 
 .leftWhole ul li {
@@ -3518,9 +3508,12 @@ p.menuIco {
     margin-right: 14px;
 }
 
+.contentRight > .contentRightChild.workingView {
+    width: 30%;
+}
 
 .contentRight > .contentRightChild.realtime {
-    width: 74%;
+    width: 65%;
 }
 
 .grade-container {

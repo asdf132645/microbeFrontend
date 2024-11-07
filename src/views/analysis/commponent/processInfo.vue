@@ -29,14 +29,12 @@
 
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, getCurrentInstance, defineProps} from "vue";
-import {useStore} from "vuex";
-import {stringToDateTime} from "@/common/lib/utils/conversionDataUtils";
-import process from "process";
-const props = defineProps([ 'parsedData']);
+import { ref, computed, watch, onMounted, defineProps } from "vue";
+import { useStore } from "vuex";
+import { stringToDateTime } from "@/common/lib/utils/conversionDataUtils";
 
-// 스토어
 const store = useStore();
+const props = defineProps([ 'parsedData']);
 const embeddedStatusJobCmd = computed(() => store.state.embeddedStatusModule);
 const siteCd = computed(() => store.state.commonModule.siteCd);
 
@@ -64,7 +62,7 @@ onMounted(() => {
 
 watch(
     () => props.parsedData,
-    (newVal, oldVal) => {
+    (newVal) => {
       runningInfoGet(newVal);
     },
     { deep: true }

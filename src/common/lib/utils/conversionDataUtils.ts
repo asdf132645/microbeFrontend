@@ -1,6 +1,6 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
 import { MO_TEST_TYPE, TEST_TYPE } from "@/common/defines/constFile/dataBase";
-import {ClassInfoType} from "@/common/api/service/runningInfo/dto/runningInfoDto";
+import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 export const getCommonCode = (grpCd: string, cd: string): string | undefined => {
     const foundCode = commonCodeList.find((code) => code.grpCd === grpCd && code.cd === cd);
 
@@ -51,4 +51,14 @@ export const getCurrentAnalysisType = (testType: string) => {
 
 export const getTotalCountOfClassInfo = (classInfo: ClassInfoType[]) => {
     return classInfo.reduce((acc: number, item) => Number(item.count) + acc, 0);
+}
+
+export const getProcessingCode = (processingCode: string) => {
+    if (processingCode === '' || !processingCode) return '';
+    if (Number(processingCode) < 300) return "Move to LowPower Area";
+    if (Number(processingCode) < 400) return "Scanning Smear";
+    if (Number(processingCode) < 500) return "Analyzing LowPower";
+    if (Number(processingCode) < 700) return "Dropping Oil";
+    if (Number(processingCode) < 900) return "Analyzing HighPower";
+    return "Device Setting";
 }

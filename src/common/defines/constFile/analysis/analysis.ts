@@ -1,6 +1,10 @@
-import {CLASS_INFO_ID} from "@/common/defines/constFile/dataBase";
+import {
+    LP_CAPTURE_OPTIONS_TYPE,
+    SLIDE_CARD_TYPE,
+    SLOT_INFO_TYPE
+} from "@/common/defines/constFile/analysis/analysis.dto";
 
-export const LP_CAPTURE_OPTIONS = [
+export const LP_CAPTURE_OPTIONS: LP_CAPTURE_OPTIONS_TYPE[] = [
     { value: "10", text: "10 LP Capture" },
     { value: "20", text: "20 LP Capture" },
     { value: "30", text: "30 LP Capture" },
@@ -8,7 +12,7 @@ export const LP_CAPTURE_OPTIONS = [
     { value: "50", text: "50 LP Capture" },
 ]
 
-export const SLIDE_CARD = {
+export const SLIDE_CARD: { input: SLIDE_CARD_TYPE[], output: SLIDE_CARD_TYPE[] } = {
     input: [
         {slotNo: 1, slotState: "0"},
         {slotNo: 2, slotState: "0"},
@@ -39,7 +43,7 @@ export const SLIDE_CARD = {
     ]
 };
 
-export const SLIDE_CARD_100A = {
+export const SLIDE_CARD_100A: { input: SLIDE_CARD_TYPE[], output: SLIDE_CARD_TYPE[] } = {
     input: [
         {slotNo: 1, slotState: "0"},
         {slotNo: 2, slotState: "0"},
@@ -66,7 +70,7 @@ export const SLIDE_CARD_100A = {
     ]
 };
 
-export const DEFAULT_SLOT_INFO = {
+export const DEFAULT_SLOT_INFO: SLOT_INFO_TYPE = {
     userId: '1',
     cassetId: '1',
     testType: '00',

@@ -1,0 +1,1 @@
+export type MachineVersionType = '100a' | '12a';

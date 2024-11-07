@@ -27,6 +27,5 @@ export const sysInfoStore = async (data: any): Promise<any> => {
 };
 
 export const runningInfoStore = async (data: any) => {
-    // await store.dispatch('wbcClassificationModule/setWbcInfo', data.slotInfo);
     await store.dispatch('runningInfoModule/setRunningInfo', data);
 }

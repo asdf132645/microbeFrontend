@@ -77,6 +77,10 @@ onMounted(async () => {
   currentPowerType.value = route.query.pageType;
 })
 
+watch(() => currentImageName.value, () => {
+  console.log('currentImageName.value', currentImageName.value);
+})
+
 watch(() => route.query.pageType, async (newPageType) => {
   await nextTick();
   currentPowerType.value = newPageType;
@@ -184,7 +188,6 @@ const initElement = async () => {
 
     viewer.value.addHandler('page', async (event: any) => {
       await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.eventSource.tileSources[event.page].Image.imageName });
-      console.log('event.eventSource.tileSources[event.page].Image.imageName', event.eventSource.tileSources[event.page].Image.imageName);
 
       if (canvas.parentElement !== viewer.value.container) {
         viewer.value.addOverlay({
@@ -242,18 +245,18 @@ const drawClassPosCanvas = (classInfoArr: any) => {
   }
 
   const COLORS = {
-    [MO_CATEGORY_CLASS_ID.WBC]: 'navy',
-    [MO_CATEGORY_CLASS_ID.GNC]: 'orange',
-    [MO_CATEGORY_CLASS_ID.GNB]: 'black',
-    [MO_CATEGORY_CLASS_ID.GPC]: 'purple',
-    [MO_CATEGORY_CLASS_ID.GPB]: '#1E90FF',
-    [MO_CATEGORY_CLASS_ID.YEAST]: '#FF6347',
+    [MO_CATEGORY_CLASS_ID.WBC]: 'navy', //
+    [MO_CATEGORY_CLASS_ID.GNC]: '#00FF00', // 빨간색 분홍색 사이
+    [MO_CATEGORY_CLASS_ID.GNB]: '#00FF00', // 빨간색 분홍색 사이
+    [MO_CATEGORY_CLASS_ID.GPC]: '#FFA500', // 보라색, 파란색 사이
+    [MO_CATEGORY_CLASS_ID.GPB]: '#FFA500', // 보라색, 파란색 사이
+    [MO_CATEGORY_CLASS_ID.YEAST]: '#3CFFDD', // 검정색,  보라색 사이
   }
 
   for (const classId of classInfoArr) {
     for (const classPosItem of classInfoPositionArr.value) {
       if (classId === classPosItem.classId) {
-        ctx.strokeStyle = COLORS[classId] || 'black';
+        ctx.strokeStyle = COLORS[classId] || '#00BFFF';
         ctx.lineWidth = 2;
         for (const detailPosItem of classPosItem.pos) {
           const rectPath = new Path2D();
@@ -311,12 +314,17 @@ const fetchTileImagesInfo = async (folderPath: string) => {
 
   const fileNames = await response.json();
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(fileNames)[0] });
-  fileNames.sort((a,b) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
+  const availableFileNames = filterAvailableImageItems(fileNames) as string[];
 
-  const availableFileNames = filterAvailableImageItems(fileNames);
+  const sortedFileNames = availableFileNames.reduce((acc: { files: string[], jpg: string[] }, fileName: string) => {
+    if (fileName.endsWith('_files')) acc.files.push(fileName);
+    else if (fileName.endsWith('.jpg')) acc.jpg.push(fileName);
+    return acc;
+  }, { files: [], jpg: [] });
 
-  const fileNamesEndsWithFiles = availableFileNames.filter((fileName: string) => fileName.endsWith('_files'));
-  const fileNamesEndsWithJpg = availableFileNames.filter((fileName: string) => fileName.endsWith('jpg'));
+  sortedFileNames.files.sort((a: string, b: string) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
+  sortedFileNames.jpg.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
+  const { files: fileNamesEndsWithFiles, jpg: fileNamesEndsWithJpg } = sortedFileNames;
 
   allImages.value = fileNamesEndsWithJpg
       .map((imageSource, index) => ({

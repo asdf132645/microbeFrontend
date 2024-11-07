@@ -44,7 +44,8 @@ import {settingUpdate} from "@/common/lib/utils/settingSave";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
 
 const store = useStore();
-const tabs = ['Login/Account', 'Analysis/Database', 'Report', 'Quality Check', 'Version'] as const;
+// const tabs = ['Login/Account', 'Analysis/Database', 'Report', 'Quality Check', 'Version'] as const;
+const tabs = ['Login/Account', 'Analysis/Database', 'Quality Check', 'Version'] as const;
 const viewerTabs = ['Login/Account', 'Analysis/Database', 'Version'] as const;
 const currentTab = ref<typeof tabs[number]>(tabs[0]);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);

@@ -1,6 +1,6 @@
-import type { GramRange } from "@/common/defines/constFile/settings/settings.dto";
+import {CBC_LIST_TYPE, GRAM_RANGE_TYPE, LOW_POWER_LIST_TYPE} from "@/common/defines/constFile/settings/settings.dto";
 
-export const LOW_POWER_CAPTURE_COUNT_LIST = [
+export const LOW_POWER_CAPTURE_COUNT_LIST: LOW_POWER_LIST_TYPE[] = [
     { value: '10', text: '10' },
     { value: '20', text: '20' },
     { value: '30', text: '30' },
@@ -8,7 +8,7 @@ export const LOW_POWER_CAPTURE_COUNT_LIST = [
     { value: '50', text: '50' },
 ]
 
-export const DEFAULT_CBC_LIST = [
+export const DEFAULT_CBC_LIST: CBC_LIST_TYPE[] = [
     { cd: '01', classCd: 'clusters', fullNm: 'GPC Clusters' },
     { cd: '02', classCd: 'pairs', fullNm: 'GPC Pairs' },
     { cd: '03', classCd: 'chains', fullNm: 'GPC Chains' },
@@ -25,27 +25,27 @@ export const DEFAULT_CBC_LIST = [
     { cd: '14', classCd: '', fullNm: 'Hyphae' },
 ];
 
-export const DEFAULT_GRAM_RANGE: GramRange[] = [
+export const DEFAULT_GRAM_RANGE: GRAM_RANGE_TYPE[] = [
     {
         fullNm: 'WBC',
         classId: '01',
         fewBoundary: 1,
-        rareBoundary: 6,
-        moderateBoundary: 30,
+        rareBoundary: 10,
+        moderateBoundary: 26,
     },
     {
         fullNm: 'EP Cell',
         classId: '02',
         fewBoundary: 1,
-        rareBoundary: 6,
-        moderateBoundary: 30,
+        rareBoundary: 10,
+        moderateBoundary: 26,
     },
     {
         fullNm: 'Gram',
         classId: '03',
         fewBoundary: 1,
         rareBoundary: 6,
-        moderateBoundary: 30,
+        moderateBoundary: 31,
     },
 ]
 

@@ -16,7 +16,6 @@ export interface CommonState {
     reqArr: any[];
     resFlag: boolean;
     firstLoading: boolean;
-    slotIndex: number;
     viewerCheck: string;
     runningArr: any;
     processInfo: any[];
@@ -43,6 +42,7 @@ export interface CommonState {
     cellImageAnalyzedSetting: CellImgAnalyzedResponse;
     currentSelectItems: any;
     currentImageName: string;
+    currentAnalyzingSlotNo: number;
 }
 
 interface CommonModule {
@@ -63,7 +63,6 @@ interface CommonModule {
         setReqArrPaste: (state: CommonState, value: any[]) => void;
         setResFlag: (state: CommonState, value: boolean) => void;
         setFirstLoading: (state: CommonState, value: boolean) => void;
-        setSlotIndex: (state: CommonState, value: number) => void;
         setViewerCheck: (state: CommonState, value: string) => void;
         setRunningArr: (state: CommonState, value: any) => void;
         setProcessInfo: (state: CommonState, value: any[]) => void;
@@ -90,6 +89,7 @@ interface CommonModule {
         setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
         setCurrentSelectItems: (state: CommonState, value: any) => void;
         setCurrentImageName: (state: CommonState, value: string) => void;
+        setCurrentAnalyzingSlotNo: (state: CommonState, value: number) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -111,7 +111,6 @@ export const commonModule: CommonModule = {
         reqArr: [],
         resFlag: true,
         firstLoading: false,
-        slotIndex: 0,
         viewerCheck: '',
         runningArr: [],
         processInfo: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
@@ -138,6 +137,7 @@ export const commonModule: CommonModule = {
         cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
         currentImageName: '',
+        currentAnalyzingSlotNo: 0
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -184,9 +184,6 @@ export const commonModule: CommonModule = {
         },
         setFirstLoading(state: CommonState, value: boolean): void {
             state.firstLoading = value;
-        },
-        setSlotIndex(state: CommonState, value: number): void {
-            state.slotIndex = value;
         },
         setViewerCheck(state: CommonState, value: string): void {
             state.viewerCheck = value;
@@ -266,6 +263,9 @@ export const commonModule: CommonModule = {
         },
         setCurrentImageName(state: CommonState, value: string): void {
             state.currentImageName = value;
+        },
+        setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
+            state.currentAnalyzingSlotNo = value;
         }
     },
     actions: {
@@ -314,9 +314,6 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('firstLoading')) {
                 commit('setFirstLoading', payload.firstLoading);
-            }
-            if (payload.hasOwnProperty('slotIndex')) {
-                commit('setSlotIndex', payload.slotIndex);
             }
             if (payload.hasOwnProperty('viewerCheck')) {
                 commit('setViewerCheck', payload.viewerCheck);
@@ -395,6 +392,9 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('currentImageName')) {
                 commit('setCurrentImageName', payload.currentImageName);
+            }
+            if (payload.hasOwnProperty('currentAnalyzingSlotNo')) {
+                commit('setCurrentAnalyzingSlotNo', payload.currentAnalyzingSlotNo);
             }
         },
     },

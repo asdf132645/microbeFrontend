@@ -1,6 +1,6 @@
 <template>
   <div class="joinContent">
-    <p class="mt20 mb4 ">CREATE ACCOUNT</p>
+    <p class="mt20 mb40 ">CREATE ACCOUNT</p>
     <div>
       <ul class="joinWrapper">
         <li>
@@ -53,6 +53,7 @@ import {createUser} from "@/common/api/service/user/userApi";
 import router from "@/router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
+import {VALIDATION_MSG} from "@/common/defines/constFile/validation";
 
 const employeeNo = ref('');
 const idVal = ref('');
@@ -67,37 +68,9 @@ const alertMessage = ref('');
 const goLoginPage = () => {
   router.push('/user/login');
 }
-const createAccount = async () => {
-  const currentDate = new Date();
 
-  if (idVal.value === "") {
-    await showErrorAlert('Please enter id');
-    return;
-  }
-  else if (idVal.value.includes('_')) {
-    await showErrorAlert('UserId is not available');
-    return;
-  }
-  else if (password.value === "") {
-    await showErrorAlert('Please enter password');
-    return;
-  }
-  else if (nameVal.value === "") {
-    await showErrorAlert('Please enter name');
-    return;
-  }
-  else if (employeeNo.value === "") {
-    await showErrorAlert('Please enter Employee No');
-    return;
-  }
-  else if (passwordRepeat.value === "") {
-    await showErrorAlert('Please enter repeat password');
-    return;
-  }
-  else if (password.value !== passwordRepeat.value) {
-    await showErrorAlert('Please check if the password and password are the same');
-    return;
-  }
+const createAccount = async () => {
+  if (!signUpValidation()) return;
 
   const user = {
     userId: idVal.value,
@@ -105,34 +78,67 @@ const createAccount = async () => {
     name: nameVal.value,
     employeeNo: employeeNo.value,
     userType: userType.value,
-    subscriptionDate: currentDate,
+    subscriptionDate: new Date(),
   }
 
   try {
     const result: any = await createUser(user);
     if (result.data?.userId) {
-      await showSuccessAlert('registration successful');
+      await showSuccessAlert(VALIDATION_MSG.SIGNUP.SIGNUP_SUCCESS);
       await router.push('/user/login');
     } else {
 
       // User Id 중복
       if (result.data.includes('Duplicate')) {
-        await showErrorAlert('Duplicated user id');
+        showErrorAlert(VALIDATION_MSG.SIGNUP.DUPLICATE_USERID);
       }
 
     }
   } catch (e) {
     console.log(e);
-    await showErrorAlert('Signin fail');
+    showErrorAlert(VALIDATION_MSG.SIGNUP.SIGNUP_FAILURE);
   }
 }
 
+const signUpValidation = () => {
+  if (idVal.value === "") {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.ENTER_ID);
+    return false;
+  }
+  else if (idVal.value.includes('_')) {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.WRONG_USERID_FORMAT);
+    return false;
+  }
+  else if (password.value === "") {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.ENTER_PASSWORD);
+    return false;
+  }
+  else if (nameVal.value === "") {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.ENTER_NAME);
+    return false;
+  }
+  else if (employeeNo.value === "") {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.ENTER_EMPLOYEE_NO);
+    return false;
+  }
+  else if (passwordRepeat.value === "") {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.ENTER_PASSWORD_REPEAT);
+    return false;
+  }
+  else if (password.value !== passwordRepeat.value) {
+    showErrorAlert(VALIDATION_MSG.SIGNUP.PASSWORD_CHECK);
+    return false;
+  }
+
+  return true;
+}
 
 const showSuccessAlert = async (message: string) => {
   showAlert.value = true;
   alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
   alertMessage.value = message;
 };
+
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
   alertType.value = MESSAGES.ALERT_TYPE_ERROR;
