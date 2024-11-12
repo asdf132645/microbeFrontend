@@ -117,7 +117,7 @@ export const getSputumGrade = (wbcCount: number, epCellCount: number) => {
 }
 
 export const getGradeByRange = (settingObj: any, count: number) => {
-    if (count < Number(settingObj.rareBoundary)) return GRADE_TEXT.RARE;
+    if (count <= Number(settingObj.rareBoundary)) return GRADE_TEXT.RARE;
     if (count <= Number(settingObj.fewBoundary)) return GRADE_TEXT.FEW;
     if (count <= Number(settingObj.moderateBoundary)) return GRADE_TEXT.MODERATE;
     return GRADE_TEXT.MANY;
