@@ -57,7 +57,7 @@ import router from "@/router";
 import {
   clearPcIpState,
   detailRunningApi,
-  pageUpDownRunnIngApi,
+  pageUpDownRunningApi,
   updatePcIpStateApi
 } from "@/common/api/service/runningInfo/runningInfoApi";
 import {useStore} from "vuex";
@@ -65,6 +65,7 @@ import {LocationQueryValue, useRoute} from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
+import {IntervalType} from "@/common/type/generalTypes";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -77,18 +78,17 @@ const alertMessage = ref('');
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const resData = ref<any>([]);
 
+let timeoutId: IntervalType = null;
+let socketTimeoutId: IntervalType = null; // 타이머 ID 저장
 const isButtonDisabled = ref(false);
-let timeoutId: number | undefined = undefined;
 const pageMoveDeleteStop = ref(false);
-
 const ipAddress = ref<any>('');
 const isLoading = ref(true);
 const keepPage = ref('');
-let socketTimeoutId: number | undefined = undefined; // 타이머 ID 저장
-const testType = computed(() => store.state.commonModule.testType);
 const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFirstNum);
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
 const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 
 onMounted(async () => {
   await getDetailRunningInfo();
@@ -140,9 +140,9 @@ const deleteConnectionStatus = async () => {
       });
 }
 
-const upDownBlockAccess = async (selectItems: any) => {
+const upDownBlockAccess = async () => {
   try {
-            const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
+    const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
     const { startDate, endDate, page, searchText, testType } = JSON.parse(day);
     const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `oldPcIp=${ipAddress.value}&newEntityId=${resData.value?.id}&newPcIp=${ipAddress.value}&dayQuery=${dayQuery}`
@@ -159,9 +159,7 @@ const upDownBlockAccess = async (selectItems: any) => {
 }
 
 const delayedEmit = (type: string, payload: string, delay: number) => {
-  if (socketTimeoutId !== undefined) {
-    clearTimeout(socketTimeoutId); // 이전 타이머 클리어
-  }
+  if (socketTimeoutId !== null) clearTimeout(socketTimeoutId);
 
   socketTimeoutId = window.setTimeout(() => {
     instance?.appContext.config.globalProperties.$socket.emit('state', {
@@ -177,18 +175,13 @@ const pageGo = async (path: string) => {
   pageMoveDeleteStop.value = false;
 }
 
-async function pageUpDownRunnIng(id: number, step: string, type: string) {
+async function pageUpDownRunning(id: number, step: string, type: string) {
   try {
     const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
     const {startDate, endDate, page, searchText, testType} = JSON.parse(day);
     const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `id=${id}&step=${step}&type=${type}&dayQuery=${dayQuery}`
-    const res = await pageUpDownRunnIngApi(req);
-    if (res.data !== null) {
-      resData.value = res.data;
-      await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: res.data });
-      await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(res.data.id)});
-    }
+    return await pageUpDownRunningApi(req);
   } catch (e) {
     console.log(e)
   }
@@ -211,9 +204,7 @@ const moveWbc = async (direction: any) => {
     }
   }
 
-  if (timeoutId !== undefined) {
-    clearTimeout(timeoutId);
-  }
+  if (timeoutId !== null) clearTimeout(timeoutId);
   isButtonDisabled.value = true; // 버튼 비활성화
   await processNextDbIndex(direction, selectItems.value?.id);
 
@@ -224,13 +215,18 @@ const moveWbc = async (direction: any) => {
 };
 
 const processNextDbIndex = async (direction: any, id: number) => {
-  const res: any = await pageUpDownRunnIng(id, '1', direction);
-  if (resData.value?.lock_status) {
+  const result = await pageUpDownRunning(id, '1', direction);
+  if (result?.data !== null) resData.value = result?.data;
+
+  if (result?.data?.lock_status) {
     showAlert.value = true;
     alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
     alertMessage.value = 'Someone else is editing.';
     return;
   }
+
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: result?.data });
+  await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: String(result?.data.id) });
   await handleDataResponse();
 };
 
@@ -240,7 +236,8 @@ const handleDataResponse = async () => {
 };
 
 const updateUpDown = async (selectItemsNewVal: any) => {
-  if ((selectItems.value?.testType === '01' && isActive("database")) || (!keepPage.value || keepPage.value === "false")) {
+  if ((isActive("database")) || (!keepPage.value || keepPage.value === "false")) {
+    await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
     pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
   }
   emits('refreshClass', selectItemsNewVal);

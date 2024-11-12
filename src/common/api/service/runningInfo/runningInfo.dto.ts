@@ -66,9 +66,9 @@ interface ClassInfo {
     classInfo: ClassInfoType[];
 }
 
-interface ClassInfoType {
+export interface ClassInfoType {
     count: string;
-    classNm: string;
+    classId: string;
     beforeGrade: string;
     afterGrade: string;
 }
@@ -93,4 +93,4 @@ interface RuningInfoApiRequest {
 }
 
 
-export { ClassInfoType, RuningInfoApiRequest, RunningInfoRequest, RunningInfoResponse };
+export { RuningInfoApiRequest, RunningInfoRequest, RunningInfoResponse };

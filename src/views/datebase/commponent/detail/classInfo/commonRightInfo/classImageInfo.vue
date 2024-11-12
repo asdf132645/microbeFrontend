@@ -65,8 +65,8 @@ const currentImageName = computed(() => store.state.commonModule.currentImageNam
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const allImages = ref<any>([]);
-const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
 const hiddenImages = ref<{ [key: string]: boolean }>({});
 const checkedClassIdArr = ref<string[]>([]);
 const classInfoPositionArr = ref<any>([]);
@@ -74,16 +74,12 @@ const drawPath = ref<any>([]);
 const zoomLevel = ref(0);
 
 onMounted(async () => {
-  currentPowerType.value = route.query.pageType;
-})
-
-watch(() => currentImageName.value, () => {
-  console.log('currentImageName.value', currentImageName.value);
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: route.query.pageType });
 })
 
 watch(() => route.query.pageType, async (newPageType) => {
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
   await nextTick();
-  currentPowerType.value = newPageType;
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
   if (tilingViewerLayer) {
     tilingViewerLayer.innerHTML = '';
@@ -208,8 +204,13 @@ const fetchImageJsonData = async (curImageName: string) => {
   const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
   const imageName = curImageName.split('.')[0];
   const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
-  const result = await readJsonFile({ fullPath: originJsonUrl });
-  classInfoPositionArr.value = result.data.classList;
+  try {
+    const result = await readJsonFile({ fullPath: originJsonUrl });
+    classInfoPositionArr.value = result.data.classList;
+  } catch (error) {
+    console.log('ERROR', error);
+    classInfoPositionArr.value = [];
+  }
 }
 
 const checkedClassSetFunc = (checkedClassSet: Set<string>) => {

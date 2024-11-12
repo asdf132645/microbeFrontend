@@ -42,6 +42,7 @@ export interface CommonState {
     cellImageAnalyzedSetting: CellImgAnalyzedResponse;
     currentSelectItems: any;
     currentImageName: string;
+    currentPowerType: 'LP' | 'HP';
     currentAnalyzingSlotNo: number;
 }
 
@@ -89,6 +90,7 @@ interface CommonModule {
         setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
         setCurrentSelectItems: (state: CommonState, value: any) => void;
         setCurrentImageName: (state: CommonState, value: string) => void;
+        setCurrentPowerType: (state: CommonState, value: 'LP' | 'HP') => void;
         setCurrentAnalyzingSlotNo: (state: CommonState, value: number) => void;
     };
     actions: {
@@ -101,7 +103,7 @@ export const commonModule: CommonModule = {
     state: () => ({
         startEmbedded: false,
         eqStatCd: 0,
-        isRunningState: false,
+            isRunningState: false,
         totalCount: '',
         isAlarm: false,
         totalSlideTime: '00:00:00',
@@ -137,7 +139,8 @@ export const commonModule: CommonModule = {
         cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
         currentImageName: '',
-        currentAnalyzingSlotNo: 0
+        currentAnalyzingSlotNo: 0,
+        currentPowerType: 'LP',
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -266,6 +269,9 @@ export const commonModule: CommonModule = {
         },
         setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
             state.currentAnalyzingSlotNo = value;
+        },
+        setCurrentPowerType(state: CommonState, value: 'LP' | 'HP'): void {
+            state.currentPowerType = value;
         }
     },
     actions: {
@@ -395,6 +401,9 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('currentAnalyzingSlotNo')) {
                 commit('setCurrentAnalyzingSlotNo', payload.currentAnalyzingSlotNo);
+            }
+            if (payload.hasOwnProperty('currentPowerType')) {
+                commit('setCurrentPowerType', payload.currentPowerType);
             }
         },
     },

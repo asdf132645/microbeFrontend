@@ -18,25 +18,25 @@ const props = defineProps(['isVisible', 'type', 'message']);
 const typeClass = computed(() => `confirm-${props.type}`);
 const emit = defineEmits(['okConfirm']);
 
-const typeConvertConfirmText = type => {
+const typeConvertConfirmText = (type: string) => {
   switch (type) {
-    case MESSAGES.SETTING:
+    case 'setting':
       return MESSAGES.SAVE;
-    case MESSAGES.DELETE:
+    case 'delete':
       return MESSAGES.DELETE;
     default:
-      return MESSAGES.OK;
+      return 'OK';
   }
 }
 
-const typeConvertCloseText = (type) => {
+const typeConvertCloseText = (type: string) => {
   switch (type) {
-    case MESSAGES.SETTING:
+    case 'setting':
       return MESSAGES.LEAVE;
-    case MESSAGES.DELETE:
+    case 'delete':
       return MESSAGES.CLOSE;
     default:
-      return MESSAGES.CLOSE;
+      return 'CLOSE';
   }
 }
 

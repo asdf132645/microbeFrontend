@@ -215,14 +215,11 @@ watch(() => [route.query.pageType, route.name], async () => {
 
 watch(() => selectItems.value, async (newSelectItems) => {
   await nextTick();
-
   if (!isObjectEmpty(newSelectItems)) {
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
     getTotalMoInfo(newSelectItems);
     memo.value = selectItems.value?.memo;
-    /** TODO 바코드 이미지 */
-    // testAfterBarcodeImage(props.selectItems?.img_drive_root_path);
-
+    setBarcodeImage();
     await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value?.testType});
     if (selectItems.value?.submitState === "" || !selectItems.value?.submitState) {
       const result: any = detailRunningApi(String(selectItems.value?.id));

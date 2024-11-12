@@ -4,7 +4,7 @@ export interface ClassInfoInterface {
 }
 
 export interface MoInfoInterface {
-    id: number;
+    id: string;
     name: string;
     LPCount?: number;
     HPCount?: number;

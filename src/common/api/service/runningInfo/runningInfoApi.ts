@@ -44,7 +44,7 @@ export const classInfoMenuDetailSelectQueryApi = async (request: any): Promise<A
     return httpClient.httpGet(apiConstants.settings.runningInfo.classInfoMenuDetailSelectQuery, `${request}`, false);
 };
 
-export const pageUpDownRunnIngApi = async (req: any): Promise<ApiResponse<any>> => {
+export const pageUpDownRunningApi = async (req: any): Promise<ApiResponse<any>> => {
     return httpClient.httpGet(apiConstants.settings.runningInfo.pageUpDown, `${req}`, true)
 }
 

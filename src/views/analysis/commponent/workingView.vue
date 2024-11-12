@@ -13,6 +13,7 @@
             <!-- Gradient for Progress Circle -->
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#56ccf2" />
+              <stop offset="50%" stop-color="#35b0b6" />
               <stop offset="100%" stop-color="#2f80ed" />
 
               <!-- Rotate the gradient over time -->
@@ -68,15 +69,14 @@
     <div class='slideCardWrap' v-if="machineVersion === '12a'">
       <!-- input -->
       <ul class='slideContent'>
-        <li class="cassette" v-for="item in slideCardData.input" :key="item.slotNo"
-            :class="getSlotStateClass(item.slotState,'input')"></li>
-        <li class="mt10">INPUT</li>
+        <li class="cassette" v-for="item in slideCardData.input" :key="item.slotNo" :class="getSlotStateClass(item.slotState, 'input')"></li>
+        <p class="mt10">INPUT</p>
       </ul>
       <!-- output -->
       <ul class='slideContent'>
-        <li class="cassette" v-for="item in slideCardData.output" :key="item.slotNo"
+        <li v-for="item in slideCardData.output" :key="item.slotNo"
             :class="getSlotStateClass(item.slotState,'output')"></li>
-        <li class="mt10">OUTPUT</li>
+        <p class="mt10">OUTPUT</p>
       </ul>
     </div>
     <div class='slideCardWrap' v-else>
@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, onBeforeUnmount, watch, computed, defineProps, onBeforeMount, watchEffect} from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed, defineProps, onBeforeMount } from 'vue';
 import {useStore} from "vuex";
 import {SlotInfo} from "@/store/modules/testPageCommon/ruuningInfo";
 import {EmbeddedStatusState} from "@/store/modules/embeddedStatusModule";
@@ -121,7 +121,6 @@ const radius = size / 2;
 const circumference = 2 * Math.PI * (radius - strokeWidth / 2);
 const dashoffset = ref(circumference);
 
-// const progressColor = ref('#00c2ff'); // 프로그레스 바 색상
 const eqStatCd = ref('');
 const slideTime = ref('');
 const totalSlideTime = ref('');
@@ -138,10 +137,6 @@ const fixEqStatCd = ref(false);
 const machineVersion = ref<MachineVersionType>('100a');
 const iCasExist = ref('0');
 const oCasExist = ref('0');
-
-watchEffect(() => {
-  console.log('dashoffset', dashoffset.value);
-})
 
 watch(() => store.state.embeddedStatusModule, (newData: EmbeddedStatusState) => {
   const sysInfo = newData.sysInfo;
@@ -161,7 +156,7 @@ watch(() => store.state.embeddedStatusModule, (newData: EmbeddedStatusState) => 
     stopCounting();
   }
 
-  const regex = /[129]/g;
+  const regex = /[1,2,9]/g;
   const dataICasStat = String(sysInfo?.iCasStat);
   if (String(sysInfo?.iCasStat) !== '999999999999') {
     if ((dataICasStat.search(regex) < 0) || sysInfo?.oCasStat === '111111111111') { // 끝났을 경우 체크하는 곳
@@ -360,7 +355,7 @@ const changeWqStatCd = (): string => {
 const getSlotStateClass = (state: string, type: string): string => {
   // 각 상태에 따라 클래스명 반환
   if (type === 'input') {
-    switch (state) {
+    switch (String(state)) {
       case '0':
         return 'class-for-state-0';
       case '1':

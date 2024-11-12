@@ -13,7 +13,21 @@
       <td></td>
       <td class="flex-justify-center">
         {{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}
-        <input v-show="isCheckable" type="checkbox"  v-model="checkedClasses[category?.classId]" @change="e => checkClassStatus(e, category?.classId)" />
+        <p v-show="isCheckable" class="ml12 cursorPointer">
+          <font-awesome-icon
+              v-if="!checkedClasses[category?.classId]"
+              :icon="['fas', 'eye-slash']"
+              @click="checkClassStatus(category?.classId, 'check')"
+              class="w20"
+          />
+          <font-awesome-icon
+              v-else
+              :icon="['fas', 'eye']"
+              color="#29C7CA"
+              @click="checkClassStatus(category?.classId, 'disable')"
+              class="w20"
+          />
+        </p>
       </td>
       <template v-for="grade in grades" :key="grade">
         <td class="text-center">
@@ -52,7 +66,7 @@ const store = useStore();
 const props = defineProps(['classInfo', 'grades', 'moInfo', 'noHead', 'isCheckable'])
 const emits = defineEmits();
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
-const checkedClasses = ref({});
+const checkedClasses = ref<any>({});
 
 watch(() => currentImageName.value, () => {
   checkedClasses.value = {};
@@ -66,9 +80,10 @@ const checkGradeFunc = (beforeAfterGrade: string, gradeText: string) => {
   return checkToggleGrade(beforeAfterGrade);
 }
 
-const checkClassStatus = (event: Event, classId: string) => {
-  const isChecked = (event.target as HTMLInputElement).checked;
-  checkedClasses[classId] = isChecked;
+const checkClassStatus = (classId: string, type: 'check' | 'disable') => {
+  if (type === 'check') checkedClasses.value[classId] = true;
+  else checkedClasses.value[classId] = false;
+  const isChecked = type === 'check' ? true : false;
   emits('classCheck', { classId, isChecked});
 }
 

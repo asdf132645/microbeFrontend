@@ -80,6 +80,7 @@
             @selectItem="selectItem"
             @refresh="refresh"
             @checkListItem="checkListItem"
+            @disableSelectItem="disableSelectItem"
             :selectedItemIdFalse="selectedItemIdFalse"
             :notStartLoading='notStartLoading'
         />
@@ -380,6 +381,7 @@ const getDbData = async (type: string, pageNum?: number) => {
     saveLastSearchParams();
     if (page.value === 1 && result.data.data.length === 0) {
       loadingDelayParents.value = false;
+      dbGetData.value = []
       return;
     }
     if (result && result.data) {
@@ -400,7 +402,6 @@ const getDbData = async (type: string, pageNum?: number) => {
         if (type === 'search') {
           dbGetData.value = newData;
         } else {
-          // dbGetData.value = [...dbGetData.value, ...newData];
           newData.forEach((item: any) => {
             const index = dbGetData.value.findIndex(data => data.id === item.id);
             if (index !== -1) {
@@ -464,6 +465,10 @@ const refresh = () => {
   getDbData('search');
 }
 
+const disableSelectItem = () => {
+  selectedItem.value = {};
+}
+
 const loadMoreData = async () => {
   page.value += 1;
   await getDbData('loadMoreData');
@@ -493,6 +498,7 @@ const hideAlert = () => {
 const dateRefresh = () => {
   startDate.value = thirtyDaysAgo
   endDate.value = new Date();
+  searchText.value = '';
   search();
 }
 

@@ -3,7 +3,7 @@
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <h1 class="fs12 classInfoClassTitle">{{ MO_CATEGORY_NAME.YEAST }}</h1>
       <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
+      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="detailClassInfo" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
@@ -11,27 +11,51 @@
         <h1 class="fs12 classInfoClassTitle">Gram</h1>
         <div class="classInfoHorizontalRule"></div>
       </div>
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
+      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="detailClassInfo" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
-      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo" :key="category.classId">
+      <div class="classDetailInfoWrapper" v-for="category in moInfo?.classInfo" :key="category.classId">
         <h1 class="fs12 classInfoClassTitle">{{ MAP_CLASS_ID_TO_CLASS_NM[category.classId] }}</h1>
         <div class="classInfoHorizontalRule"></div>
-        <template v-if="category.classId === CLASS_INFO_ID.WBC">
-          <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.WBC)" />
-        </template>
+        <GradeInputWithTitle
+            v-if="category.classId === CLASS_INFO_ID.WBC"
+            :isCheckable="true"
+            @classCheck="classCheck"
+            :grades="FOUR_GRADES"
+            :moInfo="moInfo"
+            @updateGrade="updateGrade"
+            :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.WBC])"
+        />
       </div>
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
-      <h1 class="fs12 classInfoClassTitle">Yeast</h1>
-      <div class="classInfoHorizontalRule"></div>
-      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST)" />
+      <div v-show="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST).length > 0">
+        <h1 class="fs12 classInfoClassTitle">Yeast</h1>
+        <div class="classInfoHorizontalRule"></div>
+        <GradeInputWithTitle
+            :isCheckable="true"
+            @classCheck="classCheck"
+            :grades="[GRADE_TEXT.EXIST]"
+            :moInfo="moInfo"
+            @updateGrade="updateGrade"
+            :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.YEAST])"
+        />
+      </div>
 
-      <h1 class="fs12 classInfoClassTitle">Gram</h1>
-      <div class="classInfoHorizontalRule"></div>
-      <GradeInputWithTitle :isCheckable="true" @classCheck="classCheck" :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
+      <div v-show="moInfo?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST).length > 0">
+        <h1 class="fs12 classInfoClassTitle">Gram</h1>
+        <div class="classInfoHorizontalRule"></div>
+        <GradeInputWithTitle
+            :isCheckable="true"
+            @classCheck="classCheck"
+            :grades="FOUR_GRADES"
+            :moInfo="moInfo"
+            @updateGrade="updateGrade"
+            :classInfo="filterClassInfoByClassIds(detailClassInfo, 'delete', [CLASS_INFO_ID.YEAST])"
+        />
+      </div>
     </template>
 
 
@@ -125,12 +149,17 @@ import {
   SPUTUM_GRADES
 } from "@/common/defines/constFile/dataBase";
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
-import { getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
+import {
+  filterClassInfoByClassIds,
+  getCurrentAnalysisType,
+  getValidClassIds
+} from "@/common/lib/utils/conversionDataUtils";
 import { useStore } from "vuex";
 import {updateRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputNoTitle.vue";
+import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 
 const store = useStore();
 const route = useRoute();
@@ -139,6 +168,7 @@ const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentAnalysisType = ref(MO_TEST_TYPE.BLOOD);
 const moInfo = ref<any>([]);
+const detailClassInfo =  ref<any>([]);
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const userModuleDataGet = computed(() => store.state.userModule);
 const checkedClassSet = ref<Set<string>>(new Set());
@@ -160,7 +190,6 @@ watch(() => route.query.pageType, async (newPageType) => {
   await nextTick();
   currentPowerType.value = newPageType;
   if (!isObjectEmpty(selectItems.value)) {
-
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
     getMoInfo(selectItems.value, String(newPageType));
   }
@@ -191,6 +220,11 @@ const getMoInfo = (selectItems: any, pageType: string) => {
       }
     })[0];
   }
+  if (isObjectEmpty(moInfo.value)) return;
+
+  const id = pageType === POWER_MODE.LOW_POWER ? '0' : '1';
+  const validClassIds = getValidClassIds(currentAnalysisType.value, id);
+  detailClassInfo.value = moInfo.value.classInfo.filter((item: ClassInfoType) => validClassIds.includes(item.classId));
 }
 
 const classCheck = ({ classId, isChecked }: { classId: string, isChecked: boolean }) => {
@@ -207,17 +241,8 @@ const checkGrade = (gradeText: string, paramGrade: string) => {
   return gradeText === paramGrade;
 }
 
-const checkToggleGrade = (currentGrade: string | boolean) => {
-  return currentGrade === 'Exist' || currentGrade === true;
-}
-
 const handleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
   updateGrade(updatingMoInfo, className, grade);
-}
-
-const handleToggleGradeClick = (updatingMoInfo: any, className: string, grade: string) => {
-  const newGrade = grade === 'Exist' ? 'None' : 'Exist';
-  updateGrade(updatingMoInfo, className, newGrade);
 }
 
 const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) => {

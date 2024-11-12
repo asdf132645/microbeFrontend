@@ -29,23 +29,23 @@ export const DEFAULT_GRAM_RANGE: GRAM_RANGE_TYPE[] = [
     {
         fullNm: 'WBC',
         classId: '01',
-        fewBoundary: 1,
-        rareBoundary: 10,
-        moderateBoundary: 26,
+        rareBoundary: 1,
+        fewBoundary: 9,
+        moderateBoundary: 25,
     },
     {
         fullNm: 'EP Cell',
         classId: '02',
-        fewBoundary: 1,
-        rareBoundary: 10,
-        moderateBoundary: 26,
+        rareBoundary: 1,
+        fewBoundary: 9,
+        moderateBoundary: 25,
     },
     {
         fullNm: 'Gram',
         classId: '03',
-        fewBoundary: 1,
-        rareBoundary: 6,
-        moderateBoundary: 31,
+        rareBoundary: 1,
+        fewBoundary: 5,
+        moderateBoundary: 30,
     },
 ]
 

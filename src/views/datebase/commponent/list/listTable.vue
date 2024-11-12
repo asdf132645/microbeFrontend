@@ -5,23 +5,22 @@
   </div>
   <table class='defaultTable mt20 dbDataTable' ref="scrollableDiv">
     <colgroup>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="15%"/>
-      <col width="3%"/>
-      <col width="3%"/>
-      <col width="15%"/>
-      <col width="3%"/>
+      <col width="3.12%"/>
+      <col width="3.12%"/>
+      <col width="12.5%"/>
+      <col width="6.25%"/>
+      <col width="6.25%"/>
+      <col width="9.38%"/>
+      <col width="9.38%"/>
+      <col width="9.38%"/>
+      <col width="10.16%"/>
+      <col width="9.38%"/>
+      <col width="9.38%"/>
+      <col width="9.38%"/>
+      <col width="3.12%"/>
     </colgroup>
     <thead>
-    <tr>
+    <tr style="position: sticky; top: 0; z-index: 1;">
       <th>NO</th>
       <th>
         <input type="checkbox" v-model="selectAllCheckbox" @change="selectAllItems"/>
@@ -81,7 +80,7 @@
         <td> {{ submitStateChangeText(item?.submitState, item?.submitUserId) }}</td>
         <td> {{ item?.submitOfDate === '' || !item?.submitOfDate ? '' : formatDateString(item?.submitOfDate) }}</td>
         <td>
-          <font-awesome-icon v-if="item?.submitState === 'checkFirst' || item?.submitState === ''"
+          <font-awesome-icon v-if="(item?.submitState === 'checkFirst' || item?.submitState === '') && !item.lock_status"
                              :icon="['fas', 'pen-to-square']"
                              @click="editData(item)"/>
         </td>
@@ -103,7 +102,7 @@
       <li @click="printStart">Print</li>
       <li @click="classificationRowDbClick">Classification</li>
       <li @click="editOrderData">Edit order data</li>
-      <li @click="deleteRow">Delete</li>
+      <li @click="showDeleteConfirm">Delete</li>
     </ul>
   </div>
 
@@ -167,6 +166,15 @@
       @hide="hideAlert"
       @update:hideAlert="hideAlert"
   />
+
+  <Confirm
+      v-if="showConfirm"
+      :is-visible="showConfirm"
+      type="delete"
+      :message="confirmMessage"
+      @hide="hideConfirm"
+      @okConfirm="handleOkConfirm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -198,6 +206,7 @@ import moment from "moment";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {barcodeImgDir} from "@/common/defines/constFile/settings/settings";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import Confirm from "@/components/commonUi/Confirm.vue";
 
 const props = defineProps(['dbData', 'selectedItemIdFalse', 'notStartLoading', 'loadingDelayParents']);
 const loadMoreRef = ref(null);
@@ -214,7 +223,7 @@ const alertType = ref('');
 const alertMessage = ref('');
 const myIp = ref('');
 const loadingDelay = ref(false);
-const formatDateString = (dateString) => {
+const formatDateString = (dateString: Date | string) => {
   const momentObj = moment(dateString, 'YYYYMMDDHHmmssSSSSS');
   return momentObj.format('YYYY-MM-DD HH:mm:ss');
 }
@@ -242,9 +251,13 @@ const isCtrlKeyPressed = ref(false);
 const isShiftKeyPressed = ref(false);
 const firstShiftKeyStr = ref('');
 const lastShiftKeyStr = ref('');
-let socketTimeoutId = undefined; // 타이머 ID 저장
+let socketTimeoutId: any = undefined; // 타이머 ID 저장
 const scrollableDiv = ref(null);
 const barCodeImageShowError = ref(false);
+const showConfirm = ref(false);
+const confirmMessage = ref('');
+const selectedItemsUsedInDelete = ref([]);
+const dbDataFindByIdUsedInDelete = ref([]);
 
 
 onMounted(async () => {
@@ -564,7 +577,7 @@ const dbDataEditSet = async () => {
 }
 
 
-const editData = async (item) => {
+const editData = async (item: any) => {
   openLayer();
   itemObj.value = JSON.parse(JSON.stringify(item));
   itemObj.value.submitState = ['', 'Ready', 'checkFirst'].includes(itemObj.value.submitState) ? '' : itemObj.value.submitState;
@@ -578,19 +591,18 @@ const openLayer = () => {
   visible.value = true;
 };
 
-const deleteRow = async () => {
+const deleteRow = async (selectedItems: any, dbDataFindById: any) => {
   try {
-    let selectedItems = props.dbData.filter(item => item.checked);
     if (selectedItems.length === 0 && selectedItemId.value === '') {
       showErrorAlert(MESSAGES.IDS_ERROR_SELECT_A_TARGET_ITEM);
     } else if (selectedItems.length === 0 && selectedItemId.value !== '') {
-      selectedItems = props.dbData.find(item => item.id === selectedItemId.value);
+      selectedItems = dbDataFindById;
       if (selectedItems.lock_status) {
         showErrorAlert(MESSAGES.lockRow);
         return;
       }
       const idsToDelete = selectedItems
-      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : cellImageAnalyzedSetting.value.iaRootPath;
+      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
       const rootArr = `${path}/${selectedItems.slotId}`;
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
       const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
@@ -598,17 +610,21 @@ const deleteRow = async () => {
       const req = {
         ids: [idsToDelete.id],
         img_drive_root_path: [rootArr],
-        dayQuery: dayQuery
+        dayQuery: dayQuery,
       }
+
+      loadingDelay.value = true;
       const response = await deleteRunningApi(req);
 
       if (response.success) {
         showSuccessAlert('Items deleted successfully');
         emits('refresh'); // 데이터 다시 불러오기
-        resetContextMenu();
+
       } else {
         console.error('Failed to delete items');
       }
+
+      loadingDelay.value = false;
     } else {
       const idsToDelete = selectedItems.map(item => item.id);
       const idsToDeleteLock = selectedItems.map(item => item.lock_status);
@@ -616,7 +632,7 @@ const deleteRow = async () => {
         showErrorAlert(MESSAGES.lockRow);
         return
       }
-      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : cellImageAnalyzedSetting.value.iaRootPath;
+      const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
       const rootArr = selectedItems.map(item => `${path}/${item.slotId}`);
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
       const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
@@ -626,21 +642,26 @@ const deleteRow = async () => {
         img_drive_root_path: rootArr,
         dayQuery: dayQuery,
       }
+
+      loadingDelay.value = true;
       const response = await deleteRunningApi(req);
 
       if (response.success) {
         showSuccessAlert('Items deleted successfully');
         emits('refresh'); // 데이터 다시 불러오기
-        resetContextMenu();
       } else {
         console.error('Failed to delete items');
       }
+
+      loadingDelay.value = false;
     }
 
 
   } catch (error) {
     console.error('Error:', error);
   }
+
+  loadingDelay.value = false;
 }
 
 const submitStateChangeText = (text, submitUserId) => {
@@ -656,6 +677,24 @@ const submitStateChangeText = (text, submitUserId) => {
 
 const onImageError = () => {
   barCodeImageShowError.value = true;
+}
+
+const hideConfirm = () => {
+  showConfirm.value = false;
+}
+
+const handleOkConfirm = async () => {
+  showConfirm.value = false;
+  await deleteRow(selectedItemsUsedInDelete.value, dbDataFindByIdUsedInDelete.value);
+}
+
+const showDeleteConfirm = () => {
+  showConfirm.value = true;
+  confirmMessage.value = 'Would you want delete?';
+  selectedItemsUsedInDelete.value = props.dbData.filter(item => item.checked);
+  dbDataFindByIdUsedInDelete.value = props.dbData.find(item => item.id === selectedItemId.value);
+  resetContextMenu();
+  emits('disableSelectItem');
 }
 
 </script>
