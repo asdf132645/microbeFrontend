@@ -20,11 +20,9 @@
       <col width="3.12%"/>
     </colgroup>
     <thead>
-    <tr style="position: sticky; top: 0; z-index: 1;">
+    <tr class="list-table-header">
       <th>NO</th>
-      <th>
-        <input type="checkbox" v-model="selectAllCheckbox" @change="selectAllItems"/>
-      </th>
+      <th><input type="checkbox" v-model="selectAllCheckbox" @change="selectAllItems"/></th>
       <th>Type</th>
       <th>Cassette ID</th>
       <th>State</th>
@@ -44,6 +42,7 @@
     <template v-for="(item, idx) in dbData"
               :key="item.id">
       <tr
+          class="list-table-item"
           :class="{
             selectedTr: selectedItemId === item.id,
             submittedTr: item.submitState === 'Submit' || item.submitState === 'lisCbc',
@@ -210,7 +209,7 @@ import {barcodeImgDir} from "@/common/defines/constFile/settings/settings";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 import Confirm from "@/components/commonUi/Confirm.vue";
 
-const props = defineProps(['dbData', 'selectedItemIdFalse', 'notStartLoading', 'loadingDelayParents']);
+const props = defineProps(['dbData', 'notStartLoading', 'loadingDelayParents']);
 const loadMoreRef = ref(null);
 const emits = defineEmits();
 const selectedItemId = ref('');
@@ -310,13 +309,6 @@ watch(() => props.loadingDelayParents, (newVal) => {
 watchEffect(async () => {
   if (props.dbData.length > 0) {
     await nextTick();
-
-    if (props.selectedItemIdFalse) {
-      // selectedItemId.value = '0';
-      // const filteredItems = props.dbData[0].id
-      // const selectedRow = document.querySelector(`[data-row-id="${filteredItems}"]`);
-      // selectedRow.scrollIntoView({behavior: 'smooth', block: 'center'});
-    }
     const filteredItems = props.dbData.filter(item => item.id === Number(selectedSampleId.value || 0));
 
     // 첫 번째 행을 클릭

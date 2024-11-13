@@ -83,6 +83,17 @@ onMounted(async () => {
   }
 })
 
+watch(() => selectItems.value, async () => {
+  await nextTick();
+  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
+  if (tilingViewerLayer) {
+    tilingViewerLayer.innerHTML = '';
+
+    if (viewer.value) viewer.value.destroy();
+    await initElement();
+  }
+})
+
 watch(() => currentPowerType.value, async () => {
   await nextTick();
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');

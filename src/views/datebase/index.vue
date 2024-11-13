@@ -1,21 +1,21 @@
 <template>
-  <div style="min-height: 92.5vh;">
+  <div class="main-container">
     <h3 class="titleH3">
-<!--      Classification List-->
-<!--      <button @click="classListToggleEvent" class="classificationListBtn">-->
-<!--        <font-awesome-icon :icon="['fas', 'list-check']"/>-->
-<!--      </button>-->
+      Classification List
+      <button @click="classListToggleEvent" class="classificationListBtn">
+        <font-awesome-icon :icon="['fas', 'list-check']"/>
+      </button>
     </h3>
     <div class='listBoxTable'>
       <div class="filterListDiv">
         <div>
-<!--          <select v-model="searchType" class="searchSelect">-->
-<!--            <option value="barcodeNo">Barcode No</option>-->
-<!--            <option value="patientId">Patient ID</option>-->
-<!--            <option value="patientNm">Patient Name</option>-->
-<!--          </select>-->
-<!--          <input type="text" v-model='searchText' class="searchInputBox" @keydown.enter="handleEnter" ref="barcodeInput"-->
-<!--                 @input="handleInput"/>-->
+          <select v-model="searchType" class="searchSelect">
+            <option value="barcodeNo">Barcode No</option>
+            <option value="patientId">Patient ID</option>
+            <option value="patientNm">Patient Name</option>
+          </select>
+          <input type="text" v-model='searchText' class="searchInputBox" @keydown.enter="handleEnter" ref="barcodeInput"
+                 @input="handleInput"/>
           <button class="searchClass" @click="dateRefresh">
             <font-awesome-icon :icon="['fas', 'calendar-days']"/>
             Refresh
@@ -31,40 +31,26 @@
 
         <!-- Classification List Modal -->
         <div class="filterDivBox" v-if="classListToggle">
-          <div class="nrCount">
-            <span>NR count</span>
-            <input type="text" v-model="nrCount"/>
-          </div>
-          <div class="wbcTotal">
-            <span>WBC Total</span>
-            <select v-model="wbcCountOrder">
-              <option value="all">Do Not Select</option>
-              <option>DESC</option>
-              <option>ASC</option>
-            </select>
-          </div>
-          <div class="wbcInfoFilter">
-            <span>WBC Info Filter</span>
-            <ul class="wbcInfoFilter">
-              <li v-for="(item, idx) in titleItem" :key="idx">
-                <input type="checkbox" :id="'checkbox_' + idx" v-model="item.checked" @change="updateFilter">
-                <label :for="'checkbox_' + idx">{{ item.title }}</label>
-              </li>
-            </ul>
-          </div>
           <div class="lastTestType">
             <span>Test Type</span>
             <div>
-              <label><input type="checkbox" value="00" @change="changeTestType('00')" :checked="testType === '00'"/>
-                <span>ALL</span></label>
-              <template>
-                <label><input type="checkbox" value="01" @change="changeTestType('01')" :checked="testType === '01'"/>
-                  <span>Diff</span></label>
-                <label><input type="checkbox" value="04" @change="changeTestType('04')" :checked="testType === '04'"/>
-                  <span>PBS</span></label>
-              </template>
+              <label>
+                <input type="checkbox" value="99" @change="changeTestType('99')" :checked="testType === '99'"/>
+                <span>ALL</span>
+              </label>
+              <label>
+                <input type="checkbox" value="00" @change="changeTestType('00')" :checked="testType === MO_TEST_TYPE_CODE.URINE"/>
+                <span>Sputum</span>
+              </label>
+              <label>
+                <input type="checkbox" value="01" @change="changeTestType('01')" :checked="testType === MO_TEST_TYPE_CODE.SPUTUM"/>
+                <span>Sputum</span>
+              </label>
+              <label>
+                <input type="checkbox" value="02" @change="changeTestType('02')" :checked="testType === MO_TEST_TYPE_CODE.BLOOD"/>
+                <span>Blood</span>
+              </label>
             </div>
-
           </div>
         </div>
 
@@ -81,7 +67,6 @@
             @refresh="refresh"
             @checkListItem="checkListItem"
             @disableSelectItem="disableSelectItem"
-            :selectedItemIdFalse="selectedItemIdFalse"
             :notStartLoading='notStartLoading'
         />
       </keep-alive>
@@ -114,6 +99,7 @@ import Alert from "@/components/commonUi/Alert.vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import {MO_TEST_TYPE_CODE} from "@/common/defines/constFile/dataBase";
 
 
 const store = useStore();
@@ -134,7 +120,6 @@ const prevPage = ref(1);
 const selectedItem = ref<any>({});
 const titleItem = ref<any>([]);
 const titleItemArr = ref([]);
-const nrCount = ref(0);
 const testType = ref('');
 const wbcCountOrder = ref('');
 const classListToggle = ref(false);
@@ -147,7 +132,6 @@ const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const eventTriggered = ref(false);
 const loadingDelayParents = ref(false);
-const selectedItemIdFalse = ref(false);
 const notStartLoading = ref(false);
 const barcodeInput = ref<HTMLInputElement | null>(null);
 
@@ -319,9 +303,6 @@ const saveLastSearchParams = () => {
     searchText: searchText.value,
     startDate: formatDate(startDate.value),
     endDate: formatDate(endDate.value),
-    nrCount: nrCount.value,
-    wbcTotal: wbcCountOrder.value,
-    wbcInfo: titleItemArr.value,
     testType: testType.value,
   };
   sessionStorage.setItem('lastSearchParams', JSON.stringify(lastSearchParams));
@@ -337,11 +318,9 @@ const getDbData = async (type: string, pageNum?: number) => {
 
   if (type === 'search') {
     checkedSelectedItems.value = [];
-    selectedItemIdFalse.value = true;
     notStartLoading.value = true;
     page.value = 1;
   } else {
-    selectedItemIdFalse.value = false;
     notStartLoading.value = false;
   }
   let pageChange = 0;
@@ -368,7 +347,7 @@ const getDbData = async (type: string, pageNum?: number) => {
     requestData.title = titleItemArr.value;
   }
 
-  if (testType.value !== '00' && testType.value !== '') {
+  if (testType.value !== '99' && testType.value !== '') {
     requestData.testType = testType.value;
   }
 

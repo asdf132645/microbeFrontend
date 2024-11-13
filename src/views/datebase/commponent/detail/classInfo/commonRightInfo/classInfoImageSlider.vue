@@ -5,6 +5,7 @@
         <SplideSlide v-for="image in allImages" :key="image.url">
           <img
               style="width: 112px; cursor:pointer; margin-top: 4px;"
+              class="slideImage"
               :class="currentImageName ===  image.imageName? 'selected-image' : ''"
               :src="image.url"
               v-show="!hiddenImages[`${image.url}`]"
@@ -14,8 +15,7 @@
         </SplideSlide>
       </SplideTrack>
 
-      <div class="splide__arrows splide__arrows--ltr" :style="{ display: allImages.length <= 10 ? 'none' : '' }">
-      </div>
+      <div class="splide__arrows splide__arrows--ltr" :style="{ display: allImages.length <= 10 ? 'none' : '' }"></div>
     </Splide>
   </div>
 </template>

@@ -81,10 +81,8 @@
               </thead>
               <tbody>
               <tr v-for="(item) in moInfo" :key="item.id" class="wbcClassDbDiv">
-                <template>
-                  <td>{{ MAP_CLASS_ID_TO_CLASS_NM[item?.classId] }}</td>
-                  <td>{{ item?.afterGrade }}</td>
-                </template>
+                <td>{{ MAP_CLASS_ID_TO_CLASS_NM[item?.classId] }}</td>
+                <td>{{ item?.afterGrade }}</td>
               </tr>
               </tbody>
             </table>

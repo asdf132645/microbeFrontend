@@ -44,6 +44,13 @@ export const MO_TEST_TYPE = {
     BODY_FLUID: 'Body Fluid'
 }
 
+export const MO_TEST_TYPE_CODE = {
+    URINE: '00',
+    SPUTUM: '01',
+    BLOOD: '02',
+    BODY_FLUID: '03'
+}
+
 export const MO_CATEGORY_NAME = {
     GPC_CLUSTERS: 'GPC Clusters',
     GPC_PAIRS: 'GPC Pairs',

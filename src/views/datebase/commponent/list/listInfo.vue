@@ -1,7 +1,7 @@
 <!-- ListInfo.vue -->
 <template>
-  <div class="mt12" style="height: 50%;" v-if="!isObjectEmpty(selectedItem)">
-    <div>
+  <div class="mt12 h-half list-info-container">
+    <div v-if="!isObjectEmpty(selectedItem)" class="mt12 ">
       <h3 class="orderTitle hh3title">Order Information</h3>
       <div class="orderListWrapper" style="padding: 0;">
         <ul class="orderListUi">
@@ -31,7 +31,6 @@
 <!--        </div>-->
       </div>
     </div>
-
   </div>
 </template>
 

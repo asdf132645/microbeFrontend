@@ -111,6 +111,7 @@
 
     </template>
   </Modal>
+
   <Alert
       v-if="showAlert"
       :is-visible="showAlert"
