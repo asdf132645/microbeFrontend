@@ -139,8 +139,8 @@ export const commonModule: CommonModule = {
         cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
         currentImageName: '',
-        currentAnalyzingSlotNo: 0,
         currentPowerType: 'LP',
+        currentAnalyzingSlotNo: 0,
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -267,11 +267,11 @@ export const commonModule: CommonModule = {
         setCurrentImageName(state: CommonState, value: string): void {
             state.currentImageName = value;
         },
-        setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
-            state.currentAnalyzingSlotNo = value;
-        },
         setCurrentPowerType(state: CommonState, value: 'LP' | 'HP'): void {
             state.currentPowerType = value;
+        },
+        setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
+            state.currentAnalyzingSlotNo = value;
         }
     },
     actions: {
@@ -399,12 +399,13 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('currentImageName')) {
                 commit('setCurrentImageName', payload.currentImageName);
             }
-            if (payload.hasOwnProperty('currentAnalyzingSlotNo')) {
-                commit('setCurrentAnalyzingSlotNo', payload.currentAnalyzingSlotNo);
-            }
             if (payload.hasOwnProperty('currentPowerType')) {
                 commit('setCurrentPowerType', payload.currentPowerType);
             }
+            if (payload.hasOwnProperty('currentAnalyzingSlotNo')) {
+                commit('setCurrentAnalyzingSlotNo', payload.currentAnalyzingSlotNo);
+            }
+
         },
     },
 };

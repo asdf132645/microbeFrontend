@@ -34,9 +34,10 @@ const hiddenImages = ref<{ [key: string]: boolean }>({});
 const props = defineProps(['allImages']);
 const emits = defineEmits();
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const splide = ref();
 
-watch(() => [route.params.id, route.query.pageType], () => {
+watch([() => route.params.id, () => currentPowerType.value], () => {
   if (splide.value) splide.value.go(0);
 })
 

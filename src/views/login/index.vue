@@ -109,7 +109,7 @@ const loginUser = async () => {
     }
   } catch (e) {
     showSuccessAlert('server Err.')
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -123,7 +123,7 @@ const checkIsViewer = async () => {
       isViewer.value = true;
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -142,7 +142,7 @@ const getIpAddress = async () => {
       sessionStorage.setItem('pcIp', JSON.stringify(result.data));
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

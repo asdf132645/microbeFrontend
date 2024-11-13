@@ -512,7 +512,7 @@ const cellImgGet = async () => {
     }
 
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

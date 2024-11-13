@@ -134,7 +134,7 @@ const getIpAddress = async (ip: string) => {
       viewerCheckApp.value = result.data;
     }
   } catch (e) {
-    console.log(e)
+    console.error(e);
   }
 }
 
@@ -394,8 +394,6 @@ async function socketData(data: any) {
         await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
         break;
       case 'ERROR_CLEAR':
-        console.log('err')
-        await showSuccessAlert(MESSAGES.FAILED_ALERT);
         break;
       case 'SEARCH_CARD_COUNT':
         break;
@@ -492,8 +490,6 @@ async function socketData(data: any) {
         console.log('검체 데이터 저장 실패');
         return;
       }
-
-      console.log('data', data);
 
       const moInfoNewVal = data?.MOInfo;
       const convertedMoInfo = convertMoInfo(MAP_TEST_TYPE_TO_TEST_NAME[completeSlot.testType], moInfoNewVal);
@@ -637,7 +633,7 @@ const getGramRange = async () => {
       gramConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'Gram')[0];
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -753,7 +749,7 @@ const cellImgGet = async () => {
       }
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

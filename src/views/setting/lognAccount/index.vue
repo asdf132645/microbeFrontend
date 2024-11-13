@@ -188,7 +188,7 @@ const putSelectedUserData = async () => {
     sessionStorage.setItem('user', JSON.stringify(allUsers.value.find((user) => user.userId === currentUserId.value)));
     localStorage.setItem('user', JSON.stringify(allUsers.value.find((user) => user.userId === currentUserId.value)));
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -201,7 +201,7 @@ const getAllUsers = async () => {
     }
 
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -211,7 +211,7 @@ const getSelectedUser = async (selectedUserIdParam: string) => {
     const result: any = await getUserApi(selectedUserIdParam)
     selectedUserData.value = result.data.user;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -249,7 +249,7 @@ const handleOkConfirm = async () => {
       sessionStorage.removeItem('user');
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

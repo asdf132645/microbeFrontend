@@ -72,14 +72,18 @@ const hiddenImages = ref<{ [key: string]: boolean }>({});
 const checkedClassIdArr = ref<string[]>([]);
 const classInfoPositionArr = ref<any>([]);
 const drawPath = ref<any>([]);
-const zoomLevel = ref(0);
 
 onMounted(async () => {
-  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: route.query.pageType });
+  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || '' });
+  if (tilingViewerLayer) {
+    tilingViewerLayer.innerHTML = '';
+    if (viewer.value) viewer.value.destroy();
+    await initElement();
+  }
 })
 
-watch(() => route.query.pageType, async (newPageType) => {
-  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
+watch(() => currentPowerType.value, async () => {
   await nextTick();
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
   if (tilingViewerLayer) {
@@ -88,8 +92,6 @@ watch(() => route.query.pageType, async (newPageType) => {
     if (viewer.value) viewer.value.destroy();
     await initElement();
   }
-
-  await fetchImageJsonData(currentImageName.value);
 })
 
 watch(() => currentImageName.value, async (curImgName) => {
@@ -102,19 +104,6 @@ watch(() => props.checkedClassSet, (newCheckedClassSet) => {
 
   drawClassPosCanvas(checkedClassIdArr.value);
 }, { deep: true });
-
-watch(() => selectItems.value, async () => {
-  await nextTick();
-  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || '' });
-  if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = '';
-    if (viewer.value) viewer.value.destroy();
-    await initElement();
-  }
-  await fetchImageJsonData(currentImageName.value);
-
-})
 
 const initElement = async () => {
 
@@ -156,7 +145,7 @@ const initElement = async () => {
     canvasOverlay.value = canvas;
 
     viewer.value.addHandler('open', function (event: any) {
-      const fullPageButton = viewer.value.buttons.buttons.find((button: any) => button.tooltip === 'Toggle full page');
+      const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
 
       if (fullPageButton) {
         fullPageButton.element.addEventListener('click', async () => {
@@ -209,7 +198,7 @@ const fetchImageJsonData = async (curImageName: string) => {
     const result = await readJsonFile({ fullPath: originJsonUrl });
     classInfoPositionArr.value = result.data.classList;
   } catch (error) {
-    console.log('ERROR', error);
+    console.error(error);
     classInfoPositionArr.value = [];
   }
 }
@@ -221,16 +210,10 @@ const checkedClassSetFunc = (checkedClassSet: Set<string>) => {
 
 const removeClassPosCanvas = () => {
   const canvas = canvasOverlay.value;
-  if (!canvas) {
-    console.log('Canvas element를 찾을 수 없습니다.');
-    return null;
-  }
+  if (!canvas) return null;
 
   const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    console.log('2D context를 가져올 수 없습니다.');
-    return null;
-  }
+  if (!ctx) return null;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.beginPath();
@@ -241,10 +224,7 @@ const removeClassPosCanvas = () => {
 const drawClassPosCanvas = (classInfoArr: any) => {
 
   const ctx = removeClassPosCanvas();
-  if (!ctx) {
-    console.error('Canvas context 초기화 실패');
-    return;
-  }
+  if (!ctx) return;
 
   const COLORS = {
     [MO_CATEGORY_CLASS_ID.WBC]: 'navy', //
@@ -282,8 +262,8 @@ const drawClassPosCanvas = (classInfoArr: any) => {
 const dziWidthHeight = async (imageFileName: string): Promise<any> => {
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
-  const urlImage = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;
-  const imageResponse = await readDziFile({filePath: urlImage});
+  const dziUrl = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;
+  const imageResponse = await readDziFile({ filePath: dziUrl });
   return await extractWidthHeightFromDzi(`${imageFileName}.jpg`, imageResponse);
 }
 

@@ -267,11 +267,12 @@ onMounted(async () => {
 
     userId.value = getStoredUser.id;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
   document.addEventListener('click', handleOutsideClick);
   window.addEventListener("keydown", handleKeyDown);
   window.addEventListener("keyup", handleKeyUp);
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
 })
 
 async function handleKeyDown(event: KeyboardEvent) {
@@ -490,10 +491,10 @@ const getIpAddress = async (item) => {
     await updatePcIpStateApi(req).then(response => {
       delayedEmit('SEND_DATA', 'refreshDb', 300);
     }).catch(error => {
-      console.log(error)
+      console.error(error)
     });
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 

@@ -171,7 +171,7 @@ const getDetailRunningInfo = async () => {
     selectItems.value = result.data;
     wbcInfo.value = result.data.wbcInfoAfter;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

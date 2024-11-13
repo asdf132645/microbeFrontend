@@ -380,7 +380,7 @@ const driveGet = async () => {
 
   } catch (e) {
 
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -425,7 +425,7 @@ const cellImgGet = async () => {
     }
   } catch (e) {
 
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -464,7 +464,7 @@ const cellImgSet = async () => {
     await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
     await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: null });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -511,7 +511,7 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
       showSuccessAlert('Upload completed successfully');
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -584,7 +584,7 @@ const handleDownload = async (downloadType: 'move' | 'copy') => {
     handlePolling();
     await backUpDateApi(downloadDto);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -653,7 +653,7 @@ const createBackup = async () => {
       showErrorAlert(isPossibleToBackup.data.message);
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   } finally {
     isDownloading.value = false;
     downloadUploadStopWebSocket(false);
@@ -672,7 +672,7 @@ const handleSelectUploadFile = async () => {
       possibleUploadFileNames.value = result.data;
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     possibleUploadFileNames.value = [];
   } finally {
     showUploadSelectModal.value = true;
@@ -688,7 +688,7 @@ const openSourceDrive = async () => {
     await openDriveApi(downloadDto);
   } catch (e) {
     deletableDownloadFiles.value = [];
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -714,7 +714,7 @@ const handleUploadSelectFile = async () => {
       uploadSlotIdObj.value = result.data;
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   } finally {
     downloadUploadStopWebSocket(false);
       await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });

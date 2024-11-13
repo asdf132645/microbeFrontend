@@ -183,18 +183,17 @@ watch(() => selectItems.value, async (newSelectItems) => {
 }, { deep: true });
 
 // LP or HP
-watch(() => route.query.pageType, async (newPageType) => {
+watch(() => currentPowerType.value, async () => {
   await nextTick();
-  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
   if (!isObjectEmpty(selectItems.value)) {
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
-    getMoInfo(selectItems.value, String(newPageType));
+    getMoInfo(selectItems.value, String(currentPowerType.value));
   }
 });
 
 watch(() => currentImageName.value, async (newSelectedImageName) => {
   await nextTick();
-  currentImageName.value = newSelectedImageName;
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: newSelectedImageName });
   if (!isObjectEmpty(selectItems.value)) {
     getMoInfo(selectItems.value, String(currentPowerType.value));
   }

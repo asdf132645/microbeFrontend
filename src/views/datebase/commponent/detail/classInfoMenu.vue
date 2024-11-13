@@ -113,7 +113,7 @@ const getDetailRunningInfo = async () => {
     await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value.testType});
     resData.value = result.data;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     resData.value = null;
   }
 }
@@ -132,7 +132,7 @@ const deleteConnectionStatus = async () => {
       .then(response => {
         delayedEmit('SEND_DATA', 'refreshDb', 300);
       }).catch(error => {
-        console.log('2 err', error)
+        console.error('2 err', error)
       });
 }
 
@@ -147,10 +147,10 @@ const upDownBlockAccess = async () => {
     await updatePcIpStateApi(req).then(response => {
       delayedEmit('SEND_DATA', 'refreshDb', 300);
     }).catch(error => {
-      console.log('3 err', error)
+      console.error(error)
     });
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 
@@ -179,7 +179,7 @@ async function pageUpDownRunning(id: number, step: string, type: string) {
     const req = `id=${id}&step=${step}&type=${type}&dayQuery=${dayQuery}`
     return await pageUpDownRunningApi(req);
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 

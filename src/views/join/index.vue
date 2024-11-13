@@ -95,7 +95,7 @@ const createAccount = async () => {
 
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
     showErrorAlert(VALIDATION_MSG.SIGNUP.SIGNUP_FAILURE);
   }
 }

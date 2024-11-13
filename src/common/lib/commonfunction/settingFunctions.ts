@@ -65,7 +65,7 @@ const firstGetSettings = async (initializeType: string) => {
             afterResponse(initializeType);
         }
     } catch (e) {
-        console.log(`${initializeType} Error - ${e}`);
+        console.error(`${initializeType} Error - ${e}`);
     }
 }
 

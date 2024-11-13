@@ -58,6 +58,7 @@ const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const iaRootPath = ref<string>(store.state.commonModule.iaRootPath);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const instance = getCurrentInstance();
 const isNext = ref(false);
 const showAlert = ref(false);
@@ -68,6 +69,10 @@ onMounted(async () => {
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
+
+watch(() => route.query.pageType, async (newPageType) => {
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
+})
 
 const getDetailRunningInfo = async () => {
   // const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
@@ -84,7 +89,7 @@ const getDetailRunningInfo = async () => {
     await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: result.data });
   } catch (e) {
     await store.dispatch('/commonModulesetCommonInfo', { currentSelectItems: {} });
-    console.log(e);
+    console.error(e);
   } finally {
     iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   }
@@ -106,7 +111,7 @@ const hideAlert = () => {
   showAlert.value = false;
 }
 const refreshClass = async (data: any) => {
-  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
+  // await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
 }

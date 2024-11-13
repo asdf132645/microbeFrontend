@@ -77,7 +77,7 @@ const setVersions = async () => {
     pbWbcEngineVersion.value = iniFileData.match(pbWbcPattern)[1] || '';
     pbRbcEngineVersion.value = iniFileData.match(pbRbcPattern)[1] || '';
   } catch (e) {
-    console.log(e);
+    console.error(e);
     deepNetVersion.value = '';
     coreVersion.value = '';
   }

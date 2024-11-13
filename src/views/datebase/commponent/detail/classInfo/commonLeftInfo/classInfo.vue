@@ -164,6 +164,7 @@ const userModuleDataGet = computed(() => store.state.userModule);
 
 
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const memo = ref('');
@@ -179,12 +180,10 @@ const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
 const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
-const currentPowerType = ref<RouteType>(POWER_MODE.LOW_POWER);
 const moInfoTotal = ref<any>([]);
 
 onMounted(async () => {
   await nextTick();
-  currentPowerType.value = route.query.pageType;
   setBarcodeImage();
 
   if (!isObjectEmpty(selectItems.value)) {
@@ -197,9 +196,8 @@ onMounted(async () => {
 //   selectItems.value?.submitState = 'Submit';
 // })
 
-watch(() => [route.query.pageType, route.name], async () => {
+watch([() => currentPowerType.value, () => route.name], async () => {
   await nextTick();
-  currentPowerType.value = route.query.pageType;
   if (!isObjectEmpty(selectItems.value)) {
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
     getTotalMoInfo(selectItems.value);

@@ -149,7 +149,7 @@ const getDeviceInfo = async () => {
     const deviceData = await getDeviceInfoApi();
     siteCd.value = deviceData.data.siteCd;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
