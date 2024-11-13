@@ -66,7 +66,7 @@
         </div>
         <div :class="['reportDivBottom', selectItems.testType !== '04' && 'reportDiff']">
           <div class="wbcLeft">
-            <h3 class="reportH3 mb10 pl0">{{ classTileChange() }} result</h3>
+            <h3 class="reportH3 mb10 pl0">MO Classification result</h3>
             <table class="tableClass mt22">
               <colgroup>
                 <col width="40%">
@@ -81,7 +81,7 @@
               </thead>
               <tbody>
               <tr v-for="(item) in moInfo" :key="item.id" class="wbcClassDbDiv">
-                <template v-if="shouldRenderCategory(item.title)">
+                <template>
                   <td>{{ MAP_CLASS_ID_TO_CLASS_NM[item?.classId] }}</td>
                   <td>{{ item?.afterGrade }}</td>
                 </template>
@@ -105,7 +105,6 @@ import ClassInfo from "@/views/datebase/commponent/detail/classInfo/commonLeftIn
 import { computed, getCurrentInstance, onMounted, onUnmounted, ref } from "vue";
 import {getTestTypeText, getTotalCountOfClassInfo} from "@/common/lib/utils/conversionDataUtils";
 import Print from "@/views/datebase/commponent/detail/report/print.vue";
-import router from "@/router";
 import {useStore} from "vuex";
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
@@ -113,15 +112,10 @@ import { MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
 import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
 
 const store = useStore();
-
 const moInfo = ref<any>(null);
 const printOnOff = ref(false);
-const siteCd = computed(() => store.state.commonModule.siteCd);
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
-const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const instance = getCurrentInstance();
-const nonWbcTitleArr = ['NR', 'GP', 'PA', 'AR', 'MA', 'SM'];
-const nonWbcClassList = ref<any[]>([]);
 const printContent = ref<HTMLElement | null>(null);
 const isCommitChanged = ref(false);
 const totalCount = ref(0);
@@ -142,36 +136,7 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-const shouldRenderCategory = (title: string) => {
-  // 제외할 클래스들 정의
-  const targetArray = getStringArrayBySiteCd(siteCd.value, selectItems.value?.testType);
-  return !targetArray.includes(title);
-};
-
-const getStringArrayBySiteCd = (siteCd: string, testType: string): string[] => {
-  if (!siteCd && siteCd === '') {
-    siteCd = '0000';
-    testType = '01';
-  }
-  const arraysBySiteCd: any = { // 0006 -> 고대
-    '0006': {
-      includesStr: ["AR", "NR", "GP", "PA", "MC", "MA", "SM", 'NE', 'GP', 'PA', 'OT'],
-      includesStr2: ["NR", "AR", "MC", "MA", "SM", 'NE', 'GP', 'PA', 'OT'],
-    },
-  };
-
-  // 지정된 siteCd에 대한 배열을 가져오거나, 기본 배열을 반환
-  const arraysForSiteCd = arraysBySiteCd[siteCd] || {
-    includesStr: ["AR", "NR", "GP", "PA", "MC", "SM", "MA", 'GP', 'PA', 'OT'],
-    includesStr2: ["NR", "AR", "MC", "MA", "SM", 'GP', 'PA', 'OT'],
-  };
-
-  // testType에 따라 제외할 부분 정의
-  return (testType === '01' || testType === '04') ? arraysForSiteCd.includesStr : arraysForSiteCd.includesStr2;
-};
-
-const refreshClass = async (data: any) => {
-  await getDetailRunningInfo();
+const refreshClass = async () => {
   await initData();
 }
 
@@ -179,29 +144,20 @@ const printClose = () => {
   printOnOff.value = false;
 }
 
-const classTileChange = (): string => 'MO Classification';
-
 const printStart = (event: MouseEvent) => {
   event.stopPropagation(); // 이벤트 전파를 막아 handleClickOutside 실행 방지
   printOnOff.value = true;
 };
 
-const pageGo = (path: string) => {
-  router.push(path)
-}
-
-async function initData(data?: any) {
+const initData = async () => {
   if (selectItems.value?.classInfo && selectItems.value?.classInfo.length !== 0) {
-    nonWbcClassList.value = selectItems.value?.classInfo.filter((item: any) => nonWbcTitleArr.includes(item.title));
     moInfo.value = selectItems.value?.classInfo.find((item: any) => item.id === '2').classInfo;
     totalCount.value = getTotalCountOfClassInfo(moInfo.value);
   }
-}
+};
 
 const submitStateChanged = (changedSubmitState: string) => {
-  if (changedSubmitState) {
-    isCommitChanged.value = !isCommitChanged.value;
-  }
+  if (changedSubmitState) isCommitChanged.value = !isCommitChanged.value;
 };
 
 </script>

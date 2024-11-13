@@ -57,8 +57,7 @@
 
         <!-- WBC Classification -->
         <div style="margin-top: 150px; margin-bottom: 50px; border-top: 2px dotted #696969">
-          <h3 style="margin: 10px 0; font-size: 1.2rem; font-weight: 600; text-align: center;">
-            {{ projectType === 'pb' ? 'WBC' : 'BM' }} classification result</h3>
+          <h3 style="margin: 10px 0; font-size: 1.2rem; font-weight: 600; text-align: center;">MO classification result</h3>
           <table style="width: 100%; font-size: 0.8rem;">
             <colgroup>
               <col style="width: 30%;"/>
@@ -136,7 +135,6 @@ import {formatDateString} from "@/common/lib/utils/dateUtils";
 import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {disableScroll, enableScroll} from "@/common/lib/utils/scrollBlock";
 
-const projectType = window.PROJECT_TYPE;
 const store = useStore();
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;

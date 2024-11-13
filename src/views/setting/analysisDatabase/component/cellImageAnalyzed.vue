@@ -419,6 +419,7 @@ const cellImgGet = async () => {
 
         await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: JSON.stringify(cellBeforeSettingObj) });
         await store.dispatch('commonModule/setCommonInfo', { afterSettingFormattedString: JSON.stringify(cellBeforeSettingObj) });
+        sessionStorage.setItem('keepPage', String(data?.keepPage));
       }
 
     }
@@ -455,9 +456,9 @@ const cellImgSet = async () => {
       const text = saveHttpType.value === 'post' ? MESSAGES.SETTING_SAVE_SUCCESS : MESSAGES.UPDATE_SUCCESSFULLY;
       showSuccessAlert(text);
       const data = result?.data;
-      // 공통으로 사용되는 부분 세션스토리지 저장 새로고침시에도 가지고 있어야하는부분
-      await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
+      await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: cellImgSet });
       await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
+      sessionStorage.setItem('keepPage', String(keepPage.value));
     }
 
     await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -481,8 +482,8 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
   try {
     isLoadingProgressBar.value = true;
     const day = localStorage.getItem('lastSearchParams') || '';
-    const {startDate, endDate , page, searchText }  = JSON.parse(day);
-    const dayQuery = startDate + endDate + page + searchText;
+    const {startDate, endDate , page, searchText, testType }  = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
 
     const uploadDto = {
       fileName: selectedUploadFile.value,
@@ -601,8 +602,8 @@ const downloadDtoObj = (downloadType: 'move' | 'copy') => {
   downloadUploadType.value = downloadType;
   showDownloadConfirm.value = false;
   const day = localStorage.getItem('lastSearchParams') || '';
-  const {startDate, endDate , page, searchText }  = JSON.parse(day);
-  const dayQuery = startDate + endDate + page + searchText;
+  const {startDate, endDate , page, searchText, testType }  = JSON.parse(day);
+  const dayQuery = startDate + endDate + page + searchText + testType;
   const sendingDownloadStartDate = moment(backupStartDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0];
   const sendingDownloadEndDate = moment(backupEndDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0];
   const downloadDto = {

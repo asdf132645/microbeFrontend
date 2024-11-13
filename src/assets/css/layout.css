@@ -1683,6 +1683,11 @@ span.proSpan {
     width: 430px;
 }
 
+.isNotNormalIcon {
+    position: absolute;
+    left: 16px;
+}
+
 p.loginTitle {
     color: var(--white-color);
     font-size: 3rem;

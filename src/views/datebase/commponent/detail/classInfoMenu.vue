@@ -65,7 +65,8 @@ import {LocationQueryValue, useRoute} from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
-import {IntervalType} from "@/common/type/generalTypes";
+import {IntervalType, RouteType} from "@/common/type/generalTypes";
+import {POWER_MODE} from "@/common/defines/constFile/dataBase";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -79,30 +80,25 @@ const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const resData = ref<any>([]);
 
 let timeoutId: IntervalType = null;
-let socketTimeoutId: IntervalType = null; // 타이머 ID 저장
+let socketTimeoutId: IntervalType = undefined; // 타이머 ID 저장
 const isButtonDisabled = ref(false);
 const pageMoveDeleteStop = ref(false);
 const ipAddress = ref<any>('');
-const isLoading = ref(true);
-const keepPage = ref('');
 const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFirstNum);
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
-const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
-const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const keepPage = ref(sessionStorage.getItem('keepPage') === 'true');
 
 onMounted(async () => {
   await getDetailRunningInfo();
-  isLoading.value = false;
-  keepPage.value = cellImageAnalyzedSetting.value.keepPage;
   pageMoveDeleteStop.value = true;
   const ip = await getDeviceIpApi();
   ipAddress.value = ip.data;
 });
 
 onUnmounted(async () => {
-  if (pageMoveDeleteStop.value) {
+  // if (pageMoveDeleteStop.value) {
     await deleteConnectionStatus();
-  }
+  // }
 })
 
 watch(props.isNext, (newVal) => {
@@ -159,7 +155,7 @@ const upDownBlockAccess = async () => {
 }
 
 const delayedEmit = (type: string, payload: string, delay: number) => {
-  if (socketTimeoutId !== null) clearTimeout(socketTimeoutId);
+  if (socketTimeoutId !== undefined) clearTimeout(socketTimeoutId);
 
   socketTimeoutId = window.setTimeout(() => {
     instance?.appContext.config.globalProperties.$socket.emit('state', {
@@ -171,7 +167,7 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
 
 const pageGo = async (path: string) => {
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
-  router.push(path);
+  await router.push(path);
   pageMoveDeleteStop.value = false;
 }
 
@@ -236,13 +232,12 @@ const handleDataResponse = async () => {
 };
 
 const updateUpDown = async (selectItemsNewVal: any) => {
-  if ((isActive("database")) || (!keepPage.value || keepPage.value === "false")) {
-    await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
-    pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
+  if (isActive("database") && !keepPage.value) {
+    await pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
   }
   emits('refreshClass', selectItemsNewVal);
   pageMoveDeleteStop.value = true;
-  await upDownBlockAccess(selectItemsNewVal);
+  await upDownBlockAccess();
 };
 
 const isActive = (path: string) => {

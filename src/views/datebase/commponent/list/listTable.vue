@@ -46,7 +46,7 @@
       <tr
           :class="{
             selectedTr: selectedItemId === item.id,
-            submittedTr: item.submitState === 'Submit' || item.submitState === 'lis',
+            submittedTr: item.submitState === 'Submit' || item.submitState === 'lisCbc',
             rock: item.lock_status && item.pcIp !== myIp,
             checkFirst: item.submitState === 'checkFirst',
           }"
@@ -58,17 +58,19 @@
           @contextmenu.prevent="rowRightClick(item, $event)"
           title="Double click the row"
       >
-        <td><font-awesome-icon class="red" :icon="['fas', 'triangle-exclamation']" v-if="!item.isNormal" /> {{ idx + 1 }}</td>
+        <td class="relative">
+          <font-awesome-icon class="red isNotNormalIcon" :icon="['fas', 'triangle-exclamation']" v-if="item.isNormal === 'N'" />
+          {{ idx + 1 }}
+        </td>
         <td @click="handleCheckboxChange(item)">
           <input type="checkbox" v-model="item.checked" :checked="item.checked"/>
         </td>
         <td> {{ getTestTypeText(item?.testType) }}</td>
         <td v-if="item?.cassetId">{{ item?.cassetId.split('_')[0] }}</td>
         <td v-else></td>
-
         <td>
           <font-awesome-icon
-              :icon="['fas', `${!item?.lock_status ? 'lock-open' : 'lock' }`]"
+              :icon="['fas', `${item?.lock_status ? 'lock' : 'lock-open' }`]"
           />
         </td>
         <td> {{ item?.traySlot }}</td>
@@ -80,7 +82,7 @@
         <td> {{ submitStateChangeText(item?.submitState, item?.submitUserId) }}</td>
         <td> {{ item?.submitOfDate === '' || !item?.submitOfDate ? '' : formatDateString(item?.submitOfDate) }}</td>
         <td>
-          <font-awesome-icon v-if="(item?.submitState === 'checkFirst' || item?.submitState === '') && !item.lock_status"
+          <font-awesome-icon v-if="(item?.submitState === 'checkFirst' || item?.submitState === '' || !item?.submitState) && !item.lock_status"
                              :icon="['fas', 'pen-to-square']"
                              @click="editData(item)"/>
         </td>
@@ -217,7 +219,6 @@ const itemObj = ref({});
 const store = useStore();
 const userModuleDataGet = computed(() => store.state.userModule);
 const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
-const projectType = ref('');
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -262,7 +263,6 @@ const dbDataFindByIdUsedInDelete = ref([]);
 
 onMounted(async () => {
   myIp.value = JSON.parse(sessionStorage.getItem('pcIp'));
-  projectType.value = window.PROJECT_TYPE;
   try {
 
     userId.value = getStoredUser.id;
@@ -333,16 +333,9 @@ watchEffect(async () => {
     }
 
     if (dataBasePageReset.value.dataBasePageReset === true && filteredItems.length !== 0) {
-      // loadingDelay.value = true;
       await selectItem(filteredItems[0]);
       await store.dispatch('commonModule/setCommonInfo', {dataBasePageReset: false});
       await removeCheckBox();
-      // 선택된 행이 화면에 보이도록 스크롤 조정
-      const selectedRow = document.querySelector(`[data-row-id="${filteredItems[0].id}"]`);
-      if (selectedRow && selectedItemId.value !== '0') {
-        // selectedRow.scrollIntoView({ behavior: 'auto', block: 'center' });
-        loadingDelay.value = false;
-      }
       return;
     }
 
@@ -605,8 +598,8 @@ const deleteRow = async (selectedItems: any, dbDataFindById: any) => {
       const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
       const rootArr = `${path}/${selectedItems.slotId}`;
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-      const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-      const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+      const {startDate, endDate, page, searchText, testType } = JSON.parse(day);
+      const dayQuery = startDate + endDate + page + searchText + testType;
       const req = {
         ids: [idsToDelete.id],
         img_drive_root_path: [rootArr],
@@ -635,8 +628,8 @@ const deleteRow = async (selectedItems: any, dbDataFindById: any) => {
       const path = selectedItems?.img_drive_root_path !== '' && selectedItems?.img_drive_root_path ? selectedItems?.img_drive_root_path : sessionStorage.getItem('iaRootPath');
       const rootArr = selectedItems.map(item => `${path}/${item.slotId}`);
       const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
-      const {startDate, endDate, page, searchText, nrCount, testType, wbcInfo, wbcTotal} = JSON.parse(day);
-      const dayQuery = startDate + endDate + page + searchText + nrCount + testType + wbcInfo + wbcTotal;
+      const { startDate, endDate, page, searchText, testType } = JSON.parse(day);
+      const dayQuery = startDate + endDate + page + searchText + testType;
       const req = {
         ids: idsToDelete,
         img_drive_root_path: rootArr,

@@ -47,6 +47,7 @@ import {filterAvailableImageItems, filterImageFiles} from "@/common/lib/utils/ch
 import ClassInfoImageSlider
   from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
 import { readDziFile, readJsonFile } from "@/common/api/service/fileReader/fileReaderApi";
+import {RouteType} from "@/common/type/generalTypes";
 
 
 const store = useStore();
@@ -278,7 +279,7 @@ const drawClassPosCanvas = (classInfoArr: any) => {
   }
 }
 
-const dziWidthHeight = async (imageFileName: any): Promise<any> => {
+const dziWidthHeight = async (imageFileName: string): Promise<any> => {
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
   const urlImage = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;

@@ -139,7 +139,7 @@
 
 <script setup lang="ts">
 
-import { LocationQueryValue, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import {computed, nextTick, onMounted, ref, watch, watchEffect} from "vue";
 import {
   FOUR_GRADES, GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM, CLASS_INFO_ID,
@@ -160,22 +160,19 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputNoTitle.vue";
 import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
+import {RouteType} from "@/common/type/generalTypes";
 
 const store = useStore();
 const route = useRoute();
 const emits = defineEmits();
-const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>('');
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentAnalysisType = ref(MO_TEST_TYPE.BLOOD);
 const moInfo = ref<any>([]);
 const detailClassInfo =  ref<any>([]);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const userModuleDataGet = computed(() => store.state.userModule);
 const checkedClassSet = ref<Set<string>>(new Set());
-
-onMounted(() => {
-  currentPowerType.value = route.query.pageType;
-})
 
 watch(() => selectItems.value, async (newSelectItems) => {
   await nextTick();
@@ -188,7 +185,7 @@ watch(() => selectItems.value, async (newSelectItems) => {
 // LP or HP
 watch(() => route.query.pageType, async (newPageType) => {
   await nextTick();
-  currentPowerType.value = newPageType;
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
   if (!isObjectEmpty(selectItems.value)) {
     currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
     getMoInfo(selectItems.value, String(newPageType));

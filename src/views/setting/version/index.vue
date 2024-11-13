@@ -19,10 +19,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted, onBeforeMount} from "vue";
+import { ref, onMounted } from "vue";
 import {readFileTxt} from "@/common/api/service/fileReader/fileReaderApi";
 
-const isProjectBm = ref(false);
 const projectVersionArr = ref<{key: string, name: string}[]>();
 const engineVersionArr = ref<{key: string, name: string}[]>();
 const deepNetVersion = ref('');
@@ -32,10 +31,6 @@ const bmCellEngineVersion = ref('');
 const pbSegEngineVersion = ref('');
 const pbWbcEngineVersion = ref('');
 const pbRbcEngineVersion = ref('');
-
-onBeforeMount(() => {
-  isProjectBm.value = window.PROJECT_TYPE === 'bm' ? true : false;
-})
 
 onMounted(async () => {
   await setVersions();
@@ -53,19 +48,11 @@ const getEngineVersion = () => {
   ];
 
   // Engine Versions
-  if (isProjectBm.value) {
-
-    engineVersionArr.value = [
-      { key: 'BM SEG Version', name: bmSegEngineVersion.value },
-      { key: 'BM CELL Version', name: bmCellEngineVersion.value },
-    ]
-  } else {
-    engineVersionArr.value = [
-      { key: 'MICROBE SEG Version', name: pbSegEngineVersion.value },
-      { key: 'MICROBE WBC Version', name: pbWbcEngineVersion.value },
-      { key: 'MICROBE RBC Version', name: pbRbcEngineVersion.value },
-    ]
-  }
+  engineVersionArr.value = [
+    { key: 'MICROBE SEG Version', name: pbSegEngineVersion.value },
+    { key: 'MICROBE WBC Version', name: pbWbcEngineVersion.value },
+    { key: 'MICROBE RBC Version', name: pbRbcEngineVersion.value },
+  ]
 }
 
 const setVersions = async () => {

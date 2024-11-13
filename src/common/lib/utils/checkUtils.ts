@@ -5,7 +5,9 @@ export const isObjectEmpty = <T extends object | undefined | null>(object: T) =>
 
 export const filterImageFiles = (files: string[]) => {
     const regex = /^\d*\.(jpg|bmp|jpeg)$/i;
-    return files.filter((item: string) => regex.test(item));
+    const filteredFiles = files.filter((item: string) => regex.test(item));
+    filteredFiles.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
+    return filteredFiles;
 };
 
 export const filterAvailableImageItems = (files: string[]) => {

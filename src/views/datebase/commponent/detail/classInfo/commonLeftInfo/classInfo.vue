@@ -154,7 +154,7 @@ import {
 } from "@/common/defines/constFile/dataBase";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
-import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
+import {RouteType} from "@/common/type/generalTypes";
 
 const store = useStore();
 const route = useRoute();
@@ -164,7 +164,6 @@ const userModuleDataGet = computed(() => store.state.userModule);
 
 
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
-const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const barcodeImg = ref('');
 const memo = ref('');
@@ -180,10 +179,8 @@ const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
 const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
-const currentPowerType = ref<LocationQueryValue | LocationQueryValue[]>(POWER_MODE.LOW_POWER);
+const currentPowerType = ref<RouteType>(POWER_MODE.LOW_POWER);
 const moInfoTotal = ref<any>([]);
-const classPositionArr = ref<any>([]);
-const checkedClassSet = ref<Set<string>>(new Set());
 
 onMounted(async () => {
   await nextTick();
@@ -199,10 +196,6 @@ onMounted(async () => {
 // watch(() => props.isCommitChanged, () => {
 //   selectItems.value?.submitState = 'Submit';
 // })
-
-watch(() => currentImageName.value, async () => {
-  await getClassPosition();
-})
 
 watch(() => [route.query.pageType, route.name], async () => {
   await nextTick();
@@ -335,19 +328,6 @@ const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) 
   }
 
   await resRunningItem(updatedSelectItems, true);
-}
-
-const getClassPosition = async () => {
-  const folderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
-  const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
-  const positionUrl = `${path}/${selectItems.value.slotId}/${folderName}/${currentImageName.value}.json`;
-
-  const response = await readJsonFile({ fullPath: positionUrl });
-  if (response.data !== 'not file') {
-    const newJsonData = response.data;
-  }
-
-  classPositionArr.value = null;
 }
 
 const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {

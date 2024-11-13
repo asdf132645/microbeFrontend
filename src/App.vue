@@ -635,10 +635,6 @@ const getGramRange = async () => {
       wbcConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'WBC')[0];
       epCellConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'EP Cell')[0];
       gramConvertSetting.value = gramItems.value.filter((gramItem: any) => gramItem.fullNm === 'Gram')[0];
-
-      console.log('wbcConvertSetting.value', wbcConvertSetting.value);
-      console.log('epCellConvertSetting.value', epCellConvertSetting.value);
-      console.log('gramConvertSetting.value', gramConvertSetting.value);
     }
   } catch (e) {
     console.log(e);
@@ -753,6 +749,7 @@ const cellImgGet = async () => {
         const data = result.data;
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
         await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
+        sessionStorage.setItem('keepPage', String(data?.keepPage));
       }
     }
   } catch (e) {

@@ -65,7 +65,6 @@ const alertType = ref('');
 const alertMessage = ref('');
 
 onMounted(async () => {
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
@@ -84,7 +83,7 @@ const getDetailRunningInfo = async () => {
     const result = await detailRunningApi(selectItems.value.id);
     await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: result.data });
   } catch (e) {
-    await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: {} });
+    await store.dispatch('/commonModulesetCommonInfo', { currentSelectItems: {} });
     console.log(e);
   } finally {
     iaRootPath.value = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path !== null && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
