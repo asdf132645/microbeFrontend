@@ -271,7 +271,6 @@ onMounted(async () => {
   document.addEventListener('click', handleOutsideClick);
   window.addEventListener("keydown", handleKeyDown);
   window.addEventListener("keyup", handleKeyUp);
-  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
 })
 
 async function handleKeyDown(event: KeyboardEvent) {
@@ -509,6 +508,7 @@ const rowDbClick = async (item) => {
 
   await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: item.id });
   await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: item });
+  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
   await getIpAddress(item);
   await router.push({
     name: 'databaseDetail',

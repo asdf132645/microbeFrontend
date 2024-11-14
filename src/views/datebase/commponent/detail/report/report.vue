@@ -136,6 +136,7 @@ onUnmounted(() => {
 
 const refreshClass = async () => {
   await initData();
+  await store.dispatch('commonModule/setCommonInfo', { refreshClass: false });
 }
 
 const printClose = () => {

@@ -146,10 +146,8 @@ import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {LocationQueryValue, useRoute} from "vue-router";
 import {
   CLASS_INFO_ID,
-  FOLDER_NAME,
   FOUR_GRADES, GRADE_TEXT,
   MO_TEST_TYPE,
-  POWER_MODE,
   SPUTUM_GRADES
 } from "@/common/defines/constFile/dataBase";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
@@ -158,14 +156,11 @@ import {RouteType} from "@/common/type/generalTypes";
 
 const store = useStore();
 const route = useRoute();
-const props = defineProps(['type', 'isCommitChanged']);
+const props = defineProps(['type', 'selectItems']);
 const emits = defineEmits();
 const userModuleDataGet = computed(() => store.state.userModule);
-
-
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
-const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const barcodeImg = ref('');
 const memo = ref('');
 const memoModal = ref(false);
@@ -186,9 +181,9 @@ onMounted(async () => {
   await nextTick();
   setBarcodeImage();
 
-  if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
-    getTotalMoInfo(selectItems.value);
+  if (!isObjectEmpty(props.selectItems)) {
+    currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
+    getTotalMoInfo(props.selectItems);
   }
 })
 
@@ -198,23 +193,23 @@ onMounted(async () => {
 
 watch([() => currentPowerType.value, () => route.name], async () => {
   await nextTick();
-  if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
-    getTotalMoInfo(selectItems.value);
+  if (!isObjectEmpty(props.selectItems)) {
+    currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
+    getTotalMoInfo(props.selectItems);
   }
 })
 
-watch(() => selectItems.value, async (newSelectItems) => {
+watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
   if (!isObjectEmpty(newSelectItems)) {
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
     getTotalMoInfo(newSelectItems);
-    memo.value = selectItems.value?.memo;
+    memo.value = props.selectItems?.memo;
     setBarcodeImage();
-    await store.dispatch('commonModule/setCommonInfo', {testType: selectItems.value?.testType});
-    if (selectItems.value?.submitState === "" || !selectItems.value?.submitState) {
-      const result: any = detailRunningApi(String(selectItems.value?.id));
-      const updatedItem = { id: selectItems.value.id ,submitState: 'checkFirst' };
+    await store.dispatch('commonModule/setCommonInfo', {testType: props.selectItems?.testType});
+    if (props.selectItems?.submitState === "" || !props.selectItems?.submitState) {
+      const result: any = detailRunningApi(String(props.selectItems?.id));
+      const updatedItem = { id: props.selectItems?.id ,submitState: 'checkFirst' };
       const updatedRuningInfo = {...result.data, ...updatedItem}
       await resRunningItem(updatedRuningInfo, true);
     }
@@ -227,9 +222,9 @@ const getTotalMoInfo = (newSelectItems: any) => {
 }
 
 const setBarcodeImage = () => {
-  const imgDriveRootPath = selectItems.value?.img_drive_root_path
+  const imgDriveRootPath = props.selectItems?.img_drive_root_path
   const path = imgDriveRootPath !== '' && imgDriveRootPath ? imgDriveRootPath : iaRootPath.value;
-  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, selectItems.value?.slotId, barcodeImgDir.barcodeDirName);
+  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
 }
 
 const lisModalOpen = () => {
@@ -240,7 +235,7 @@ const lisModalOpen = () => {
 
 const barcodeCopy = async () => {
   const textarea = document.createElement('textarea');
-  textarea.value = selectItems.value.barcodeNo;
+  textarea.value = props.selectItems.barcodeNo;
   document.body.appendChild(textarea);
   textarea.select();
   document.execCommand('copy');
@@ -266,7 +261,7 @@ const hideConfirm = () => {
 
 const onCommit = async () => {
   const localTime = moment().local();
-  const result: any = await detailRunningApi(String(selectItems.value?.id));
+  const result: any = await detailRunningApi(String(props.selectItems?.id));
   const updatedItem = {
     submitState: 'Submit',
     submitOfDate: localTime.format(),
@@ -282,7 +277,7 @@ const onCommit = async () => {
 const memoChange = async () => {
   const enterAppliedmemo = memo.value.replaceAll('\r\n', '<br>');
   const updatedItem = { memo: enterAppliedmemo };
-  const result: any = await detailRunningApi(String(selectItems.value?.id));
+  const result: any = await detailRunningApi(String(props.selectItems?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
 
   await resRunningItem(updatedRuningInfo);
@@ -314,14 +309,14 @@ const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) 
     return item;
   })
 
-  const updatedMoInfoObj = selectItems.value.classInfo.map((item: any) => {
+  const updatedMoInfoObj = props.selectItems.classInfo.map((item: any) => {
     if (item.id === filteredMoInfo.id && item.name === filteredMoInfo.name) {
       return {...item, ...filteredMoInfo };
     }
     return item;
   })
   const updatedSelectItems = {
-    ...selectItems.value,
+    ...props.selectItems,
     moInfo: updatedMoInfoObj
   }
 

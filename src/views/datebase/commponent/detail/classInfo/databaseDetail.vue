@@ -13,12 +13,12 @@
         :cbcAge="selectItems?.cbcAge"
     />
     <div class="databaseDetailLeft shadowBox">
-        <ClassInfo type='listTable' @nextPage="nextPage" />
+        <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage" />
     </div>
 
 
     <div class="databaseDetailRight">
-      <ClassImageInfo />
+      <ClassImageInfo :selectItems="selectItems" />
     </div>
   </div>
 
@@ -52,13 +52,9 @@ import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
 const store = useStore();
 const route = useRoute();
 const wbcInfo = ref<any>(null);
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
-
-const userId = ref('');
-const userModuleDataGet = computed(() => store.state.userModule);
 const iaRootPath = ref<string>(store.state.commonModule.iaRootPath);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
-const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const instance = getCurrentInstance();
 const isNext = ref(false);
 const showAlert = ref(false);
@@ -69,10 +65,6 @@ onMounted(async () => {
   await getDetailRunningInfo();
   wbcInfo.value = [];
 });
-
-watch(() => route.query.pageType, async (newPageType) => {
-  await store.dispatch('commonModule/setCommonInfo', { currentPowerType: newPageType });
-})
 
 const getDetailRunningInfo = async () => {
   // const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
@@ -103,17 +95,15 @@ const isNextFalse = () => {
   isNext.value = false;
 }
 
-watch(userModuleDataGet.value, (newUserId, oldUserId) => {
-  userId.value = newUserId.id;
-});
-
 const hideAlert = () => {
   showAlert.value = false;
 }
 const refreshClass = async (data: any) => {
-  // await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
+
+  await store.dispatch('commonModule/setCommonInfo', { refreshClass: false });
 }
 
 </script>

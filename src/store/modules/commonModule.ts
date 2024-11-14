@@ -42,8 +42,9 @@ export interface CommonState {
     cellImageAnalyzedSetting: CellImgAnalyzedResponse;
     currentSelectItems: any;
     currentImageName: string;
-    currentPowerType: 'LP' | 'HP';
     currentAnalyzingSlotNo: number;
+    currentPowerType: 'LP' | 'HP';
+    refreshClass: boolean;
 }
 
 interface CommonModule {
@@ -90,8 +91,9 @@ interface CommonModule {
         setCellImageAnalyzedSetting: (state: CommonState, value: CellImgAnalyzedResponse) => void;
         setCurrentSelectItems: (state: CommonState, value: any) => void;
         setCurrentImageName: (state: CommonState, value: string) => void;
-        setCurrentPowerType: (state: CommonState, value: 'LP' | 'HP') => void;
         setCurrentAnalyzingSlotNo: (state: CommonState, value: number) => void;
+        setCurrentPowerType: (state: CommonState, value: 'LP' | 'HP') => void;
+        setRefreshClass: (state: CommonState, value: boolean) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -139,8 +141,9 @@ export const commonModule: CommonModule = {
         cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED,
         currentSelectItems: {},
         currentImageName: '',
-        currentPowerType: 'LP',
         currentAnalyzingSlotNo: 0,
+        currentPowerType: 'LP',
+        refreshClass: false,
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -267,11 +270,14 @@ export const commonModule: CommonModule = {
         setCurrentImageName(state: CommonState, value: string): void {
             state.currentImageName = value;
         },
+        setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
+            state.currentAnalyzingSlotNo = value;
+        },
         setCurrentPowerType(state: CommonState, value: 'LP' | 'HP'): void {
             state.currentPowerType = value;
         },
-        setCurrentAnalyzingSlotNo(state: CommonState, value: number): void {
-            state.currentAnalyzingSlotNo = value;
+        setRefreshClass(state: CommonState, value: boolean): void {
+            state.refreshClass = value;
         }
     },
     actions: {
@@ -399,13 +405,15 @@ export const commonModule: CommonModule = {
             if (payload.hasOwnProperty('currentImageName')) {
                 commit('setCurrentImageName', payload.currentImageName);
             }
-            if (payload.hasOwnProperty('currentPowerType')) {
-                commit('setCurrentPowerType', payload.currentPowerType);
-            }
             if (payload.hasOwnProperty('currentAnalyzingSlotNo')) {
                 commit('setCurrentAnalyzingSlotNo', payload.currentAnalyzingSlotNo);
             }
-
+            if (payload.hasOwnProperty('currentPowerType')) {
+                commit('setCurrentPowerType', payload.currentPowerType);
+            }
+            if (payload.hasOwnProperty('refreshClass')) {
+                commit('setRefreshClass', payload.refreshClass);
+            }
         },
     },
 };

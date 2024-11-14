@@ -17,7 +17,7 @@
           </div>
         </div>
 
-        <ClassDetailInfo @checkedClassSet="checkedClassSetFunc" />
+        <ClassDetailInfo :selectItems="selectItems" @checkedClassSet="checkedClassSetFunc" />
       </div>
 
       <ClassInfoImageSlider :allImages="allImages" @goToSelectImage="goToSelectImage" />
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import OpenSeadragon from 'openseadragon';
-import { computed, defineEmits, nextTick, onMounted, ref, watch } from 'vue';
+import {computed, defineEmits, nextTick, onMounted, ref, watch} from 'vue';
 import { useStore } from "vuex";
 import { LocationQueryValue, useRoute } from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
@@ -52,7 +52,7 @@ import {RouteType} from "@/common/type/generalTypes";
 
 const store = useStore();
 const route = useRoute();
-const props = defineProps(['checkedClassSet']);
+const props = defineProps(['selectItems']);
 const emits = defineEmits();
 const showAlert = ref(false);
 const alertType = ref('');
@@ -61,47 +61,42 @@ const canvasOverlay = ref<HTMLCanvasElement | null>(null);
 let viewer: any = ref<any>(null);
 const tilingViewerLayer = ref(null);
 const tileExist = ref(true);
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
-const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const refreshClass = computed(() => store.state.commonModule.refreshClass);
 const allImages = ref<any>([]);
 const hiddenImages = ref<{ [key: string]: boolean }>({});
 const checkedClassIdArr = ref<string[]>([]);
 const classInfoPositionArr = ref<any>([]);
 const drawPath = ref<any>([]);
 
-onMounted(async () => {
+const checkAndInitialize = async () => {
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: currentImageName.value || '' });
   if (tilingViewerLayer) {
     tilingViewerLayer.innerHTML = '';
     if (viewer.value) viewer.value.destroy();
     await initElement();
   }
-})
+};
 
-watch(() => selectItems.value, async () => {
+watch(() => currentPowerType.value, async (newValue, oldValue) => {
+  if (newValue === oldValue || refreshClass.value) return;
   await nextTick();
-  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = '';
+  await checkAndInitialize();
+});
 
-    if (viewer.value) viewer.value.destroy();
-    await initElement();
-  }
-})
-
-watch(() => currentPowerType.value, async () => {
+watch(() => props.selectItems, async (newValue, oldValue) => {
+  if (newValue === oldValue || refreshClass.value) return;
   await nextTick();
-  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = '';
+  await checkAndInitialize();
+});
 
-    if (viewer.value) viewer.value.destroy();
-    await initElement();
+watch(() => refreshClass.value, async () => {
+  if (!refreshClass.value) {
+    await checkAndInitialize();
   }
 })
 
@@ -109,24 +104,15 @@ watch(() => currentImageName.value, async (curImgName) => {
   await fetchImageJsonData(curImgName);
 })
 
-watch(() => props.checkedClassSet, (newCheckedClassSet) => {
-  removeClassPosCanvas();
-  checkedClassIdArr.value = [...newCheckedClassSet];
-
-  drawClassPosCanvas(checkedClassIdArr.value);
-}, { deep: true });
-
 const initElement = async () => {
-
-  const rootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const rootPath = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
-  const folderPath = `${rootPath}/${selectItems.value.slotId}/${powerFolderName}`;
+  const folderPath = `${rootPath}/${props.selectItems?.slotId}/${powerFolderName}`;
   const tilesInfo = await fetchTileImagesInfo(folderPath);
 
-  if (tilesInfo.length === 0) return;
+  if (!tilesInfo || tilesInfo.length === 0) return;
 
   try {
-
     viewer.value = OpenSeadragon({
       id: "tiling-viewer_img_list",
       animationTime: 0.4,
@@ -201,10 +187,10 @@ const initElement = async () => {
 const fetchImageJsonData = async (curImageName: string) => {
   if (!curImageName) return;
 
-  const imageDriveRootPath = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const imageDriveRootPath = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
   const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
   const imageName = curImageName.split('.')[0];
-  const originJsonUrl = `${imageDriveRootPath}/${selectItems.value?.slotId}/${folderName}/${imageName}.json`;
+  const originJsonUrl = `${imageDriveRootPath}/${props.selectItems?.slotId}/${folderName}/${imageName}.json`;
   try {
     const result = await readJsonFile({ fullPath: originJsonUrl });
     classInfoPositionArr.value = result.data.classList;
@@ -271,9 +257,9 @@ const drawClassPosCanvas = (classInfoArr: any) => {
 }
 
 const dziWidthHeight = async (imageFileName: string): Promise<any> => {
-  const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : iaRootPath.value;
+  const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
-  const dziUrl = `${path}/${selectItems.value.slotId}/${powerFolderName}/${imageFileName}.dzi`;
+  const dziUrl = `${path}/${props.selectItems.slotId}/${powerFolderName}/${imageFileName}.dzi`;
   const imageResponse = await readDziFile({ filePath: dziUrl });
   return await extractWidthHeightFromDzi(`${imageFileName}.jpg`, imageResponse);
 }
@@ -306,7 +292,6 @@ const fetchTileImagesInfo = async (folderPath: string) => {
   if (!response.ok) return;
 
   const fileNames = await response.json();
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: filterImageFiles(fileNames)[0] });
   const availableFileNames = filterAvailableImageItems(fileNames) as string[];
 
   const sortedFileNames = availableFileNames.reduce((acc: { files: string[], jpg: string[] }, fileName: string) => {

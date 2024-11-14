@@ -53,6 +53,8 @@ import {
   watch
 } from "vue";
 import router from "@/router";
+import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 
 import {
   clearPcIpState,
@@ -60,13 +62,10 @@ import {
   pageUpDownRunningApi,
   updatePcIpStateApi
 } from "@/common/api/service/runningInfo/runningInfoApi";
-import {useStore} from "vuex";
-import {LocationQueryValue, useRoute} from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
-import {IntervalType, RouteType} from "@/common/type/generalTypes";
-import {POWER_MODE} from "@/common/defines/constFile/dataBase";
+import { IntervalType } from "@/common/type/generalTypes";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -76,14 +75,13 @@ const props = defineProps(['isNext']);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const resData = ref<any>([]);
-
 let timeoutId: IntervalType = null;
 let socketTimeoutId: IntervalType = undefined; // 타이머 ID 저장
 const isButtonDisabled = ref(false);
 const pageMoveDeleteStop = ref(false);
 const ipAddress = ref<any>('');
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const dbListDataFirstNum = computed(() => store.state.commonModule.dbListDataFirstNum);
 const dbListDataLastNum = computed(() => store.state.commonModule.dbListDataLastNum);
 const keepPage = ref(sessionStorage.getItem('keepPage') === 'true');
@@ -166,6 +164,9 @@ const delayedEmit = (type: string, payload: string, delay: number) => {
 };
 
 const pageGo = async (path: string) => {
+  if (path.includes('LP')) await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'LP' });
+  else if (path.includes('HP')) await store.dispatch('commonModule/setCommonInfo', { currentPowerType: 'HP' });
+
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: '' });
   await router.push(path);
   pageMoveDeleteStop.value = false;
@@ -221,18 +222,19 @@ const processNextDbIndex = async (direction: any, id: number) => {
     return;
   }
 
-  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: result?.data });
   await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: String(result?.data.id) });
-  await handleDataResponse();
+  await handleDataResponse(result?.data);
 };
 
-const handleDataResponse = async () => {
+const handleDataResponse = async (selectItemsNewVal: any) => {
   if (!resData.value) return;
-  await updateUpDown(selectItems.value);
+  await updateUpDown(selectItemsNewVal);
 };
 
 const updateUpDown = async (selectItemsNewVal: any) => {
+  await store.dispatch('commonModule/setCommonInfo', { refreshClass: true });
   if (isActive("database") && !keepPage.value) {
+    await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: selectItemsNewVal });
     await pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
   }
   emits('refreshClass', selectItemsNewVal);

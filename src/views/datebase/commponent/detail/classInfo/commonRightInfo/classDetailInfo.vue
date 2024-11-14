@@ -140,7 +140,7 @@
 <script setup lang="ts">
 
 import { useRoute } from "vue-router";
-import {computed, nextTick, onMounted, ref, watch, watchEffect} from "vue";
+import {computed, nextTick, ref, watch, defineProps } from "vue";
 import {
   FOUR_GRADES, GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM, CLASS_INFO_ID,
   MO_CATEGORY_NAME,
@@ -160,24 +160,23 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputNoTitle.vue";
 import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
-import {RouteType} from "@/common/type/generalTypes";
 
 const store = useStore();
 const route = useRoute();
+const props = defineProps(['selectItems'])
 const emits = defineEmits();
 const currentAnalysisType = ref(MO_TEST_TYPE.BLOOD);
 const moInfo = ref<any>([]);
 const detailClassInfo =  ref<any>([]);
-const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
-const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const userModuleDataGet = computed(() => store.state.userModule);
+const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const checkedClassSet = ref<Set<string>>(new Set());
 
-watch(() => selectItems.value, async (newSelectItems) => {
+watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
   if (!isObjectEmpty(newSelectItems)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
+    currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
     getMoInfo(newSelectItems, String(currentPowerType.value));
   }
 }, { deep: true });
@@ -185,17 +184,16 @@ watch(() => selectItems.value, async (newSelectItems) => {
 // LP or HP
 watch(() => currentPowerType.value, async () => {
   await nextTick();
-  if (!isObjectEmpty(selectItems.value)) {
-    currentAnalysisType.value = getCurrentAnalysisType(selectItems.value.testType);
-    getMoInfo(selectItems.value, String(currentPowerType.value));
+  if (!isObjectEmpty(props.selectItems)) {
+    currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
+    getMoInfo(props.selectItems, String(currentPowerType.value));
   }
 });
 
-watch(() => currentImageName.value, async (newSelectedImageName) => {
+watch(() => currentImageName.value, async () => {
   await nextTick();
-  await store.dispatch('commonModule/setCommonInfo', { currentImageName: newSelectedImageName });
-  if (!isObjectEmpty(selectItems.value)) {
-    getMoInfo(selectItems.value, String(currentPowerType.value));
+  if (!isObjectEmpty(props.selectItems)) {
+    getMoInfo(props.selectItems, String(currentPowerType.value));
   }
 })
 
@@ -250,14 +248,14 @@ const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) 
     return item;
   })
 
-  const updatedMoInfoObj = selectItems.value.classInfo.map((item: any) => {
+  const updatedMoInfoObj = props.selectItems.classInfo.map((item: any) => {
     if (item.id === filteredMoInfo.id && item.name === filteredMoInfo.name) {
       return {...item, ...filteredMoInfo };
     }
     return item;
   })
   const updatedSelectItems = {
-    ...selectItems.value,
+    ...props.selectItems,
     moInfo: updatedMoInfoObj
   }
 

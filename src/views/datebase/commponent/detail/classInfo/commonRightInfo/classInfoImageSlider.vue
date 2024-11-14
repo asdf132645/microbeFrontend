@@ -27,7 +27,6 @@ import {useRoute} from "vue-router";
 import { useStore } from "vuex";
 import { Splide, SplideSlide, SplideTrack } from '@splidejs/vue-splide';
 
-
 const route = useRoute();
 const store = useStore();
 const hiddenImages = ref<{ [key: string]: boolean }>({});
@@ -41,7 +40,9 @@ watch([() => route.params.id, () => currentPowerType.value], () => {
   if (splide.value) splide.value.go(0);
 })
 
-
+watch(() => props.allImages, async (newAllImages) => {
+  await store.dispatch('commonModule/setCommonInfo', { currentImageName: newAllImages[0]?.imageName ?? '' });
+})
 
 const selectImage = async (imageIndex: number, imageFileName: string) => {
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: imageFileName });
