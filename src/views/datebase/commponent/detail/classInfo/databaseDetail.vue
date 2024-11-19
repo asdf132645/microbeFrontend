@@ -102,7 +102,6 @@ const refreshClass = async (data: any) => {
   await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: data });
   const path = selectItems.value?.img_drive_root_path !== '' && selectItems.value?.img_drive_root_path ? selectItems.value?.img_drive_root_path : store.state.commonModule.iaRootPath;
   iaRootPath.value = path;
-
   await store.dispatch('commonModule/setCommonInfo', { refreshClass: false });
 }
 

@@ -233,11 +233,12 @@ const handleDataResponse = async (selectItemsNewVal: any) => {
 
 const updateUpDown = async (selectItemsNewVal: any) => {
   await store.dispatch('commonModule/setCommonInfo', { refreshClass: true });
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: selectItemsNewVal });
+  emits('refreshClass', selectItemsNewVal);
+
   if (isActive("database") && !keepPage.value) {
-    await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: selectItemsNewVal });
     await pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
   }
-  emits('refreshClass', selectItemsNewVal);
   pageMoveDeleteStop.value = true;
   await upDownBlockAccess();
 };

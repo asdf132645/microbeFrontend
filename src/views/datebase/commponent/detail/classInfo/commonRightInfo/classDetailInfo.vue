@@ -176,6 +176,7 @@ const checkedClassSet = ref<Set<string>>(new Set());
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
   if (!isObjectEmpty(newSelectItems)) {
+    checkedClassSet.value = new Set();
     currentAnalysisType.value = getCurrentAnalysisType(newSelectItems.testType);
     getMoInfo(newSelectItems, String(currentPowerType.value));
   }
@@ -185,6 +186,7 @@ watch(() => props.selectItems, async (newSelectItems) => {
 watch(() => currentPowerType.value, async () => {
   await nextTick();
   if (!isObjectEmpty(props.selectItems)) {
+    checkedClassSet.value = new Set();
     currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
     getMoInfo(props.selectItems, String(currentPowerType.value));
   }
@@ -193,6 +195,7 @@ watch(() => currentPowerType.value, async () => {
 watch(() => currentImageName.value, async () => {
   await nextTick();
   if (!isObjectEmpty(props.selectItems)) {
+    checkedClassSet.value = new Set();
     getMoInfo(props.selectItems, String(currentPowerType.value));
   }
 })

@@ -179,9 +179,8 @@ const moInfoTotal = ref<any>([]);
 
 onMounted(async () => {
   await nextTick();
-  setBarcodeImage();
-
   if (!isObjectEmpty(props.selectItems)) {
+    setBarcodeImage();
     currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
     getTotalMoInfo(props.selectItems);
   }

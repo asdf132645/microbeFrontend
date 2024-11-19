@@ -61,14 +61,20 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 import { useStore } from "vuex";
+import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 
 const store = useStore();
 const props = defineProps(['classInfo', 'grades', 'moInfo', 'noHead', 'isCheckable'])
 const emits = defineEmits();
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
+const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const checkedClasses = ref<any>({});
 
 watch(() => currentImageName.value, () => {
+  checkedClasses.value = {};
+})
+
+watch(() => selectItems.value, () => {
   checkedClasses.value = {};
 })
 

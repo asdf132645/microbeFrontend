@@ -14,7 +14,7 @@
     />
     <div class="reportDiv">
       <div class="databaseDetailLeft shadowBox">
-        <ClassInfo type='report' @submitStateChanged="submitStateChanged" :isCommitChanged="isCommitChanged"/>
+        <ClassInfo type='report' @submitStateChanged="submitStateChanged" :isCommitChanged="isCommitChanged" :selectItems="selectItems" />
       </div>
       <div class="reportDetail shadowBox">
         <div class="reportTitle">

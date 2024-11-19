@@ -501,10 +501,8 @@ const delayedEmit = (type, payload, delay) => {
     });
   }, delay);
 };
-const rowDbClick = async (item) => {
-  if (item.lock_status && item?.pcIp !== myIp.value) {
-    return;
-  }
+const rowDbClick = async (item: any) => {
+  if (item.lock_status && item?.pcIp !== myIp.value) return;
 
   await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: item.id });
   await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: item });
@@ -517,7 +515,7 @@ const rowDbClick = async (item) => {
   });
 }
 
-const closeLayer = (val) => {
+const closeLayer = (val: boolean) => {
   visible.value = val;
 };
 

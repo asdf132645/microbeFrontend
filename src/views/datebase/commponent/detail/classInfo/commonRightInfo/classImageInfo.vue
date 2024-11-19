@@ -80,6 +80,7 @@ const checkAndInitialize = async () => {
     if (viewer.value) viewer.value.destroy();
     await initElement();
   }
+  await fetchImageJsonData(currentImageName.value);
 };
 
 watch(() => currentPowerType.value, async (newValue, oldValue) => {
@@ -141,7 +142,8 @@ const initElement = async () => {
     canvas.id = 'myCanvas';
     canvasOverlay.value = canvas;
 
-    viewer.value.addHandler('open', function (event: any) {
+    viewer.value.addHandler('open', async (event: any) => {
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.source.Image.imageName });
       const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
 
       if (fullPageButton) {
