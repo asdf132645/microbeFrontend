@@ -99,6 +99,7 @@ const afterResponse = async (initializeType: string) => {
     switch (initializeType) {
         case 'cellImage':
             await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: DEFAULT_CELL_IMAGE_ANALYZED })
+            sessionStorage.setItem('iaRootPath', String(DEFAULT_CELL_IMAGE_ANALYZED.iaRootPath));
             break;
         default:
             break;

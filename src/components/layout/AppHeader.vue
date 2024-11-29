@@ -2,7 +2,7 @@
   <header class='header'>
     <nav>
       <!--  좌측메뉴  -->
-      <div class='appHeaderLeft bmComponent' v-if="!appHeaderLeftHidden">
+      <div class='appHeaderLeft' v-if="!appHeaderLeftHidden">
         <div class="borderLine">
           <img src="@/assets/celli.png" class="headerLogo"/>
           <p class="logoProjectTitle">MO</p>
@@ -29,6 +29,19 @@
           <span class='icoText'>Database</span>
         </router-link>
 
+        <!-- 가운데 메뉴 -->
+        <div v-if="machineVersion === '100a'" class="autoStart-container">
+          <ProgressBar
+              text="Auto Start"
+              :value="autoStartTimer"
+              gradientStart="#2196f3"
+              gradientEnd="#03a9f4"
+              :animationDuration="0.3"
+              :showGlowEffect="true"
+          />
+
+        </div>
+
         <!--  우측메뉴  -->
         <div class="small-icon-menu">
           <div class="lastMenu">
@@ -50,7 +63,7 @@
           <div class="iconHeaderMenu">
             <ul>
               <li class="alarm">
-                <font-awesome-icon :icon="['fas', 'bell']" :class="{ 'blinking': isAlarm }"/>
+                <font-awesome-icon :icon="['fas', 'bell']" :class="{ 'blinking-red': isErrorAlarm, 'blinking-blue': isCompleteAlarm }"/>
               </li>
               <li>
                 <font-awesome-icon v-if="isDoorOpen !== 'Y'" :icon="['fas', 'door-closed']"></font-awesome-icon>
@@ -132,7 +145,7 @@
 
 <script setup lang="ts">
 import {LocationQueryValue, useRoute} from 'vue-router';
-import {computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {computed, getCurrentInstance, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 import router from "@/router";
 import Modal from '@/components/commonUi/modal.vue';
@@ -148,6 +161,8 @@ import {getDateTimeStr} from "@/common/lib/utils/dateUtils";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import axios from "axios";
+import {SOUND_COMPLETE_ALARM, SOUND_ERROR_ALARM} from "@/common/lib/utils/assetUtils";
+import ProgressBar from "@/components/commonUi/ProgressBar.vue";
 
 const route = useRoute();
 const appHeaderLeftHidden = ref(false);
@@ -157,6 +172,7 @@ const getStoredUser = JSON.parse(storedUser || '{}');
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const isBlinkingPrime = ref(false);
 let blinkTimeout: ReturnType<typeof setTimeout> | null = null;
+const machineVersion = ref('');
 
 const instance = getCurrentInstance();
 const showConfirm = ref(false);
@@ -176,7 +192,8 @@ const eqStatCdData = ref({
 });
 const oilCountData = ref('');
 const storagePercentData = ref('');
-const isAlarm = ref(false);
+const isCompleteAlarm = ref(false);
+const isErrorAlarm = ref(false);
 const oilVisible = ref(false);
 const maxOilCount = ref(1000);
 const statusBarWrapper = ref<HTMLDivElement | null>(null);
@@ -188,35 +205,20 @@ const alarmCount = ref(0);
 const noRouterPush = ref(false);
 const currentDate = ref<string>("");
 const currentTime = ref<string>("");
-let isAralrmInterver = null;
+let isAlarmInterval = null;
+let isCompleteAlarmInterval = null;
+let isErrorAlarmInterval = null;
+const isPlayingCompleteAlarm = ref(false);
+const isPlayingErrorAlarm = ref(false);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
 const clickType = ref('');
-const userSetOutUl = ref(false);
 const isStartCountUpdated = ref(false);
+const autoStartTimer = ref(0);
 
-const keydownHandler = (e: KeyboardEvent) => {
-  if (e.ctrlKey && ['61', '107', '173', '109', '187', '189'].includes(String(e.which))) {
-    e.preventDefault();
-  }
-}
-
-const formattedDate = computed(() => {
-  return currentDate.value;
-});
-
-const formattedTime = computed(() => {
-  return currentTime.value;
-});
-
-const userSetOutToggle = () => {
-  userSetOutUl.value = !userSetOutUl.value;
-}
-
-const userSetOutOff = () => {
-  userSetOutUl.value = false;
-}
+const formattedDate = computed(() => currentDate.value);
+const formattedTime = computed(() => currentTime.value);
 
 const updateDateTime = () => {
   const now = new Date();
@@ -257,6 +259,10 @@ const fullScreen = () => {
   }
 }
 
+onBeforeMount(() => {
+  machineVersion.value = window.MACHINE_VERSION;
+})
+
 onMounted(async () => {
 
   updateDateTime(); // 초기 시간 설정
@@ -269,17 +275,15 @@ onMounted(async () => {
     await store.dispatch('userModule/setUserAction', getStoredUser);
   }
 
-  document.addEventListener('click', closeUserSetBox);
   window.addEventListener('wheel', preventScroll, {passive: false});
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', closeUserSetBox);
   window.removeEventListener('wheel', preventScroll);
 })
 
 
-watch(userModuleDataGet.value, (newUserId, oldUserId) => {
+watch(userModuleDataGet.value, (newUserId) => {
   cellImgGet();
   userId.value = newUserId.id;
 });
@@ -290,6 +294,11 @@ watch([embeddedStatusJobCmd.value], async (newVals: any) => {
   isDoorOpen.value = newVals[0].sysInfo.isDoorOpen;
   storagePercent.value = Number(newVals[0].sysInfo.storageSize);
   eqStatCd.value = newVals[0].sysInfo.eqStatCd;
+
+  const autoStartTimerNumber = newVals[0].sysInfo?.autoStartTimer;
+  if (machineVersion.value === '100a' && autoStartTimerNumber !== undefined) {
+    autoStartTimer.value = (parseFloat(autoStartTimerNumber) / 5) * 100;
+  }
 
   eqStatCdData.value = eqStatCdChangeVal(newVals[0].sysInfo.eqStatCd);
   oilCountData.value = oilCountChangeVal();
@@ -330,24 +339,42 @@ watch([commonDataGet.value], async (newVals: any) => {
 });
 
 watch([runInfo.value], async (newVals: any) => {
+  isCompleteAlarm.value = newVals[0].isCompleteAlarm;
+  isErrorAlarm.value = newVals[0].isErrorAlarm;
 
-  isAlarm.value = newVals[0].isAlarm;
-  if (newVals[0].isAlarm) {
-    isAralrmInterver = setTimeout(() => {
-      store.dispatch('commonModule/setCommonInfo', {isAlarm: false});
+  if (isErrorAlarm.value) {
+    if (!isPlayingErrorAlarm.value) {
+      isPlayingErrorAlarm.value = true;
+      try {
+        await SOUND_ERROR_ALARM.play();
+      } catch (e) {
+        console.log(e);
+      } finally {
+        isPlayingErrorAlarm.value = false;
+      }
+    }
+
+    isErrorAlarmInterval = setTimeout(() => {
+      store.dispatch('commonModule/setCommonInfo', { isErrorAlarm: false });
+    }, alarmCount.value);
+  } else if (isCompleteAlarm.value) {
+
+    if (!isPlayingCompleteAlarm.value) {
+      isPlayingCompleteAlarm.value = true;
+      try {
+        await SOUND_COMPLETE_ALARM.play();
+      } catch (e) {
+        console.log(e);
+      } finally {
+        isPlayingCompleteAlarm.value = false;
+      }
+    }
+
+    isCompleteAlarmInterval = setTimeout(() => {
+      store.dispatch('commonModule/setCommonInfo', { isCompleteAlarm: false });
     }, alarmCount.value);
   }
-
 });
-
-const closeUserSetBox = (event: any) => {
-  const selectBox = document.querySelector('.userSetOutUl');
-  const selectButton = document.querySelector('.cursorPointer');
-  if (selectButton && selectButton.contains(event.target as Node)) return;
-  if (selectBox && !selectBox.contains(event.target as Node)) {
-    userSetOutUl.value = false;
-  }
-}
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
@@ -372,14 +399,12 @@ const logout = () => {
   confirmMessage.value = MESSAGES.Logout;
   showConfirm.value = true;
   localStorage.removeItem('user')
-  userSetOutUl.value = false;
 }
 
 const exit = async () => {
   clickType.value = 'exit';
   confirmMessage.value = MESSAGES.exit;
   showConfirm.value = true;
-  userSetOutUl.value = false;
 }
 
 const oilCountChangeVal = (): string => {
@@ -461,21 +486,15 @@ const onReset = () => {
     // uiVersion: 'uimd-pb-comm_v3',
     userId: '',
   });
-  instance?.appContext.config.globalProperties.$socket.emit('message', {
-    type: 'SEND_DATA',
-    payload: settings
-  });
 
+  EventBus.publish('childEmitSocketData', settings);
   showSuccessAlert(MESSAGES.SUCCESS_ALERT);
 }
 
 const getPercent = () => {
-  if (!statusBarWrapper.value || !statusBar.value) {
-    return;
-  }
+  if (!statusBarWrapper.value || !statusBar.value) return;
   const percent = Math.round((oilCount.value / maxOilCount.value) * 100);
   const progressBarWidth = `${(percent / 100) * statusBarWrapper.value.offsetWidth}px`;
-
   statusBar.value.style.width = progressBarWidth;
 }
 
@@ -508,6 +527,7 @@ const cellImgGet = async () => {
         alarmCount.value = data?.isAlarm ? Number(data.alarmCount) * 1000 : 5000;
         await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
+        sessionStorage.setItem('iaRootPath', data?.iaRootPath);
 
       }
     }

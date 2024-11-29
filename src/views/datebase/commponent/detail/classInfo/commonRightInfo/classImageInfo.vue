@@ -48,6 +48,7 @@ import ClassInfoImageSlider
   from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
 import { readDziFile, readJsonFile } from "@/common/api/service/fileReader/fileReaderApi";
 import {RouteType} from "@/common/type/generalTypes";
+import {openseadragonPrefixUrl} from "@/common/lib/utils/assetUtils";
 
 
 const store = useStore();
@@ -120,7 +121,7 @@ const initElement = async () => {
       showNavigator: false,
       sequenceMode: true,
       defaultZoomLevel: 1,
-      prefixUrl: `${apiBaseUrl}/folders?folderPath=D:/UIMD_Data/Res/uimdFe/images/`,
+      prefixUrl: openseadragonPrefixUrl(apiBaseUrl),
       tileSources: tilesInfo,
       showSequenceControl: true,
       showReferenceStrip: false,

@@ -45,7 +45,8 @@
           class="list-table-item"
           :class="{
             selectedTr: selectedItemId === item.id,
-            submittedTr: item.submitState === 'Submit' || item.submitState === 'lisCbc',
+            submittedTr: item.submitState === 'Submit',
+            lisTr: item.submitState === 'lisCbc',
             rock: item.lock_status && item.pcIp !== myIp,
             checkFirst: item.submitState === 'checkFirst',
           }"
@@ -58,7 +59,7 @@
           title="Double click the row"
       >
         <td class="relative">
-          <font-awesome-icon class="red isNotNormalIcon" :icon="['fas', 'triangle-exclamation']" v-if="item.isNormal === 'N'" />
+          <font-awesome-icon class="red isNotNormalIcon" :icon="['fas', 'triangle-exclamation']" v-if="!item.isNormal" />
           {{ idx + 1 }}
         </td>
         <td @click="handleCheckboxChange(item)">
@@ -79,7 +80,7 @@
         <td> {{ item?.analyzedDttm === '' ? '' : formatDateString(item?.analyzedDttm) }}</td>
         <td> {{ item?.tactTime }}</td>
         <td> {{ submitStateChangeText(item?.submitState, item?.submitUserId) }}</td>
-        <td> {{ item?.submitOfDate === '' || !item?.submitOfDate ? '' : formatDateString(item?.submitOfDate) }}</td>
+        <td> {{ !item?.submitOfDate ? '' : formatDateString(item?.submitOfDate) }}</td>
         <td>
           <font-awesome-icon v-if="(item?.submitState === 'checkFirst' || item?.submitState === '' || !item?.submitState) && !item.lock_status"
                              :icon="['fas', 'pen-to-square']"
@@ -157,8 +158,7 @@
       </div>
     </template>
   </Modal>
-  <Print v-if="printOnOff" :selectItems="rightClickItem" ref="printContent" :printOnOff="printOnOff"
-         :selectItemWbc="selectItemWbc" @printClose="printClose"/>
+  <Print v-if="printOnOff" :selectItems="rightClickItem" ref="printContent" :printOnOff="printOnOff" @printClose="printClose"/>
   <Alert
       v-if="showAlert"
       :is-visible="showAlert"
@@ -208,13 +208,24 @@ import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import {barcodeImgDir} from "@/common/defines/constFile/settings/settings";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 import Confirm from "@/components/commonUi/Confirm.vue";
+import {RunningInfoResponse} from "@/common/api/service/runningInfo/runningInfo.dto";
 
-const props = defineProps(['dbData', 'notStartLoading', 'loadingDelayParents']);
+interface RunningInfoWithChecked extends RunningInfoResponse {
+  checked: boolean;
+}
+
+interface PropsType {
+  dbData: RunningInfoWithChecked[],
+  notStartLoading: boolean;
+  loadingDelayParents: boolean;
+}
+
+const props = defineProps<PropsType>();
 const loadMoreRef = ref(null);
 const emits = defineEmits();
-const selectedItemId = ref('');
+const selectedItemId = ref<number | string>('');
 const visible = ref(false);
-const itemObj = ref({});
+const itemObj = ref<RunningInfoResponse>({});
 const store = useStore();
 const userModuleDataGet = computed(() => store.state.userModule);
 const cellImageAnalyzedSetting = computed(() => store.state.commonModule.cellImageAnalyzedSetting);
@@ -240,7 +251,6 @@ const userId = ref('');
 const rightClickItem = ref({});
 const printOnOff = ref(false);
 const printContent = ref(null);
-const selectItemWbc = ref([]);
 const selectAllCheckbox = ref(false);
 const instance = getCurrentInstance();
 const barcodeImg = ref('');
@@ -261,7 +271,7 @@ const dbDataFindByIdUsedInDelete = ref([]);
 
 
 onMounted(async () => {
-  myIp.value = JSON.parse(sessionStorage.getItem('pcIp'));
+  myIp.value = JSON.parse(sessionStorage.getItem('pcIp') ?? '');
   try {
 
     userId.value = getStoredUser.id;
@@ -373,27 +383,17 @@ const resetContextMenu = () => {
   contextMenu.value.visible = false;
 }
 
-const handleOutsideClick = (event) => {
+const handleOutsideClick = (event: MouseEvent) => {
   const contextMenuElement = document.querySelector('.context-menu');
-  if (contextMenuElement && !contextMenuElement.contains(event.target)) {
+  if (contextMenuElement && !contextMenuElement.contains(event.target as Node)) {
     resetContextMenu();
   }
 };
 
 
-const rowRightClick = async (item, event) => {
-  if (props.dbData.filter(data => data.id === item.id).lock_status === false) {
-    showSuccessAlert(MESSAGES.IDS_ERROR_SELECT_A_TARGET_ITEM);
-    return;
-  }
-
+const rowRightClick = async (item: RunningInfoResponse, event: MouseEvent) => {
   await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: item.id});
   rightClickItem.value = item;
-  if (!isObjectEmpty(item?.wbcInfo)) {
-    const wbcInfoData = item?.wbcInfo?.wbcInfo[0];
-    const sortedArray = wbcInfoData.sort((a, b) => a.id - b.id);
-    selectItemWbc.value = sortedArray;
-  }
   if (event) {
     contextMenu.value.x = event.clientX;
     contextMenu.value.y = event.clientY;
@@ -417,8 +417,8 @@ const handleShiftSelection = () => {
   emits('checkListItem', props.dbData.filter(dbDataItem => dbDataItem.checked));
 };
 
-const handleCheckboxChange = (item) => {
-  if (!item) return;
+const handleCheckboxChange = (item: RunningInfoWithChecked) => {
+  if (isObjectEmpty(item)) return;
   item.checked = !item.checked;
   emits('checkListItem', props.dbData.filter(dbDataItem => dbDataItem.checked));
 };
@@ -576,10 +576,12 @@ const openLayer = () => {
 };
 
 const deleteRow = async (selectedItems: any, dbDataFindById: any) => {
+  if (isObjectEmpty(selectedItems)) selectedItems = [rightClickItem.value];
   try {
-    if (selectedItems.length === 0 && selectedItemId.value === '') {
+    if (isObjectEmpty(selectedItems) && selectedItemId.value === '') {
       showErrorAlert(MESSAGES.IDS_ERROR_SELECT_A_TARGET_ITEM);
-    } else if (selectedItems.length === 0 && selectedItemId.value !== '') {
+      return;
+    } else if (isObjectEmpty(selectedItems) && selectedItemId.value !== '') {
       selectedItems = dbDataFindById;
       if (selectedItems.lock_status) {
         showErrorAlert(MESSAGES.lockRow);

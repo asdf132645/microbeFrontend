@@ -1,1 +1,2 @@
-export type MachineVersionType = '100a' | '12a';
+declare module '*.mp3';
+declare module '*.wav';

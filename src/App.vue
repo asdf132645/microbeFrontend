@@ -743,6 +743,7 @@ const cellImgGet = async () => {
     if (result) {
       if (result?.data) {
         const data = result.data;
+        sessionStorage.setItem('iaRootPath', data?.iaRootPath);
         await store.dispatch('commonModule/setCommonInfo', {iaRootPath: String(data?.iaRootPath)});
         await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: data });
         sessionStorage.setItem('keepPage', String(data?.keepPage));

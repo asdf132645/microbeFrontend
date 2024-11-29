@@ -112,8 +112,6 @@
             <select v-model='uploadRootPath' class="uploadSavePath">
               <option v-for="type in drive" :key="type" :value="type">{{ type }}</option>
             </select>
-
-<!--              <input type="file" ref="uploadFileInput" @change="handleUploadFileChange" style="display: none;" accept=".sql" />-->
             <button class="uploadBtn" @click="handleSelectUploadFile">Upload</button>
           </div>
         </td>
@@ -198,15 +196,6 @@
       :message="confirmMessage"
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
-  />
-
-  <Confirm
-      v-if="showDownloadConfirm"
-      :is-visible="showDownloadConfirm"
-      :type="MESSAGES.SETTING"
-      :message="downloadConfirmMessage"
-      @hide="handleDownloadClose"
-      @okConfirm="handleDownload('copy')"
   />
 
   <ConfirmThreeBtn
@@ -459,6 +448,7 @@ const cellImgSet = async () => {
       await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: cellImgSet });
       await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
       sessionStorage.setItem('keepPage', String(keepPage.value));
+      sessionStorage.setItem('iaRootPath', data?.iaRootPath);
     }
 
     await store.dispatch('commonModule/setCommonInfo', { beforeSettingFormattedString: null });
@@ -481,7 +471,7 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
   totalFileCount.value = possibleUploadCount.value;
   try {
     isLoadingProgressBar.value = true;
-    const day = localStorage.getItem('lastSearchParams') || '';
+    const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
     const {startDate, endDate , page, searchText, testType }  = JSON.parse(day);
     const dayQuery = startDate + endDate + page + searchText + testType;
 
@@ -494,11 +484,7 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
     }
     downloadUploadType.value = uploadType;
 
-    if (uploadType === 'move') {
-      loadingState.value = 'moved';
-    } else {
-      loadingState.value = 'copied';
-    }
+    loadingState.value = uploadType === 'move' ? 'moved' : 'copied';
 
     successFileCount.value = 0;
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: true });
@@ -552,11 +538,13 @@ const handleDownloadClose = () => {
 }
 
 const handlePolling = async () => {
-  const duration = String(totalFileCount.value).length
+  const duration = String(totalFileCount.value).length // 1초
   intervalId.value = setInterval(async () => {
     successFileCount.value += 1;
-    if (successFileCount.value === totalFileCount.value - 1 && intervalId.value !== null) clearInterval(intervalId.value);
-  }, duration *  3000);
+    if (successFileCount.value === totalFileCount.value - 1) {
+      clearInterval(intervalId.value);
+    }
+  }, duration * 3000);
 }
 
 const downloadUploadStopWebSocket = (state: boolean) => {
@@ -568,16 +556,9 @@ const downloadUploadStopWebSocket = (state: boolean) => {
 
 const handleDownload = async (downloadType: 'move' | 'copy') => {
   const downloadDto = downloadDtoObj(downloadType);
-
   await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: true });
   downloadUploadStopWebSocket(true);
-
-  if (downloadType === 'move') {
-    loadingState.value = 'moved';
-  } else {
-    loadingState.value = 'copied';
-  }
-
+  loadingState.value = downloadType === 'move' ? 'moved' : 'copied';
   successFileCount.value = 0;
 
   try {
@@ -601,7 +582,7 @@ const updateFileCounts = async (downloadUploadType: 'download' | 'upload') => {
 const downloadDtoObj = (downloadType: 'move' | 'copy') => {
   downloadUploadType.value = downloadType;
   showDownloadConfirm.value = false;
-  const day = localStorage.getItem('lastSearchParams') || '';
+  const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
   const {startDate, endDate , page, searchText, testType }  = JSON.parse(day);
   const dayQuery = startDate + endDate + page + searchText + testType;
   const sendingDownloadStartDate = moment(backupStartDate.value).add(1, 'day').local().toDate().toISOString().split('T')[0];
@@ -639,23 +620,21 @@ const createBackup = async () => {
     originDownloadPath: `${iaRootPath.value}`, //이미지가 있는 경로 옮겨져야 하는 폴더 위치
     destinationDownloadPath: downloadRootPath.value, // 백업 경로
   };
+
   try {
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: true });
     downloadUploadStopWebSocket(true);
-    isDownloading.value = true;
     const isPossibleToBackup = await downloadPossibleApi(downloadDto.value);
     if (isPossibleToBackup.data.success) {
       totalFileCount.value = Number(isPossibleToBackup.data.message.split(' ')[1]);
       showDownloadConfirm.value = true;
       downloadConfirmMessage.value = 'Would you like to copy files?';
-      // downloadConfirmMessage.value = `Would you move or copy files`;
     } else {
       showErrorAlert(isPossibleToBackup.data.message);
     }
   } catch (e) {
     console.error(e);
   } finally {
-    isDownloading.value = false;
     downloadUploadStopWebSocket(false);
     await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });
   }
@@ -717,7 +696,7 @@ const handleUploadSelectFile = async () => {
     console.error(e);
   } finally {
     downloadUploadStopWebSocket(false);
-      await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });
+    await store.dispatch('commonModule/setCommonInfo', { isDownloadOrUploading: false });
     isRestoring.value = false;
   }
 

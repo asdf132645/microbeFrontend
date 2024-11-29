@@ -425,20 +425,12 @@ main.content {
     background: var(--main-bg-6-color);
 }
 
-main.bmComponent {
-    background: var(--main-bg-5-color);
-}
-
 .appHeaderLeft {
     height: 100%;
     background: var(--main-bg-2-color);
     text-align: left;
     border-right: 1px solid var(--gray-1-color);
     border-bottom: 1px solid var(--main-bg-7-color);
-}
-
-.appHeaderLeft.bmComponent {
-    background: var(--main-bg-5-color);
 }
 
 .rock {
@@ -515,7 +507,7 @@ main.bmComponent {
 }
 
 .startBtn.onRecover {
-    color: var(--coral-bg-3-color);
+    color: var(--coral-bg-4-color);
 }
 
 .lastLiM {
@@ -1795,21 +1787,34 @@ input.loginInput {
     color: var(--blue-bg-1-color);
 }
 
-.blinking {
-    animation: blink 0.5s infinite alternate;
+.blinking-red {
+    animation: blink-red 0.5s infinite alternate;
 }
 
-.hoverSizeAction:hover {
-    transform: scale(1.1);
+.blinking-blue {
+    animation: blink-blue 0.5s infinite alternate;
 }
 
-@keyframes blink {
+@keyframes blink-red {
     0% {
         color: var(--white-color);
     }
     100% {
         color: red;
     }
+}
+
+@keyframes blink-blue {
+    0% {
+        color: var(--white-color);
+    }
+    100% {
+        color: var(--coral-bg-0-color);
+    }
+}
+
+.hoverSizeAction:hover {
+    transform: scale(1.1);
 }
 
 .oliCount {

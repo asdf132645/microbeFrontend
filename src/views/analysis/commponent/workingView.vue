@@ -99,7 +99,6 @@ import {EmbeddedStatusState} from "@/store/modules/embeddedStatusModule";
 import {getCountToTime} from "@/common/lib/utils/dateUtils";
 import { SLIDE_CARD, SLIDE_CARD_100A } from "@/common/defines/constFile/analysis/analysis";
 import {getProcessingCode} from "@/common/lib/utils/conversionDataUtils";
-import { MachineVersionType } from "#/global";
 import {CommonState} from "@/store/modules/commonModule";
 import { SLIDE_CARD_TYPE } from "@/common/defines/constFile/analysis/analysis.dto";
 import {IntervalType} from "@/common/type/generalTypes";
@@ -134,7 +133,7 @@ const totalElapsedTimeCount = ref(0);
 const elapsedTimeCount = ref(0);
 const isBlinking = ref(false);
 const fixEqStatCd = ref(false);
-const machineVersion = ref<MachineVersionType>('100a');
+const machineVersion = ref('100a');
 const iCasExist = ref('0');
 const oCasExist = ref('0');
 

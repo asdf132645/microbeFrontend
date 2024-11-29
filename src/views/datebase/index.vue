@@ -16,15 +16,11 @@
           </select>
           <input type="text" v-model='searchText' class="searchInputBox" @keydown.enter="handleEnter" ref="barcodeInput"
                  @input="handleInput"/>
-          <button class="searchClass" @click="dateRefresh">
-            <font-awesome-icon :icon="['fas', 'calendar-days']"/>
-            Refresh
-          </button>
           <div class="settingDatePickers">
             <Datepicker v-model="startDate"></Datepicker>
             <Datepicker v-model="endDate"></Datepicker>
           </div>
-
+          <button class="searchClass" @click="dateRefresh">Refresh</button>
           <button type="button" class="searchClass" @click="search">Search</button>
         </div>
 
@@ -100,10 +96,11 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 import {MO_TEST_TYPE_CODE} from "@/common/defines/constFile/dataBase";
+import {ClassInfoType, RunningInfoResponse} from "@/common/api/service/runningInfo/runningInfo.dto";
 
 
 const store = useStore();
-const dbGetData = ref<any[]>([]);
+const dbGetData = ref<RunningInfoResponse[]>([]);
 const showAlert = ref(false);
 const alertMessage = ref('');
 
@@ -267,7 +264,7 @@ const changeTestType = (value: any) => {
 }
 
 const updateFilter = () => {
-  const selectedItems = titleItem.value?.filter((item: any) => item.checked).map((item: any) => item.title);
+  const selectedItems = titleItem.value?.filter((item: any) => item.checked).map((item: any) => item.classId);
   titleItemArr.value = selectedItems;
 }
 
@@ -391,8 +388,22 @@ const getDbData = async (type: string, pageNum?: number) => {
           });
         }
 
+        // if (titleItem.value.length === 0) {
+        //   const wbcInfoItems = dbGetData.value[0]?.wbcInfo?.wbcInfo[0];
+        //   titleItem.value = wbcInfoItems.map((item: WbcInfo) => {
+        //     if (titleItemArr.value.includes(item.title)) {
+        //       return {...item, checked: true };
+        //     }
+        //     return { ...item, checked: false };
+        //   });
+        // }
+
         if (titleItem.value.length === 0) {
-          titleItem.value = dbGetData.value[0]?.classInfo;
+          const moInfoItems = dbGetData.value[0]?.classInfo;
+          titleItem.value = moInfoItems.map((item: ClassInfoType) => {
+            if (titleItemArr.value.includes(item.classId)) return {...item, checked: true };
+            return { ...item, checked: false };
+          });
         }
 
         if (wbcCountOrder.value === '' || wbcCountOrder.value === 'all') {
@@ -433,7 +444,7 @@ const search = () => {
   sessionStorage.removeItem('lastSearchParams');
   const diffInMs = endDate.value.getTime() - startDate.value.getTime();
   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-  if (diffInDays > 30) {
+  if (diffInDays > 31) {
     showSuccessAlert("You cannot select a period of more than 30 days.");
     return;
   }
