@@ -1,8 +1,8 @@
 <template>
-  <div class="mo-right-detail-container rbc-container imgList shadowBox borderRadiusRound">
+  <div class="mo-right-detail-container rbc-container imgList container-shadow borderRadiusRound">
 
     <div class="flex-column-justify-center">
-      <div class="flex-justify-center-align-start mt40">
+      <div class="flex-justify-around mt12">
         <div class="flex-center">
           <div class="classImageInfo-container">
             <div class="tiling-viewer_img_list-box_img_list">
@@ -43,11 +43,11 @@ import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
 import {FOLDER_NAME, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
-import {filterAvailableImageItems, filterImageFiles} from "@/common/lib/utils/checkUtils";
+import { filterAvailableImageItems } from "@/common/lib/utils/checkUtils";
 import ClassInfoImageSlider
   from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classInfoImageSlider.vue";
 import { readDziFile, readJsonFile } from "@/common/api/service/fileReader/fileReaderApi";
-import {RouteType} from "@/common/type/generalTypes";
+import {detailRunningApi, updateRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {openseadragonPrefixUrl} from "@/common/lib/utils/assetUtils";
 
 
@@ -64,6 +64,7 @@ const tilingViewerLayer = ref(null);
 const tileExist = ref(true);
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const userModuleDataGet = computed(() => store.state.userModule);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
@@ -73,6 +74,10 @@ const hiddenImages = ref<{ [key: string]: boolean }>({});
 const checkedClassIdArr = ref<string[]>([]);
 const classInfoPositionArr = ref<any>([]);
 const drawPath = ref<any>([]);
+const powerModeToIdMap = {
+  [POWER_MODE.LOW_POWER]: '0',
+  [POWER_MODE.HIGH_POWER]: '1',
+};
 
 const checkAndInitialize = async () => {
   const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
@@ -104,6 +109,23 @@ watch(() => refreshClass.value, async () => {
 
 watch(() => currentImageName.value, async (curImgName) => {
   await fetchImageJsonData(curImgName);
+
+  const result: any = await detailRunningApi(props.selectItems.id)
+  const getSelectItems = result.data;
+  if (currentPowerType.value in powerModeToIdMap) {
+    const updatedClassInfo = getSelectItems.classInfo.map((item: any) => {
+      return item.name === currentImageName.value && item.id === powerModeToIdMap[currentPowerType.value]
+          ? { ...item, isWatched: true }
+          : item;
+    });
+
+    const updatedSelectItems = {
+      ...getSelectItems,
+      classInfo: updatedClassInfo,
+    }
+
+    await updateRunningInfo(updatedSelectItems);
+  }
 })
 
 const initElement = async () => {
@@ -125,6 +147,7 @@ const initElement = async () => {
       tileSources: tilesInfo,
       showSequenceControl: true,
       showReferenceStrip: false,
+      showHomeControl: false,
       gestureSettingsMouse: {clickToZoom: false},
       maxZoomLevel: 15,
       minZoomLevel: 1, // 최소 확대 레벨 설정
@@ -205,6 +228,8 @@ const fetchImageJsonData = async (curImageName: string) => {
 
 const checkedClassSetFunc = (checkedClassSet: Set<string>) => {
   checkedClassIdArr.value = [...checkedClassSet];
+  const ctx = removeClassPosCanvas()
+  if (checkedClassIdArr.value.length === 0 && ctx) ctx.globalCompositeOperation = 'destination-out'; // 기존 색상을 지우는 모드로 설정
   drawClassPosCanvas(checkedClassIdArr.value);
 }
 
@@ -222,42 +247,71 @@ const removeClassPosCanvas = () => {
 }
 
 const drawClassPosCanvas = (classInfoArr: any) => {
-
   const ctx = removeClassPosCanvas();
   if (!ctx) return;
 
   const COLORS = {
-    [MO_CATEGORY_CLASS_ID.WBC]: 'navy', //
-    [MO_CATEGORY_CLASS_ID.GNC]: '#00FF00', // 빨간색 분홍색 사이
-    [MO_CATEGORY_CLASS_ID.GNB]: '#00FF00', // 빨간색 분홍색 사이
-    [MO_CATEGORY_CLASS_ID.GPC]: '#FFA500', // 보라색, 파란색 사이
-    [MO_CATEGORY_CLASS_ID.GPB]: '#FFA500', // 보라색, 파란색 사이
-    [MO_CATEGORY_CLASS_ID.YEAST]: '#3CFFDD', // 검정색,  보라색 사이
-  }
+    [MO_CATEGORY_CLASS_ID.WBC]: 'navy',
+    [MO_CATEGORY_CLASS_ID.GNC]: '#00FF00',
+    [MO_CATEGORY_CLASS_ID.GNB]: '#00FF00',
+    [MO_CATEGORY_CLASS_ID.GPC]: '#FFA500',
+    [MO_CATEGORY_CLASS_ID.GPB]: '#FFA500',
+    [MO_CATEGORY_CLASS_ID.YEAST]: '#3CFFDD',
+  };
 
+  // 1. 전체 캔버스를 반투명하게 채우기
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // 검정색, 50% 투명도
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  // 2. 상자 결합 경로 생성
+  const combinedPath = new Path2D();
   for (const classId of classInfoArr) {
     for (const classPosItem of classInfoPositionArr.value) {
       if (classId === classPosItem.classId) {
-        ctx.strokeStyle = COLORS[classId] || '#00BFFF';
-        ctx.lineWidth = 2;
         for (const detailPosItem of classPosItem.pos) {
-          const rectPath = new Path2D();
           const drawObj = {
             classId: classId,
             posX: Number(detailPosItem.x1),
             posY: Number(detailPosItem.y1),
             width: Number(detailPosItem.x2) - Number(detailPosItem.x1),
-            height: Number(detailPosItem.y2) - Number(detailPosItem.y1)
-          }
+            height: Number(detailPosItem.y2) - Number(detailPosItem.y1),
+          };
 
-          rectPath.rect(drawObj.posX, drawObj.posY, drawObj.width, drawObj.height);
+          // 모든 상자를 하나의 Path2D에 추가
+          combinedPath.rect(drawObj.posX, drawObj.posY, drawObj.width, drawObj.height);
           drawPath.value.push(drawObj);
-          ctx.stroke(rectPath);
         }
       }
     }
   }
-}
+
+  // 3. 결합된 경로 내부 지우기
+  ctx.globalCompositeOperation = 'destination-out'; // 기존 색상을 지우는 모드
+  ctx.fill(combinedPath);
+
+  // 4. 일반 모드로 복원 후 테두리 그리기
+  ctx.globalCompositeOperation = 'source-over';
+  for (const classId of classInfoArr) {
+    for (const classPosItem of classInfoPositionArr.value) {
+      if (classId === classPosItem.classId) {
+        ctx.strokeStyle = COLORS[classId] || '#00BFFF';
+        ctx.lineWidth = 1;
+        for (const detailPosItem of classPosItem.pos) {
+          const drawObj = {
+            classId: classId,
+            posX: Number(detailPosItem.x1),
+            posY: Number(detailPosItem.y1),
+            width: Number(detailPosItem.x2) - Number(detailPosItem.x1),
+            height: Number(detailPosItem.y2) - Number(detailPosItem.y1),
+          };
+
+          // 상자 테두리 그리기
+          ctx.strokeRect(drawObj.posX, drawObj.posY, drawObj.width, drawObj.height);
+        }
+      }
+    }
+  }
+};
 
 const dziWidthHeight = async (imageFileName: string): Promise<any> => {
   const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
@@ -314,6 +368,16 @@ const fetchTileImagesInfo = async (folderPath: string) => {
         index,
       }))
 
+  if (currentPowerType.value in powerModeToIdMap) {
+    const targetId = powerModeToIdMap[currentPowerType.value];
+    allImages.value = allImages.value.map((item: { url: string; imageName: string; index: number }) => {
+      const matchedClassInfo = props.selectItems.classInfo.find(
+          (classInfoItem: any) => classInfoItem.id === targetId && classInfoItem.name === item.imageName
+      );
+      return { ...item, isWatched: matchedClassInfo?.isWatched ?? false };
+    });
+  }
+
   const tilesInfo = await Promise.all(
       fileNamesEndsWithFiles
           .map(async (fileName: string) => {
@@ -342,6 +406,22 @@ const fetchTileImagesInfo = async (folderPath: string) => {
 
 const goToSelectImage = async (imageIndex: number) => {
   viewer.value.goToPage(imageIndex);
+}
+
+const updateRunningInfo = async (updatedRuningInfoObj: any) => {
+  try {
+    const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
+    const {startDate, endDate, page, searchText, testType } = JSON.parse(day);
+    const dayQuery = startDate + endDate + page + searchText + testType;
+    const response = await updateRunningApi({
+      userId: Number(userModuleDataGet.value.id),
+      runingInfoDtoItems: [updatedRuningInfoObj],
+      dayQuery: dayQuery,
+    })
+    if (!response) console.error('백엔드가 디비에 저장 실패함');
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }
 
 const hideImage = (fileName: string) => {

@@ -669,7 +669,7 @@ const convertMoInfo = (cassetteType: string, moInfo: MoInfoInterface[]) => {
             cassetteType,
             classId: moClassInfoItem.classId,
             count: calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType)
-          })
+          }),
         }))
 
     if (cassetteType === MO_TEST_TYPE.SPUTUM) {
@@ -689,7 +689,9 @@ const convertMoInfo = (cassetteType: string, moInfo: MoInfoInterface[]) => {
     const updatedMoInfoItem = {
       id: moItem.id,
       name: moItem.name,
-      classInfo: updatingClassInfo
+      classInfo: updatingClassInfo,
+      detailMemo: '',
+      isWatched: false,
     }
     convertedMoInfo.push(updatedMoInfoItem);
   }

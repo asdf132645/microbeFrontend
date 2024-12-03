@@ -1,5 +1,5 @@
 <template>
-  <div class="orderListTableContainer">
+  <div class="orderList-container container-shadow">
     <h3 class="titleText">Order List</h3>
     <table class="orderListTable">
       <thead>

@@ -13,7 +13,7 @@
       <td></td>
       <td class="flex-justify-center">
         {{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}
-        <p v-show="isCheckable" class="ml12 cursorPointer">
+        <p v-if="isCheckable" class="ml12 cursor-pointer">
           <font-awesome-icon
               v-if="!checkedClasses[category?.classId]"
               :icon="['fas', 'eye-slash']"

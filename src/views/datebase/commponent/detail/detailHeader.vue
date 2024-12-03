@@ -1,13 +1,13 @@
 <template>
   <div class="topClintInfo">
     <ul>
-      <li>Test Type: {{ testType }}</li>
-      <li v-show="barcodeNo">Barcode No: {{ barcodeNo }}</li>
-      <li v-show="cbcPatientNo">CBC Patient No: {{ cbcPatientNo }}</li>
-      <li v-show="patientName">Patient Name: {{ patientName }}</li>
-      <li v-show="cbcPatientName">Patient Name: {{ cbcPatientName}}</li>
-      <li v-show="cbcSex">Sex: {{ cbcSex }}</li>
-      <li v-show="cbcAge">Age: {{ cbcAge }}</li>
+      <li>{{ testType }}</li>
+      <li v-show="barcodeNo">{{ barcodeNo }}</li>
+      <li v-show="cbcPatientNo">{{ cbcPatientNo }}</li>
+      <li v-show="patientName">{{ patientName }}</li>
+      <li v-show="cbcPatientName">{{ cbcPatientName}}</li>
+      <li v-show="cbcSex">{{ cbcSex }}</li>
+      <li v-show="cbcAge">{{ cbcAge }}</li>
     </ul>
   </div>
 </template>

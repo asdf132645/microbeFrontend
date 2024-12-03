@@ -1,12 +1,15 @@
 <template>
-  <div v-if="allImages.length > 0" class="classImageSliderContainer">
+  <div v-if="localAllImages.length > 0" class="classImageSliderContainer">
     <Splide :has-track="false" ref="splide" :options="{ perPage: 10, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }">
       <SplideTrack>
-        <SplideSlide v-for="image in allImages" :key="image.url">
+        <SplideSlide v-for="image in localAllImages" :key="image.url">
           <img
               style="width: 112px; cursor:pointer; margin-top: 4px;"
-              class="slideImage"
-              :class="currentImageName ===  image.imageName? 'selected-image' : ''"
+              class="slideImage cursor-pointer"
+              :class="[
+                  image.isWatched ? 'watched-image' : '',
+                  currentImageName ===  image.imageName? 'selected-image' : '',
+              ]"
               :src="image.url"
               v-show="!hiddenImages[`${image.url}`]"
               @error="hideImage(image.url)"
@@ -15,7 +18,7 @@
         </SplideSlide>
       </SplideTrack>
 
-      <div class="splide__arrows splide__arrows--ltr" :style="{ display: allImages.length <= 10 ? 'none' : '' }"></div>
+      <div class="splide__arrows splide__arrows--ltr" :style="{ display: localAllImages.length <= 10 ? 'none' : '' }"></div>
     </Splide>
   </div>
 </template>
@@ -34,6 +37,7 @@ const props = defineProps(['allImages']);
 const emits = defineEmits();
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
+const localAllImages = ref(props.allImages);
 const splide = ref();
 
 watch([() => route.params.id, () => currentPowerType.value], () => {
@@ -41,7 +45,18 @@ watch([() => route.params.id, () => currentPowerType.value], () => {
 })
 
 watch(() => props.allImages, async (newAllImages) => {
+  localAllImages.value = props.allImages;
+  localAllImages.value[0].isWatched = true;
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: newAllImages[0]?.imageName ?? '' });
+})
+
+watch(() => currentImageName.value, () => {
+  localAllImages.value = localAllImages.value.map((item) => {
+    if (item.imageName === currentImageName.value) {
+      return {...item, isWatched: true };
+    }
+    return item;
+  })
 })
 
 const selectImage = async (imageIndex: number, imageFileName: string) => {
@@ -50,7 +65,7 @@ const selectImage = async (imageIndex: number, imageFileName: string) => {
 }
 
 const hideImage = (fileName: string) => {
-  hiddenImages.value[`${fileName}`] = true;
+  hiddenImages.value[fileName] = true;
 }
 
 </script>

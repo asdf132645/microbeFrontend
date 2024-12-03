@@ -4,7 +4,7 @@
     <div v-if="allImages.length > 0" class="dbImageContainer">
       <template v-for="imageName in allImages" :key="imageName">
         <img
-            class="dbRightImages slideImage"
+            class="dbRightImages"
             :src="showImage(imageName)"
             @error="hideImage(imageName, imageName)"
             v-show="!hiddenImages[`${imageName}`]"

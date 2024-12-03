@@ -1,7 +1,7 @@
 <template>
   <ClassInfoMenu @refreshClass="refreshClass" :isNext="isNext" @isNextFalse="isNextFalse"/>
 
-  <div class="wbcContent">
+  <div class="list-detail-container">
     <DetailHeader
         :testType="getTestTypeText(selectItems?.testType)"
         :barcodeNo="selectItems?.barcodeNo"

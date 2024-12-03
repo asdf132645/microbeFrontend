@@ -22,12 +22,12 @@
       >
         <font-awesome-icon :icon="['fas', 'square-check']"/>
       </li>
-      <li
-          @click="lisModalOpen"
-          :class="{'submitted': selectItems?.submitState === 'lis' || lisBtnColor,}"
-      >
-        <font-awesome-icon :icon="['fas', 'upload']"/>
-      </li>
+<!--      <li-->
+<!--          @click="lisModalOpen"-->
+<!--          :class="{'submitted': selectItems?.submitState === 'lis' || lisBtnColor,}"-->
+<!--      >-->
+<!--        <font-awesome-icon :icon="['fas', 'upload']"/>-->
+<!--      </li>-->
     </ul>
   </div>
 
@@ -129,6 +129,14 @@
       @hide="hideConfirm"
       @okConfirm="handleOkConfirm"
   />
+
+  <Toast
+      v-if="toastMessage"
+      :message="toastMessage"
+      :messageType="toastMessageType"
+      :duration="1500"
+      position="bottom-right"
+  />
 </template>
 
 <script setup lang="ts">
@@ -138,7 +146,7 @@ import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
-import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES, MSG_TOAST, TOAST_MSG_TYPE} from "@/common/defines/constFile/constantMessageText";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import moment from 'moment';
@@ -153,6 +161,7 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import {RouteType} from "@/common/type/generalTypes";
+import Toast from "@/components/commonUi/Toast.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -176,6 +185,8 @@ const submittedScreen = ref(false);
 const lisBtnColor = ref(false);
 const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
 const moInfoTotal = ref<any>([]);
+const toastMessage = ref('');
+const toastMessageType = ref(TOAST_MSG_TYPE.SUCCESS);
 
 onMounted(async () => {
   await nextTick();
@@ -210,7 +221,7 @@ watch(() => props.selectItems, async (newSelectItems) => {
       const result: any = detailRunningApi(String(props.selectItems?.id));
       const updatedItem = { id: props.selectItems?.id ,submitState: 'checkFirst' };
       const updatedRuningInfo = {...result.data, ...updatedItem}
-      await resRunningItem(updatedRuningInfo, true);
+      await resRunningItem({ updatedRunningInfo: updatedRuningInfo, noAlert: true });
     }
     barCodeImageShowError.value = false;
   }
@@ -239,7 +250,9 @@ const barcodeCopy = async () => {
   textarea.select();
   document.execCommand('copy');
   document.body.removeChild(textarea);
-  showSuccessAlert(MESSAGES.SUCCESS_ALERT);
+
+  toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
+  await showToast(MSG_TOAST.BAR_CODE_SUCCESS);
 }
 
 const commitConfirmed = () => {
@@ -250,8 +263,13 @@ const commitConfirmed = () => {
 }
 
 const handleOkConfirm = () => {
-  onCommit();
+  if (okMessageType.value == 'commit') onCommit();
+  else uploadLis();
   showConfirm.value = false;
+}
+
+const uploadLis = async () => {
+  //
 }
 
 const hideConfirm = () => {
@@ -267,7 +285,7 @@ const onCommit = async () => {
     submitUserId: userModuleDataGet.value.name,
   };
   const updatedRuningInfo = {...result.data, ...updatedItem}
-  await resRunningItem(updatedRuningInfo);
+  await resRunningItem({ updatedRunningInfo: updatedRuningInfo, type: 'commit' });
 
   // selectItems.value?.submitState = 'Submit';
   emits('submitStateChanged', 'Submit');
@@ -278,8 +296,7 @@ const memoChange = async () => {
   const updatedItem = { memo: enterAppliedmemo };
   const result: any = await detailRunningApi(String(props.selectItems?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
-
-  await resRunningItem(updatedRuningInfo);
+  await resRunningItem({ updatedRunningInfo: updatedRuningInfo, type: 'memo' });
   memoModal.value = false;
 }
 
@@ -319,24 +336,31 @@ const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) 
     moInfo: updatedMoInfoObj
   }
 
-  await resRunningItem(updatedSelectItems, true);
+  await resRunningItem({ updatedRunningInfo: updatedSelectItems, noAlert: true });
 }
 
-const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
+const resRunningItem = async ({ updatedRunningInfo, noAlert, type }: {updatedRunningInfo: any; noAlert?: boolean; type?: 'commit' | 'memo'}) => {
   try {
     const day = sessionStorage.getItem('lastSearchParams') || localStorage.getItem('lastSearchParams') || '';
     const {startDate, endDate, page, searchText, testType } = JSON.parse(day);
     const dayQuery = startDate + endDate + page + searchText + testType;
     const response = await updateRunningApi({
       userId: Number(userModuleDataGet.value.id),
-      runingInfoDtoItems: [updatedRuningInfo],
+      runingInfoDtoItems: [updatedRunningInfo],
       dayQuery: dayQuery,
     })
     if (response) {
       if (!noAlert) {
-        showSuccessAlert(MESSAGES.SUCCESS_ALERT);
+        console.log('type', type);
+        if (type === 'commit') {
+          toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
+          await showToast(MSG_TOAST.SUCCESS);
+        } else if (type === 'memo') {
+          toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
+          await showToast(MSG_TOAST.SAVED);
+        }
       }
-      memo.value = updatedRuningInfo.memo;
+      memo.value = updatedRunningInfo.memo;
     } else {
       console.error('백엔드가 디비에 저장 실패함');
     }
@@ -344,13 +368,6 @@ const resRunningItem = async (updatedRuningInfo: any, noAlert?: boolean) => {
     console.error('Error:', error);
   }
 }
-
-const showSuccessAlert = (message: string) => {
-  showAlert.value = true;
-  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
-  alertMessage.value = message;
-  window.scrollTo({top: 0, behavior: 'smooth'});
-};
 
 const showErrorAlert = (message: string) => {
   showAlert.value = true;
@@ -369,5 +386,12 @@ const onImageError = () => {
 const onLoadImg = () => {
   barCodeImageShowError.value = false;
 }
+
+const showToast = async (message: string) => {
+  toastMessage.value = message;
+  setTimeout(() => {
+    toastMessage.value = ''; // 메시지를 숨기기 위해 빈 문자열로 초기화
+  }, 1500); // 5초 후 토스트 메시지 사라짐
+};
 
 </script>

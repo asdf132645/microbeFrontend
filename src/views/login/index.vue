@@ -1,8 +1,11 @@
 <template>
-  <div class="loaderBackgroundForLogin" v-if="forceViewer === 'main' && !isViewer && !isTcpConnected">
-    <div class="loaderForLogin"></div>
-    <p class="loadingTextLogin">Loading...</p>
+  <div class="progressBarLogin" v-if="!progressOnOff && forceViewer === 'main' && !isViewer">
+    <div class="progressDiv">
+      <progress class="login-process" id="file" :value="progress" max="100"></progress>
+      <div class="loading-text mt10">Loading...</div>
+    </div>
   </div>
+
   <div class='uimdLogin'>
     <div class='loginContent'>
       <p class="loginTitle"><span class="loginColorSpan">U</span>IMD</p>
@@ -35,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import {ref, onMounted, computed, onBeforeMount, watch} from "vue";
 import { login } from "@/common/api/service/user/userApi";
 import { getDeviceIpApi } from "@/common/api/service/device/deviceApi";
 import router from "@/router";
@@ -56,14 +59,46 @@ const isAutoLoginEnabled = ref(false);
 const isViewer = ref(false);
 const forceViewer = ref('');
 const isTcpConnected = computed(() => store.state.commonModule.isTcpConnected);
+const uimdOpenIp = ref('');
+const progress = ref(0);
+const progressOnOff = ref(false);
 
-
-//
-onMounted(async () => {
+onBeforeMount(async () => {
+  uimdOpenIp.value = window.MAIN_WEBSOCKET_IP;
   forceViewer.value = window.FORCE_VIEWER;
-  await checkIsViewer()
-  isAutoLogginable();
+  await checkIsViewer();
 })
+
+onMounted(async () => {
+  isAutoLogginable();
+  startProgress();
+  if (isTcpConnected.value) {
+    progressOnOff.value = true;
+  }
+})
+
+const startProgress = () => {
+  progress.value = 0;
+
+  const interval = setInterval(() => {
+    if (!isTcpConnected.value) {
+      progress.value += 0.5;
+    } else {
+      progress.value = 100;
+      clearInterval(interval);
+    }
+  }, 1000);
+
+  watch(isTcpConnected, (newValue) => {
+    if (newValue) {
+      progress.value = 100;
+      setTimeout(() => {
+        progressOnOff.value = true;
+      }, 1000);
+      clearInterval(interval);
+    }
+  });
+};
 
 /** 자동 로그인 확인 */
 const isAutoLogginable = () => {
@@ -116,7 +151,6 @@ const loginUser = async () => {
 const checkIsViewer = async () => {
   try {
     const result = await getDeviceIpApi();
-
     if((result.data === '1' || (window.APP_API_BASE_URL && window.APP_API_BASE_URL.includes(result.data)))) {
       isViewer.value = false;
     } else {

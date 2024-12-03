@@ -5,8 +5,8 @@
     <orderList :parsedData="props.parsedData" :startStatus="props.startStatus" :pb100aCassette="pb100aCassette"/>
   </div>
   <div class="contentRight" v-show="props.isClass">
-    <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild workingView" />
-    <RealTimeProcess  class="contentRightChild realtime"/>
+    <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild workingView container-shadow" />
+    <RealTimeProcess  class="contentRightChild realtime container-shadow"/>
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="execute">
+  <div class="execute-container container-shadow">
     <div class='startDiv'>
       <p class="startStopP" v-if="showStopBtn" @click="isInit === 'Y' && toggleStartStop('start')">
         <font-awesome-icon

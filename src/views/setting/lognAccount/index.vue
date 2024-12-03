@@ -34,10 +34,10 @@
           <td>{{ date(user.subscriptionDate) }}</td>
           <td>{{ date(user.latestDate) }}</td>
           <template v-if="getStoredUser.userType.includes('admin')">
-            <td class="cursorPointer hoverSizeAction" @click="openLayer(user.userId)">
+            <td class="cursor-pointer hoverSizeAction" @click="openLayer(user.userId)">
               <font-awesome-icon :icon="['fas', 'pen-to-square']" />
             </td>
-            <td class="cursorPointer hoverSizeAction" @click="handleDeleteUser(user.userId)">
+            <td class="cursor-pointer hoverSizeAction" @click="handleDeleteUser(user.userId)">
               <font-awesome-icon :icon="['fas', 'trash']" />
             </td>
           </template>

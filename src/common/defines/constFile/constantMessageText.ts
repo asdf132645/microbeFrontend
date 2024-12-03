@@ -103,3 +103,15 @@ export const MSG = {
         IA_ROOT_PATH_ENG: '',
     }
 } as const;
+
+export const enum MSG_TOAST {
+    SUCCESS = 'success',
+    ERROR = 'error',
+    BAR_CODE_SUCCESS = 'Barcode Copied',
+    SAVED = 'Saved',
+}
+
+export const enum TOAST_MSG_TYPE {
+    SUCCESS = 'success',
+    ERROR = 'error',
+}

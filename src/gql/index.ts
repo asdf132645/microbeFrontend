@@ -108,10 +108,8 @@ export type GetRunningInfoByIdQueryVariables = Exact<{
 
 
 export type GetRunningInfoByIdQuery = {
-    __typename?: 'Query',
     getRunningInfoById?: { __typename?: 'RuningInfoEntity', id: number } | null
 };
-
 
 export const GetRunningInfoByIdDocument = gql`
   query GetRunningInfoById($id: Int!) {
@@ -142,7 +140,8 @@ export const GetRunningInfoByIdDocument = gql`
                   classId
                   afterGrade
                   beforeGrade
-              }          
+              }
+              detailMemo
           }
           submitUserId
           memo
@@ -181,16 +180,3 @@ export function useGetRunningInfoByIdQuery(
         options
     );
 }
-
-export function useGetRunningInfoByIdLazyQuery(
-    variables?: GetRunningInfoByIdQueryVariables | ReactiveFunction<GetRunningInfoByIdQueryVariables>,
-    options: VueApolloComposable.UseQueryOptions<GetRunningInfoByIdQuery, GetRunningInfoByIdQueryVariables> | ReactiveFunction<VueApolloComposable.UseQueryOptions<GetRunningInfoByIdQuery, GetRunningInfoByIdQueryVariables>> = {}
-) {
-    return VueApolloComposable.useLazyQuery<GetRunningInfoByIdQuery, GetRunningInfoByIdQueryVariables>(
-        GetRunningInfoByIdDocument,
-        variables,
-        options
-    );
-}
-
-export type GetRunningInfoByIdQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<GetRunningInfoByIdQuery, GetRunningInfoByIdQueryVariables>;

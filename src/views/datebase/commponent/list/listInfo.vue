@@ -13,11 +13,11 @@
             <span class="mb10">Cassette ID:</span>
             <span v-if="selectedItem?.cassetId" class="mb20">{{ selectedItem?.cassetId.split('_')[0] }}</span>
           </li>
-          <li class="flex-justify-between">
+          <li v-if="selectedItem?.patientId" class="flex-justify-between">
             <span class="mb10">Patient ID:</span>
             <span class="mb20">{{ selectedItem?.patientId }}</span>
           </li>
-          <li class="flex-justify-between">
+          <li v-if="selectedItem?.patientNm" class="flex-justify-between">
             <span class="mb10">Patient Name:</span>
             <span class="mb20">{{ selectedItem?.patientNm }}</span>
           </li>
@@ -25,10 +25,6 @@
             <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath" class="orderListBarcodeImg" />
           </li>
         </ul>
-<!--        <div>-->
-<!--          <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath"-->
-<!--               style="width: 200px; float:right;"/>-->
-<!--        </div>-->
       </div>
     </div>
   </div>

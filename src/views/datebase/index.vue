@@ -6,7 +6,7 @@
         <font-awesome-icon :icon="['fas', 'list-check']"/>
       </button>
     </h3>
-    <div class='listBoxTable'>
+    <div class="listBoxTable container-shadow">
       <div class="filterListDiv">
         <div>
           <select v-model="searchType" class="searchSelect">
@@ -67,7 +67,7 @@
         />
       </keep-alive>
     </div>
-    <div class='listBox'>
+    <div class='listBox container-shadow'>
       <ListInfo :dbData="dbGetData" :selectedItem="selectedItem"/>
       <ListMoImg :dbData="dbGetData" :selectedItem="selectedItem"/>
     </div>

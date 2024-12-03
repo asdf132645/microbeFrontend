@@ -132,20 +132,24 @@
     pointer-events: none;
 }
 
-.cursorNotAllowed {
+.cursor-notAllowed {
     cursor: not-allowed;
 }
 
-.cursorPointer {
+.cursor-pointer {
     cursor: pointer;
 }
 
-.cursorDefault {
+.cursor-default {
     cursor: default;
 }
 
-.cursorMove {
+.cursor-move {
     cursor: move;
+}
+
+.container-shadow {
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* DISPLAY FLEX */
@@ -471,13 +475,10 @@ main.content {
 }
 
 .topClintInfo ul li {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #f0f0f0;
     white-space: nowrap;
     padding: 2px 5px;
-    border-radius: 5px;
-    background-color: #2a2b2e;
-    transition: background-color 0.2s;
 }
 
 .small-icon-menu {
@@ -536,10 +537,6 @@ ul.userSetOutUl > li:hover {
     border-radius: 5px;
 }
 
-.reportDivBottom.reportDiff > .wbcLeft {
-    width: 100%;
-}
-
 ul.userSetOutUl {
     position: absolute;
     background: var(--gray-bg-12-color);
@@ -592,6 +589,35 @@ ul.userSetOutUl {
     color: var(--gray-bg-12-color);
 }
 
+.detailMemo-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.detailMemo-textarea {
+    width: 450px;
+    padding: 0;
+    height: 120px;
+    resize: none;
+ }
+
+.detailMemo-button {
+    border: 1px solid var(--white-color);
+    color: var(--white-color);
+    padding: 6px;
+    border-radius: 4px;
+    background-color: inherit;
+    font-size: 0.8rem;
+    width: 100%;
+    cursor: pointer;
+}
+
+.detailMemo-button:hover {
+    background-color: var(--white-color);
+    color: var(--main-bg-0-color);
+}
+
 .lastMenu {
     width: 240px;
     text-align: right;
@@ -614,11 +640,6 @@ span.icoText {
 
 .greenColor {
     color: var(--white-color);
-}
-
-.dbDataTable > tbody {
-    overflow-y: auto;
-    height: 82.5vh;
 }
 
 /* header-menu-end */
@@ -684,13 +705,47 @@ h3.titleText {
     margin-bottom: 10px;
 }
 
-.execute {
+.progressBarLogin {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progressDiv {
+    width: 50%;
+    padding-top: 20px;
+}
+
+.login-process {
+    opacity: 1;
+    width: 100%;
+    height: 20px;
+    margin-top: 10px;
+    z-index: 999999;
+    position: relative;
+    border-radius: 10px; /* 모서리 둥글게 */
+    overflow: hidden; /* 내부 요소가 넘치지 않도록 */
+    background-color: white; /* 배경색 */
+}
+
+progress::-webkit-progress-bar {
+    background-color: white; /* 배경색 */
+    border-radius: 10px; /* 모서리 둥글게 */
+}
+
+.execute-container {
     text-align: center;
     background: var(--white-color);
     padding: 19px;
     display: flex;
     justify-content: space-between;
     margin-top: 0px !important;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.8);
 }
 
 .initBtn {
@@ -1093,8 +1148,8 @@ button.degreeAllCheckBtn {
 }
 
 .classImageInfo-container {
-    width: 750px;
-    height: 750px;
+    width: 768px;
+    height: 768px;
 }
 
 .loader {
@@ -1215,8 +1270,8 @@ p.loadingText {
 
 #tiling-viewer_img_list {
     position: relative;
-    width: 750px;
-    height: 750px;
+    width: 768px;
+    height: 768px;
 }
 
 .btn-container_img_list {
@@ -1432,8 +1487,10 @@ li.wbcTitleText p.firstP {
 }
 
 .classDetailInfoContainer {
+    position: relative;
     width: 450px;
     margin-left: 16px;
+    height: 768px;
 }
 
 .classInfoWbc {
@@ -1562,7 +1619,7 @@ ul.slideContent .outClassDefault {
     padding: 0;
 }
 
-.orderListTableContainer {
+.orderList-container {
     height: 51.1vh;
 }
 li.flexColumn span {
@@ -2219,6 +2276,10 @@ ul.wbcImgWrap > li {
     outline: 4px solid var(--green-bg-1-color) !important;
 }
 
+.watched-image {
+    outline: 2px solid var(--secondary);
+}
+
 .context-menu.detail {
     /*height: 250px;*/
     /*overflow-y: auto;*/
@@ -2275,9 +2336,8 @@ ul.wbcImgWrap > li {
 
 .classImageSliderContainer {
     display: flex;
-    margin: 18px;
     overflow-x: hidden;
-    /*margin-top: 4px;*/
+    margin: 24px 0 0 4px;
 }
 
 ul.cellImgBox {
@@ -2383,10 +2443,6 @@ h3.wbcClassInfoLeft {
     /*margin-left: 13px;*/
 }
 
-.reportDiv ul.leftWbcInfo {
-    width: 59%;
-}
-
 ul.leftWbcInfo {
     display: inline-block;
     width: 38%;
@@ -2411,15 +2467,30 @@ ul.leftWbcInfo {
 
 .dbDataTable {
     height: 82.5vh;
-    overflow-y: auto;
     display: block;
     width: 100%;
-    border-collapse: collapse;
+    overflow-y: auto;
+}
+
+.dbDataTable::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dbDataTable::-webkit-scrollbar-track {
+    background: var(--white-color);
+    border-radius: 4px;
+    outline: 1px solid var(--main-bg-7-color);
+}
+
+.dbDataTable::-webkit-scrollbar-thumb {
+    background: var(--main-bg-7-color);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 .dbDataTable::-webkit-scrollbar-thumb:hover {
-    background: var(--main-bg-7-color);
-    cursor: pointer;
+    background: var(--main-bg-9-color);
 }
 
 .dbDataTable > thead {
@@ -2427,7 +2498,6 @@ ul.leftWbcInfo {
     top: -39px;
     background: white;
     z-index: 1;
-
 }
 
 .orderListUi {
@@ -2453,11 +2523,6 @@ button.searchClass:hover {
     background: var(--white-color);
 }
 
-.reportDiv > div {
-    display: inline-block;
-    vertical-align: top;
-}
-
 .wbcDiv {
     width: 25%;
     height: 83%;
@@ -2466,15 +2531,16 @@ button.searchClass:hover {
     padding: 10px;
 }
 
+
 .reportDetail {
-    width: 56%;
+    display: inline-block;
+    width: 70%;
     background: var(--white-color);
     color: var(--gray-bg-3-color);
     font-size: 0.8rem;
     overflow-y: auto;
-    max-height: 87vh;
+    height: 87vh;
     border-radius: 4px;
-    margin-left: 10px;
 }
 
 li.onRight {
@@ -2515,11 +2581,6 @@ h3.reportH3 {
 
 table.reportTable tr {
     border-bottom: 1px solid var(--gray-bg-11-color);
-}
-
-.wbcLeft {
-    width: 49%;
-    display: inline-block;
 }
 
 .reportDivTop {
@@ -2617,7 +2678,7 @@ h3.orderTitle {
     left: 4px;
 }
 
-.wbcContent {
+.list-detail-container {
     display: inline-block;
     width: 95%;
     height: 92.5vh;
@@ -2728,13 +2789,6 @@ select.selectSizeTitle {
     display: inline-block;
     width: 95%;
     min-height: 92.5vh;
-}
-
-.reportDiv {
-    margin-left: 14px;
-    /*padding-left: 1.7%;*/
-    display: flex;
-    height: 90vh;
 }
 
 .reportContent {
@@ -3149,10 +3203,11 @@ ul.editOrder li input {
 
 .dbImageContainer::-webkit-scrollbar-thumb {
     border-radius: 10px;
+    background: var(--main-bg-7-color);
 }
 
 .dbImageContainer::-webkit-scrollbar-thumb:hover {
-    background: var(--main-bg-7-color);
+    background: var(--main-bg-9-color);
     cursor: pointer;
 }
 
@@ -3463,7 +3518,7 @@ button.rollbackButton {
     margin: 0 auto;
 }
 
-.cursorPointer.userBox {
+.cursor-pointer.userBox {
     border: 1px solid #fff;
     border-radius: 5px;
     padding: 5px;
@@ -3476,7 +3531,7 @@ button.rollbackButton {
     color: #ffffff;
 }
 
-.cursorPointer.userBox:hover {
+.cursor-pointer.userBox:hover {
     background: #fff;
     color: #000;
 }
@@ -3620,7 +3675,7 @@ p.menuIco {
 }
 
 .slideImage:hover {
-    outline: 2px solid var(--green-bg-1-color);
+    transform: scale(1.02);
 }
 
 .splide.is-initialized, .splide.is-rendered {
@@ -3629,6 +3684,62 @@ p.menuIco {
 
 .splide__track {
     padding-bottom: 4px;
+}
+
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    font-size: 16px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    z-index: 9999999999;
+    animation: fadeInOut 4s ease forwards;
+}
+
+.toast-notification.center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    font-size: 16px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    z-index: 999999999999999;
+    animation: fadeInOut 4s ease forwards;
+}
+
+.toast-notification.error {
+    background-color: red;
+}
+
+/* 페이드 인-아웃 애니메이션 */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
 }
 
 @media screen and (max-width: 1900px) {
