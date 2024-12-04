@@ -546,9 +546,6 @@ async function socketData(data: any) {
         result = await createRunningApi({userId: Number(userId.value), runingInfoDtoItems: runningInfo});
 
         if (result) {
-          if (slotId) {
-            console.log('save successful');
-          }
           delayedEmit('SEND_DATA', 'refreshDb', 300);
         }
       } catch (e) {

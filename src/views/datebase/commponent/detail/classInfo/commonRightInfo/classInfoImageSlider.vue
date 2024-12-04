@@ -8,7 +8,7 @@
               class="slideImage cursor-pointer"
               :class="[
                   image.isWatched ? 'watched-image' : '',
-                  currentImageName ===  image.imageName? 'selected-image' : '',
+                  currentImageName.split('.')[0] ===  image.imageName.split('.')[0] ? 'selected-image' : '',
               ]"
               :src="image.url"
               v-show="!hiddenImages[`${image.url}`]"
@@ -52,7 +52,7 @@ watch(() => props.allImages, async (newAllImages) => {
 
 watch(() => currentImageName.value, () => {
   localAllImages.value = localAllImages.value.map((item) => {
-    if (item.imageName === currentImageName.value) {
+    if (item.imageName.split('.')[0] === currentImageName.value.split('.')[0]) {
       return {...item, isWatched: true };
     }
     return item;

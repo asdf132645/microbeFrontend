@@ -348,7 +348,7 @@ watch([runInfo.value], async (newVals: any) => {
       try {
         await SOUND_ERROR_ALARM.play();
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         isPlayingErrorAlarm.value = false;
       }
@@ -364,7 +364,7 @@ watch([runInfo.value], async (newVals: any) => {
       try {
         await SOUND_COMPLETE_ALARM.play();
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         isPlayingCompleteAlarm.value = false;
       }

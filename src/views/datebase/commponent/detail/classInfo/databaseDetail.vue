@@ -68,9 +68,6 @@ onMounted(async () => {
 
 const getDetailRunningInfo = async () => {
   // const { result, loading, error } = useQuery(GetRunningInfoByIdDocument, selectItems.value.id);
-  // console.log('result', result);
-  // console.log('loading', loading);
-  // console.log('error', error);
   try {
     // Store에 담아서 관리
     // 상위 부모에서 호출 한번만

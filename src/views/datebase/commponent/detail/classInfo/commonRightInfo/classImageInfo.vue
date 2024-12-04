@@ -113,11 +113,10 @@ watch(() => currentImageName.value, async (curImgName) => {
   const result: any = await detailRunningApi(props.selectItems.id)
   const getSelectItems = result.data;
   if (currentPowerType.value in powerModeToIdMap) {
-    const updatedClassInfo = getSelectItems.classInfo.map((item: any) => {
-      return item.name === currentImageName.value && item.id === powerModeToIdMap[currentPowerType.value]
-          ? { ...item, isWatched: true }
-          : item;
-    });
+    const updatedClassInfo = getSelectItems.classInfo.map((item: any) =>
+        item?.name && item.name.split('.')[0] === currentImageName.value.split('.')[0] && item.id === powerModeToIdMap[currentPowerType.value]
+        ? { ...item, isWatched: true }
+        : item);
 
     const updatedSelectItems = {
       ...getSelectItems,
@@ -178,7 +177,6 @@ const initElement = async () => {
 
     if (fullPageButton) {
       fullPageButton.element.addEventListener('click', async () => {
-        console.log('viewer.value.isFullPage()', viewer.value.isFullPage());
         if (viewer.value.isFullPage()) {
           await document.exitFullscreen();
           viewer.value.setFullPage(false);
@@ -353,17 +351,19 @@ const fetchTileImagesInfo = async (folderPath: string) => {
   const fileNames = await response.json();
   const availableFileNames = filterAvailableImageItems(fileNames) as string[];
 
-  const sortedFileNames = availableFileNames.reduce((acc: { files: string[], jpg: string[] }, fileName: string) => {
+  const sortedFileNames = availableFileNames.reduce((acc: { files: string[], images: string[] }, fileName: string) => {
     if (fileName.endsWith('_files')) acc.files.push(fileName);
-    else if (fileName.endsWith('.jpg')) acc.jpg.push(fileName);
+    else if (fileName.endsWith('.jpg') || fileName.endsWith('.bmp')) acc.images.push(fileName);
     return acc;
-  }, { files: [], jpg: [] });
+  }, { files: [], images: [] });
+
+  console.log('sortedFileNames', sortedFileNames);
 
   sortedFileNames.files.sort((a: string, b: string) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
-  sortedFileNames.jpg.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
-  const { files: fileNamesEndsWithFiles, jpg: fileNamesEndsWithJpg } = sortedFileNames;
+  sortedFileNames.images.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
+  const { files: fileNamesEndsWithFiles, images: fileNamesWithImages } = sortedFileNames;
 
-  allImages.value = fileNamesEndsWithJpg
+  allImages.value = fileNamesWithImages
       .map((imageSource, index) => ({
         url: `${url}\\${imageSource}`,
         imageName: imageSource,
@@ -374,7 +374,7 @@ const fetchTileImagesInfo = async (folderPath: string) => {
     const targetId = powerModeToIdMap[currentPowerType.value];
     allImages.value = allImages.value.map((item: { url: string; imageName: string; index: number }) => {
       const matchedClassInfo = props.selectItems.classInfo.find(
-          (classInfoItem: any) => classInfoItem.id === targetId && classInfoItem.name === item.imageName
+          (classInfoItem: any) => classInfoItem.id === targetId && classInfoItem.name.split('.')[0] === item.imageName.split('.')[0]
       );
       return { ...item, isWatched: matchedClassInfo?.isWatched ?? false };
     });

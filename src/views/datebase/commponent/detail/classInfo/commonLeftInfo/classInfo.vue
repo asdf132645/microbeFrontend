@@ -351,7 +351,6 @@ const resRunningItem = async ({ updatedRunningInfo, noAlert, type }: {updatedRun
     })
     if (response) {
       if (!noAlert) {
-        console.log('type', type);
         if (type === 'commit') {
           toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
           await showToast(MSG_TOAST.SUCCESS);

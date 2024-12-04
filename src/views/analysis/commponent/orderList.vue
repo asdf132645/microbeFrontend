@@ -55,7 +55,6 @@ watch(() => props.parsedData, (newVal) => {
 watch(() => props.pb100aCassette, (newVal) => {
       if (newVal === 'reset') {
         dspOrderList.value = [];
-        console.log('pb100aCassette 초기화', dspOrderList.value)
       }
     }, {deep: true});
 

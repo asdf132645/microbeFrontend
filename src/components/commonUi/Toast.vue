@@ -38,7 +38,6 @@ onMounted(() => {
 });
 
 watch(props, (newProps) => {
-  console.log(props);
   // props 값이 변경되면 다시 표시 후 사라짐
   visible.value = true;
   setTimeout(() => {
