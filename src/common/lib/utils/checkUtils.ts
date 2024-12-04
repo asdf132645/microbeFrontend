@@ -20,7 +20,7 @@ export const filterAvailableImageItems = (files: string[]) => {
         // 조건에 맞는 파일들이 모두 존재하는지 확인
         if (
             fileNameSet.has(`${baseName}.dzi`) &&
-            fileNameSet.has(`${baseName}.jpg`) &&
+            (fileNameSet.has(`${baseName}.bmp`) || fileNameSet.has(`${baseName}.jpg`)) &&
             fileNameSet.has(`${baseName}.json`) &&
             fileNameSet.has(`${baseName}_files`)
         ) {

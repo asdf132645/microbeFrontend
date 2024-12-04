@@ -1,5 +1,5 @@
 <template>
-  <table class="no-css-table" v-if="!isObjectEmpty(classInfo)">
+  <table class="no-css-table container-shadow" v-if="!isObjectEmpty(classInfo)">
     <thead v-if="!noHead">
       <th></th>
       <th></th>
@@ -11,7 +11,7 @@
     <tbody>
     <tr v-for="category in classInfo" :key="category?.classId">
       <td></td>
-      <td class="flex-justify-center">
+      <td class="classDetail-gradeTitle">
         {{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}
         <p v-if="isCheckable" class="ml12 cursor-pointer">
           <font-awesome-icon
@@ -121,11 +121,11 @@ const handleToggleGradeClick = (updatingMoInfo: any, classId: string, grade: str
 const colReturn = (col: number) => {
   switch (col + 1) {
     case 2:
-      return [7, 18, 60];
+      return [5, 20, 60];
     case 4:
       return [25, 25, 25, 25];
     case 5:
-      return [8, 18, 18, 18, 18, 18];
+      return [5.5, 18.5, 18.5, 18.5, 18.5, 18.5];
     case 6:
       return [20, 16, 16, 16, 16, 16];
   }

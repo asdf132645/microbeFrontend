@@ -3,7 +3,7 @@
     <h3 class="titleText">Working View</h3>
     <div>
       <p class="mt30" :class="{'blinkColor': isBlinking}">{{ changeWqStatCd() }}</p>
-      <p class="mt12">{{ getProcessingCode(processingCode) }}</p>
+      <p class="workingViewer-processingCode">{{ getProcessingCode(processingCode) }}</p>
 
       <div class="circular-progress-bar mt20">
         <svg class="progress-ring" width="240" height="240">

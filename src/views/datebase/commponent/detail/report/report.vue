@@ -12,10 +12,10 @@
         :cbcSex="selectItems?.cbcSex"
         :cbcAge="selectItems?.cbcAge"
     />
-    <div class="databaseDetailLeft shadowBox">
+    <div class="databaseDetailLeft container-shadow">
       <ClassInfo type='report' @submitStateChanged="submitStateChanged" :isCommitChanged="isCommitChanged" :selectItems="selectItems" />
     </div>
-    <div class="reportDetail shadowBox">
+    <div class="reportDetail container-shadow">
       <div class="reportTitle">
         <span>[Hospital]</span> <span>DM Serial Nbr : {{ selectItems?.slotId }}</span>
         <font-awesome-icon :icon="['fas', 'print']" @click="printStart" class="printStart"/>
@@ -69,7 +69,7 @@
           <table class="tableClass mt22">
             <colgroup>
               <col width="10%">
-              <col width="20%">
+              <col width="80%">
             </colgroup>
             <thead>
             <tr class="reportWbcclassificationSmallTitle">

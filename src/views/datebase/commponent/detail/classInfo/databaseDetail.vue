@@ -12,7 +12,7 @@
         :cbcSex="selectItems?.cbcSex"
         :cbcAge="selectItems?.cbcAge"
     />
-    <div class="databaseDetailLeft shadowBox">
+    <div class="databaseDetailLeft container-shadow">
         <ClassInfo :selectItems="selectItems" type='listTable' @nextPage="nextPage" />
     </div>
 

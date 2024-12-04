@@ -1,5 +1,21 @@
 <template>
   <div class="classDetailInfoContainer">
+
+    <div class="classDetailInfo-title-container">
+      <h3 class="classDetailInfo-title">{{ currentAnalysisType }} Classification</h3>
+      <ul>
+        <li @click.stop="handleMemoOpen">
+          <font-awesome-icon class="classDetailFont" :icon="['fas', 'pen-to-square']" />
+        </li>
+      </ul>
+
+      <div v-if="showDetailMemo" class="detailMemo-container">
+        <textarea  v-model="detailMemo" class="detailMemo-textarea"></textarea>
+        <button @click="updateDetailMemo" class="detailMemo-button">Save</button>
+      </div>
+    </div>
+    <div class="classInfoHorizontalRule"></div>
+
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <h1 class="fs12 classInfoClassTitle">Fungi</h1>
       <div class="classInfoHorizontalRule"></div>
@@ -9,15 +25,13 @@
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper">
         <h1 class="fs12 classInfoClassTitle">Bacteria</h1>
-        <div class="classInfoHorizontalRule"></div>
       </div>
       <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="detailClassInfo" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper" v-for="category in moInfo?.classInfo" :key="category.classId">
-        <h1 class="fs12 classInfoClassTitle">{{ getClassTitle(category.classId)  }}</h1>
-        <div class="classInfoHorizontalRule"></div>
+        <h1 class="classInfoClassTitle mb4">{{ getClassTitle(category.classId)  }}</h1>
         <GradeInputWithTitle
             v-if="category.classId === CLASS_INFO_ID.WBC"
             :isCheckable="true"
@@ -32,8 +46,7 @@
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
       <div v-show="moInfo?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST).length > 0">
-        <h1 class="fs12 classInfoClassTitle">Bacteria</h1>
-        <div class="classInfoHorizontalRule"></div>
+        <h1 class="classInfoClassTitle">Bacteria</h1>
         <GradeInputWithTitle
             :isCheckable="true"
             @classCheck="classCheck"
@@ -44,9 +57,8 @@
         />
       </div>
 
-      <div v-show="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST).length > 0">
-        <h1 class="fs12 classInfoClassTitle">Fungi</h1>
-        <div class="classInfoHorizontalRule"></div>
+      <div v-show="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST).length > 0" class="mt24">
+        <h1 class="classInfoClassTitle">Fungi</h1>
         <GradeInputWithTitle
             :isCheckable="true"
             @classCheck="classCheck"
@@ -60,8 +72,7 @@
 
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.SPUTUM)  && !isObjectEmpty(moInfo)">
-      <h1 class="fs12 classInfoClassTitle mt24">Sputum</h1>
-      <div class="classInfoHorizontalRule"></div>
+      <h1 class="classInfoClassTitle mt24">Sputum</h1>
 
       <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
         <table class="no-css-table">
@@ -116,28 +127,23 @@
       </table>
       </div>
 
-      <h1 class="fs12 classInfoClassTitle mt24">Yeast</h1>
+      <h1 class="classInfoClassTitle mt24">Yeast</h1>
       <div class="classInfoHorizontalRule"></div>
       <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
 
-      <h1 class="fs12 classInfoClassTitle">Hyphae</h1>
+      <h1 class="classInfoClassTitle">Hyphae</h1>
       <div class="classInfoHorizontalRule"></div>
       <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.HYPHAE)" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper">
-        <h1 class="fs12 classInfoClassTitle">Bacteria</h1>
+        <h1 class="classInfoClassTitle">Bacteria</h1>
         <div class="classInfoHorizontalRule"></div>
       </div>
 
       <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
     </template>
-
-    <div class="detailMemo-container">
-      <textarea  v-model="detailMemo" class="detailMemo-textarea"></textarea>
-      <button @click="updateDetailMemo" class="detailMemo-button">Save</button>
-    </div>
   </div>
 
   <Toast
@@ -190,6 +196,7 @@ const checkedClassSet = ref<Set<string>>(new Set());
 const detailMemo = ref('');
 const toastMessage = ref('');
 const toastMessageType = ref(TOAST_MSG_TYPE.SUCCESS);
+const showDetailMemo = ref(false);
 
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
@@ -290,6 +297,7 @@ const updateDetailMemo = async () => {
   updateRunningInfo(updatedSelectItems);
   toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
   await showToast(MSG_TOAST.SUCCESS);
+  showDetailMemo.value = false;
 }
 
 const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) => {
@@ -337,6 +345,10 @@ const showToast = async (message: string) => {
     toastMessage.value = ''; // 메시지를 숨기기 위해 빈 문자열로 초기화
   }, 1500); // 5초 후 토스트 메시지 사라짐
 };
+
+const handleMemoOpen = () => {
+  showDetailMemo.value = !showDetailMemo.value;
+}
 
 
 </script>

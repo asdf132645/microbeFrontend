@@ -3,22 +3,7 @@
     <div class="loader"></div>
     <p class="loadingText">Loading...</p>
   </div>
-  <table class='defaultTable mt20 dbDataTable' ref="scrollableDiv">
-    <colgroup>
-      <col width="3.12%"/>
-      <col width="3.12%"/>
-      <col width="12.5%"/>
-      <col width="6.25%"/>
-      <col width="6.25%"/>
-      <col width="9.38%"/>
-      <col width="9.38%"/>
-      <col width="9.38%"/>
-      <col width="10.16%"/>
-      <col width="9.38%"/>
-      <col width="9.38%"/>
-      <col width="9.38%"/>
-      <col width="3.12%"/>
-    </colgroup>
+  <table class='defaultTable dbDataTable' ref="scrollableDiv">
     <thead>
     <tr class="list-table-header">
       <th>NO</th>

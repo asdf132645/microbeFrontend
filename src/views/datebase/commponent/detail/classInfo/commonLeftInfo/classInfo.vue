@@ -1,15 +1,15 @@
 <template>
-  <img class="mt10" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
-  <div class="mt10" v-else-if="barCodeImageShowError" style="height: 209.5px;"></div>
-  <div class="mt10 mb20 flex-justify-between">
-    <h3 class="wbcClassInfoLeft">{{ currentAnalysisType }} Classification</h3>
+  <img class="classInfo-barcode-img" v-if="!barCodeImageShowError" @error="onImageError" @load="onLoadImg" :src="barcodeImg"/>
+  <div class="mt10" v-else style="height: 204px;"></div>
+  <div class="classInfo-title-container">
+    <h3 class="wbcClassInfoLeft">{{ currentAnalysisType }} Total Classification</h3>
 
     <ul class="leftWbcInfo">
       <li @click="barcodeCopy">
-        <font-awesome-icon :icon="['fas', 'copy']"/>
+        <font-awesome-icon class="classDetailFont" :icon="['fas', 'copy']"/>
       </li>
       <li class="relative">
-        <font-awesome-icon :icon="['fas', 'comment-dots']" class="memoOpenBtn" @click="memoOpen"/>
+        <font-awesome-icon :icon="['fas', 'comment-dots']" class="memoOpenBtn classDetailFont" @click="memoOpen"/>
         <div v-if="memoModal" class="memoModal">
           <textarea v-model="memo"></textarea>
           <button class="memoModalBtn" @click="memoChange">OK</button>
@@ -20,7 +20,7 @@
           @click="commitConfirmed"
           :class="{'submitted': selectItems?.submitState === 'Submit',}"
       >
-        <font-awesome-icon :icon="['fas', 'square-check']"/>
+        <font-awesome-icon class="classDetailFont" :icon="['fas', 'square-check']"/>
       </li>
 <!--      <li-->
 <!--          @click="lisModalOpen"-->

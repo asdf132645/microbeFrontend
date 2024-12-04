@@ -3,18 +3,18 @@
 
     <div class="flex-column-justify-center">
       <div class="flex-justify-around mt12">
-        <div class="flex-center">
-          <div class="classImageInfo-container">
+          <div class="classImageInfo-container container-shadow">
             <div class="tiling-viewer_img_list-box_img_list">
               <div v-if="tileExist"
                    ref="tilingViewerLayer"
-                   id="tiling-viewer_img_list" style="width: 100%;">
+                   id="tiling-viewer_img_list"
+                   class="w-full"
+              >
               </div>
               <div v-else>
                 <span>Tile does not exist.</span>
               </div>
             </div>
-          </div>
         </div>
 
         <ClassDetailInfo :selectItems="selectItems" @checkedClassSet="checkedClassSetFunc" />
@@ -168,23 +168,25 @@ const initElement = async () => {
 
     viewer.value.addHandler('open', async (event: any) => {
       await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.source.Image.imageName });
-      const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
-
-      if (fullPageButton) {
-        fullPageButton.element.addEventListener('click', async () => {
-          if (viewer.value.isFullPage()) {
-            await document.exitFullscreen();
-            viewer.value.setFullPage(false);
-          } else {
-            viewer.value.setFullPage(true);
-          }
-        });
-      }
 
       // 캔버스 크기를 조정
       canvas.width = event.source.Image.Size.Width;
       canvas.height = event.source.Image.Size.Height;
     });
+
+    const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
+
+    if (fullPageButton) {
+      fullPageButton.element.addEventListener('click', async () => {
+        console.log('viewer.value.isFullPage()', viewer.value.isFullPage());
+        if (viewer.value.isFullPage()) {
+          await document.exitFullscreen();
+          viewer.value.setFullPage(false);
+        } else {
+          viewer.value.setFullPage(true);
+        }
+      });
+    }
 
     viewer.value.addHandler('full-page', async (event: any) => {
       if (!event.fullPage) {
