@@ -2405,6 +2405,8 @@ ul.cellImgBox {
     overflow-x: auto;
     background-color: var(--main-bg-2-color);
     border-radius: 4px;
+    display: flex;
+    flex-direction: column;
 }
 
 .classInfoDetailTop {
