@@ -192,8 +192,6 @@ const eqStatCdData = ref({
 });
 const oilCountData = ref('');
 const storagePercentData = ref('');
-const isCompleteAlarm = ref(false);
-const isErrorAlarm = ref(false);
 const oilVisible = ref(false);
 const maxOilCount = ref(1000);
 const statusBarWrapper = ref<HTMLDivElement | null>(null);
@@ -201,6 +199,10 @@ const statusBar = ref<HTMLDivElement | null>(null);
 const userId = ref('');
 const userModuleDataGet = computed(() => store.state.userModule);
 const analysisType = computed(() => store.state.commonModule.analysisType);
+const isCompleteAlarm = computed(() => store.state.commonModule.isCompleteAlarm);
+const isErrorAlarm = computed(() => store.state.commonModule.isErrorAlarm);
+const isErrorAlarmRunning = ref(false);
+const isCompleteAlarmRunning = ref(false);
 const alarmCount = ref(0);
 const noRouterPush = ref(false);
 const currentDate = ref<string>("");
@@ -252,11 +254,8 @@ const hideConfirm = () => {
 }
 
 const fullScreen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
 }
 
 onBeforeMount(() => {
@@ -264,7 +263,7 @@ onBeforeMount(() => {
 })
 
 onMounted(async () => {
-
+  await cellImgGet();
   updateDateTime(); // 초기 시간 설정
   const timerId = setInterval(updateDateTime, 1000); // 1초마다 현재 시간을 갱신
   // 컴포넌트가 해제되기 전에 타이머를 정리하여 메모리 누수를 방지
@@ -282,9 +281,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('wheel', preventScroll);
 })
 
-
 watch(userModuleDataGet.value, (newUserId) => {
-  cellImgGet();
   userId.value = newUserId.id;
 });
 
@@ -304,9 +301,7 @@ watch([embeddedStatusJobCmd.value], async (newVals: any) => {
   oilCountData.value = oilCountChangeVal();
   storagePercentData.value = storagePercentChangeVal();
 
-  if (!isStartCountUpdated.value) {
-    searchCardCount();
-  }
+  if (!isStartCountUpdated.value) searchCardCount();
 
 });
 
@@ -331,19 +326,14 @@ const searchCardCount = async () => {
 
 watch([commonDataGet.value], async (newVals: any) => {
   const newValsObj = JSON.parse(JSON.stringify(newVals));
-  if (newValsObj[0].isRunningState) {
-    noRouterPush.value = true;
-  } else {
-    noRouterPush.value = false;
-  }
+  if (newValsObj[0].isRunningState) noRouterPush.value = true;
+  else noRouterPush.value = false;
 });
 
-watch([runInfo.value], async (newVals: any) => {
-  isCompleteAlarm.value = newVals[0].isCompleteAlarm;
-  isErrorAlarm.value = newVals[0].isErrorAlarm;
-
-  if (isErrorAlarm.value) {
+watch(() => isErrorAlarm.value, async (newIsErrorAlarm: boolean) => {
+  if (newIsErrorAlarm && !isErrorAlarmRunning.value) {
     if (!isPlayingErrorAlarm.value) {
+      isErrorAlarmRunning.value = true;
       isPlayingErrorAlarm.value = true;
       try {
         await SOUND_ERROR_ALARM.play();
@@ -353,13 +343,17 @@ watch([runInfo.value], async (newVals: any) => {
         isPlayingErrorAlarm.value = false;
       }
     }
-
     isErrorAlarmInterval = setTimeout(() => {
       store.dispatch('commonModule/setCommonInfo', { isErrorAlarm: false });
+      isErrorAlarmRunning.value = false;
     }, alarmCount.value);
-  } else if (isCompleteAlarm.value) {
+  }
+})
 
+watch(() => isCompleteAlarm.value, async (newIsCompleteAlarm: boolean) => {
+  if (newIsCompleteAlarm && !isCompleteAlarmRunning.value) {
     if (!isPlayingCompleteAlarm.value) {
+      isCompleteAlarmRunning.value = true;
       isPlayingCompleteAlarm.value = true;
       try {
         await SOUND_COMPLETE_ALARM.play();
@@ -371,10 +365,11 @@ watch([runInfo.value], async (newVals: any) => {
     }
 
     isCompleteAlarmInterval = setTimeout(() => {
+      isCompleteAlarmRunning.value = false;
       store.dispatch('commonModule/setCommonInfo', { isCompleteAlarm: false });
     }, alarmCount.value);
   }
-});
+})
 
 const showSuccessAlert = (message: string) => {
   showAlert.value = true;
@@ -493,15 +488,13 @@ const onReset = () => {
 
 const getPercent = () => {
   if (!statusBarWrapper.value || !statusBar.value) return;
-  const percent = Math.round((oilCount.value / maxOilCount.value) * 100);
+  const percent = Math.min(Math.round((oilCount.value / maxOilCount.value) * 100), 100);
   const progressBarWidth = `${(percent / 100) * statusBarWrapper.value.offsetWidth}px`;
   statusBar.value.style.width = progressBarWidth;
 }
 
 const onPrime = () => {
-  if (blinkTimeout !== null) {
-    clearTimeout(blinkTimeout);
-  }
+  if (blinkTimeout !== null) clearTimeout(blinkTimeout);
 
   isBlinkingPrime.value = true;
   tcpReq().embedStatus.oilPrime.reqUserId = userId;

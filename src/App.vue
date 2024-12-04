@@ -59,19 +59,15 @@ import {
   MO_TEST_TYPE,
   CLASS_INFO_ID,
   MAP_TEST_TYPE_TO_TEST_NAME,
-  URINE_HIGH_POWER_CLASS_IDS,
   URINE_LOW_POWER_CLASS_IDS,
-  URINE_TOTAL_CLASS_IDS,
   BLOOD_LOW_POWER_CLASS_IDS,
-  BLOOD_TOTAL_CLASS_IDS,
-  BLOOD_HIGH_POWER_CLASS_IDS,
-  SPUTUM_TOTAL_CLASS_IDS,
-  SPUTUM_HIGH_POWER_CLASS_IDS, SPUTUM_LOW_POWER_CLASS_IDS
+  SPUTUM_LOW_POWER_CLASS_IDS
 } from "@/common/defines/constFile/dataBase";
 import {CommonState} from "@/store/modules/commonModule";
 import { MoInfoInterface, RUNNING_INFO_INTERFACE } from "@/common/type/tcp";
 import {IntervalType} from "@/common/type/generalTypes";
 import {getValidClassIds} from "@/common/lib/utils/conversionDataUtils";
+import {JOB_CMD} from "@/common/defines/constFile/analysis/analysis";
 
 const router = useRouter();
 const store = useStore();
@@ -111,7 +107,6 @@ const epCellConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item
 const gramConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.GRAM)[0]);
 
 instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async (isTcpConnected) => {
-  console.log('isTcpConnected', isTcpConnected);
   if (isTcpConnected) {
     setTimeout(async () => {
       await store.dispatch('commonModule/setCommonInfo', {isTcpConnected: true});
@@ -122,8 +117,6 @@ instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async 
 instance?.appContext.config.globalProperties.$socket.on('viewerCheck', async (ip) => { // 뷰어인지 아닌지 체크하는곳
   await getIpAddress(ip)
 });
-
-const siteCdDvBarCode = ref(false);
 
 const getIpAddress = async (ip: string) => {
   try {
@@ -138,14 +131,14 @@ const getIpAddress = async (ip: string) => {
   }
 }
 
-function checkFullscreenStatus() {
+const checkFullscreenStatus = () => {
   const {path} = router.currentRoute.value;
   if (path === '/user/login') {
     return;
   }
   isFullscreen.value = window.matchMedia('(display-mode: fullscreen)').matches;
   if (!isFullscreen.value) {
-    showErrorAlert('Please click the full screen button.');
+    showSuccessAlert('Please click the full screen button.');
   } else {
     if (alertMessage.value === 'Please click the full screen button.') {
       hideAlert();
@@ -153,7 +146,7 @@ function checkFullscreenStatus() {
   }
 }
 
-function startChecking() {
+const startChecking = () => {
   // 화면 상태를 즉시 업데이트
   checkFullscreenStatus();
   // 1분(60000ms)마다 체크를 수행
@@ -164,7 +157,7 @@ function startChecking() {
 watch(reqArr.value, async (newVal: CommonState) => {
   if (!newVal.reqArr) return;
   const uniqueReqArr = removeDuplicateJobCmd(newVal.reqArr);
-  const notSysRunInfo = uniqueReqArr.filter((item) => !['SYSINFO', 'RUNNING_INFO'].includes(item.jobCmd));
+  const notSysRunInfo = uniqueReqArr.filter((item: any) => !['SYSINFO', 'RUNNING_INFO'].includes(item.jobCmd));
 
   if (notSysRunInfo.length > 0) {
     await sendMessage(notSysRunInfo[0]);
@@ -215,18 +208,6 @@ window.addEventListener('beforeunload', async () => {
   await store.dispatch('commonModule/setCommonInfo', {firstLoading: false});
 });
 
-window.addEventListener('unload', async () => {
-  if (!ipMatches.value) return;
-  instance?.appContext.config.globalProperties.$socket.emit('message', {
-    type: 'SEND_DATA',
-    payload: {
-      jobCmd: 'clientExit',
-      reqUserId: '',
-      reqDttm: '',
-    }
-  });
-})
-
 const leave = async (event: any) => {
   event.preventDefault();
   if (!ipMatches.value) {
@@ -234,6 +215,8 @@ const leave = async (event: any) => {
     const ipAddress = `ip=${result.data}`
     const url = `http://${result.data}:3000/close?${ipAddress}`;
     await axios.get(url);
+  } else {
+    await EventBus.publish('childEmitSocketData', tcpReq().embedStatus.exit);
   }
 };
 
@@ -255,7 +238,6 @@ onMounted(async () => {
   startChecking();
   const result = await getDeviceIpApi();
   ipMatches.value = isIpMatching(window.APP_API_BASE_URL, result.data);
-  siteCdDvBarCode.value = false;
   window.addEventListener('beforeunload', leave);
 
   if (userId.value === '') { // 사용자가 강제 초기화 시킬 시 유저 정보를 다시 세션스토리지에 담아준다.
@@ -299,9 +281,7 @@ instance?.appContext.config.globalProperties.$socket.on('chat', async (data) => 
 });
 
 async function socketData(data: any) {
-  if (commonDataGet.value.viewerCheck !== 'main') {
-    return;
-  }
+  if (commonDataGet.value.viewerCheck !== 'main') return;
   deleteData.value = false;
   try {
     if (typeof data === 'string') {
@@ -312,41 +292,36 @@ async function socketData(data: any) {
     const stringData = textDecoder.decode(data);
     const parseDataWarp = JSON.parse(stringData);
 
-    if (alertMessage.value === MESSAGES.TCP_DiSCONNECTED) {
-      hideAlert();
-    }
+    if (alertMessage.value === MESSAGES.TCP_DiSCONNECTED) hideAlert();
 
     // 시스템정보 스토어에 담기
     switch (parseDataWarp.jobCmd) {
-      case 'SYSINFO':
+      case JOB_CMD.SYSINFO:
         const res = await sysInfoStore(parseDataWarp);
         if (res !== null) {
-          showErrorAlert(res);
-        }
-        const deviceInfoObj = {
-          siteCd: parseDataWarp.siteCd,
-          deviceSerialNm: parseDataWarp.deviceSerialNm
-        }
-        if (!siteCdDvBarCode.value) {
-          await saveDeviceInfo(deviceInfoObj);
+          showCoreErrorAlert(res);
+          const isAlarm = sessionStorage.getItem('isAlarm');
+          if (isAlarm === 'true') {
+            await store.dispatch('commonModule/setCommonInfo', {isErrorAlarm: true}); // 오류 알람을 킨다.
+          }
         }
         break;
-      case 'INIT':
+      case JOB_CMD.INIT:
         barcodeNum.value = '';
         await store.dispatch('commonModule/setCommonInfo', {initValData: false});
         sendSettingInfo();
         break;
-      case 'START':
+      case JOB_CMD.START:
         barcodeNum.value = '';
         await runningStart();
         break;
-      case 'RUNNING_INFO':
+      case JOB_CMD.RUNNING_INFO:
         parsedDataProps.value = parseDataWarp;
         runningInfoBoolean.value = true;
         await runningInfoStore(parseDataWarp);
         await runningInfoCheckStore(parseDataWarp);
         break;
-      case 'STOP':
+      case JOB_CMD.STOP:
         console.log('stop!=--------------------------')
         barcodeNum.value = '';
         await store.dispatch('commonModule/setCommonInfo', {isRunningState: false});
@@ -359,11 +334,11 @@ async function socketData(data: any) {
         startStatus.value = false;
         runningInfoBoolean.value = false;
         break;
-      case 'RUNNING_COMP':
+      case JOB_CMD.RUNNING_COMP:
         barcodeNum.value = '';
         await runningComplete();
         break;
-      case 'PAUSE':
+      case JOB_CMD.PAUSE:
         barcodeNum.value = '';
         await store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', {isPause: true}); // 일시정지 상태로 변경한다.
         await store.dispatch('commonModule/setCommonInfo', {runningSlotId: ''});
@@ -373,7 +348,7 @@ async function socketData(data: any) {
         startStatus.value = false;
         runningInfoBoolean.value = false;
         break;
-      case 'RESTART':
+      case JOB_CMD.RESTART:
         barcodeNum.value = '';
         await runningInfoStore(parseDataWarp);
         await runningInfoCheckStore(parseDataWarp);
@@ -386,16 +361,16 @@ async function socketData(data: any) {
         await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: 0 });
         await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
         break;
-      case 'RECOVERY':
+      case JOB_CMD.RECOVERY:
         barcodeNum.value = '';
         await store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', {userStop: false});
         await store.dispatch('commonModule/setCommonInfo', {runningSlotId: ''});
         await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: 0 });
         await store.dispatch('commonModule/setCommonInfo', {runningArr: []});
         break;
-      case 'ERROR_CLEAR':
-        break;
-      case 'SEARCH_CARD_COUNT':
+      case JOB_CMD.ERROR_CLEAR:
+        showAlert.value = false;
+        console.log('ERROR CLEAR');
         break;
     }
 
@@ -520,24 +495,6 @@ async function socketData(data: any) {
       }
       await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: completeSlot.slotNo });
       await saveRunningInfo(newObj, completeSlot.slotId);
-    }
-
-    async function saveDeviceInfo(deviceInfo: any) {
-      try {
-        const deviceData = await getDeviceInfoApi();
-        if (deviceData.data.length === 0 || !deviceData.data) {
-          await createDeviceInfoApi({ deviceItem: deviceInfo });
-          siteCdDvBarCode.value = true;
-        } else {
-          siteCdDvBarCode.value = true;
-        }
-
-        await store.dispatch('commonModule/setCommonInfo', {siteCd: parseDataWarp.siteCd})
-        localStorage.setItem('siteCd', parseDataWarp.siteCd);
-      } catch (err) {
-        console.error("Error handling device information", err);
-        siteCdDvBarCode.value = true;
-      }
     }
 
     async function saveRunningInfo(runningInfo: any, slotId: string) {
@@ -759,13 +716,19 @@ const showSuccessAlert = async (message: string) => {
   alertMessage.value = message;
 };
 
-const showErrorAlert = (message: string) => {
+const showCoreErrorAlert = (message: string) => {
   showAlert.value = true;
-  alertType.value = MESSAGES.ALERT_TYPE_ERROR;
+  alertType.value = 'coreError'
   alertMessage.value = message;
-};
+}
 
 const hideAlert = () => {
+  if (alertType.value === 'coreError') errorClear();
   showAlert.value = false;
 };
+
+const errorClear = async () => {
+  await store.dispatch('commonModule/setCommonInfo', {reqArr: tcpReq().embedStatus.errorClear });
+}
+
 </script>

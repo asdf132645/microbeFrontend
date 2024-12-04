@@ -1,4 +1,5 @@
 import {getDateTimeStr, getDateTimeStrForUI} from "@/common/lib/utils/dateUtils";
+import {JOB_CMD} from "@/common/defines/constFile/analysis/analysis";
 
 export const tcpReq:any = () => {
     const reqDttm = getDateTimeStr(); // 현재 날짜와 시간을 가져오는 함수
@@ -7,106 +8,110 @@ export const tcpReq:any = () => {
     return {
         embedStatus: {
             start: {
-                jobCmd: "START",
+                jobCmd: JOB_CMD.START,
                 reqUserId: '',
                 testType: "",
                 wbcCount: "",
                 reqDttm: reqDttm
             },
             startAction: {
-                jobCmd: 'START',
+                jobCmd: JOB_CMD.START,
                 reqUserId: '',
                 testType: '06',
                 LPCount: '10',
                 reqDttm: reqDttm,
             },
             init: {
-                jobCmd: 'INIT',
+                jobCmd: JOB_CMD.INIT,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             restart: {
-                jobCmd: 'RESTART',
+                jobCmd: JOB_CMD.RESTART,
                 reqUserId: '',
                 reqDttm: reqDttm,
                 bfSelectFiles: []
             },
             stop: {
-                jobCmd: 'STOP',
+                jobCmd: JOB_CMD.STOP,
                 reqUserId: '',
                 reqDttm: reqDttm,
                 isEmergency: 'N',
                 isUserStop: 'Y'
             },
             end: {
-                jobCmd: "END",
+                jobCmd: JOB_CMD.END,
                 reqUserId: '',
                 testType: "",
                 wbcCount: "",
                 reqDttm: reqDttm
             },
             runningInfo: {
-                jobCmd: "RUNNING_INFO",
+                jobCmd: JOB_CMD.RUNNING_INFO,
                 reqUserId: '',
                 reqDttm: reqDttm
             },
             sysInfo: {
-                jobCmd: 'SYSINFO',
+                jobCmd: JOB_CMD.SYSINFO,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             pause: {
-                jobCmd: 'PAUSE',
+                jobCmd: JOB_CMD.PAUSE,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             runIngComp: {
-                jobCmd: 'RUNNING_COMP',
+                jobCmd: JOB_CMD.RUNNING_COMP,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             recovery: {
-                jobCmd: 'RECOVERY',
+                jobCmd: JOB_CMD.RECOVERY,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             settings: {
-                jobCmd: 'SETTINGS',
+                jobCmd: JOB_CMD.SETTINGS,
                 reqUserId: '',
                 reqDttm: reqDttm,
                 saveReqDttm: saveReqDttm,
-                pbiaRootDir: 'D:/IA_Proc',
+                pbiaRootDir: 'D:/MOIA_Proc',
                 oilCount: '',
                 isOilReset: '',
                 deviceType: '03',
-                // uiVersion: 'web',
             },
             oilPrime: {
-                jobCmd: 'OIL_PRIME',
+                jobCmd: JOB_CMD.OIL_PRIME,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             gripperOpen: {
-                jobCmd: 'GRIPPER_OPEN',
+                jobCmd: JOB_CMD.GRIPPER_OPEN,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             cameraReset: {
-                jobCmd: 'CAMERA_RESET',
+                jobCmd: JOB_CMD.CAMERA_RESET,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             exit: {
-                jobCmd: 'clientExit',
+                jobCmd: JOB_CMD.CLIENT_EXIT,
                 reqUserId: '',
                 reqDttm: reqDttm,
             },
             searchCardCount: {
-                jobCmd: 'SEARCH_CARD_COUNT',
+                jobCmd: JOB_CMD.SEARCH_CARD_COUNT,
                 reqUserId: '',
                 reqDttm: reqDttm,
                 testType: '',
             },
+            errorClear: {
+                jobCmd: JOB_CMD.ERROR_CLEAR,
+                reqUserId: '',
+                reqDttm: reqDttm,
+            }
         },
     };
 };

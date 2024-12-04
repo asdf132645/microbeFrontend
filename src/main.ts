@@ -39,5 +39,4 @@ app.use(VueSplide)
 app.component('font-awesome-icon', FontAwesomeIcon);
 useProvideApolloClient();
 
-
 app.mount('#app');

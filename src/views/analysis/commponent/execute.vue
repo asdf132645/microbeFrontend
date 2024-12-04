@@ -2,10 +2,7 @@
   <div class="execute-container container-shadow">
     <div class='startDiv'>
       <p class="startStopP" v-if="showStopBtn" @click="isInit === 'Y' && toggleStartStop('start')">
-        <font-awesome-icon
-            :icon="['fas', 'circle-play']"
-            :class="{ 'startBtn': true, [btnStatus]: true }"
-        />
+        <font-awesome-icon :icon="['fas', 'circle-play']" :class="{ 'startBtn': true, [btnStatus]: true }"/>
       </p>
       <p class="startStopP" v-else @click="toggleStartStop('stop')">
         <font-awesome-icon :icon="['fas', 'circle-stop']" class='stopBtn' />

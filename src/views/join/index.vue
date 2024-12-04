@@ -52,7 +52,7 @@ import {ref} from "vue";
 import {createUser} from "@/common/api/service/user/userApi";
 import router from "@/router";
 import Alert from "@/components/commonUi/Alert.vue";
-import {MESSAGES} from "@/common/defines/constFile/constantMessageText";
+import {ALERT_TYPE, MESSAGES} from "@/common/defines/constFile/constantMessageText";
 import {VALIDATION_MSG} from "@/common/defines/constFile/validation";
 
 const employeeNo = ref('');
@@ -135,7 +135,7 @@ const signUpValidation = () => {
 
 const showSuccessAlert = async (message: string) => {
   showAlert.value = true;
-  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
+  alertType.value = ALERT_TYPE.SUCCESS;
   alertMessage.value = message;
 };
 

@@ -76,17 +76,6 @@ const socketPlugin: Plugin = {
         // 전역 속성에 소켓 인스턴스 등록
         app.config.globalProperties.$socket = socket;
         app.config.globalProperties.$socketError = false; // 연결 상태 확인용 추가 속성
-
-        // Vue 컴포넌트가 해제될 때 소켓 연결을 정리
-        const originalUnmount = app.unmount.bind(app);
-
-        app.unmount = () => {
-            socket.disconnect(); // 소켓 연결 해제
-            if (pingTimeout) {
-                clearTimeout(pingTimeout); // 컴포넌트가 해제될 때 pingTimeout 제거
-            }
-            originalUnmount(); // 기존 unmount 호출
-        };
     },
 };
 

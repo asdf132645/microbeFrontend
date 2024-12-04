@@ -101,17 +101,40 @@ export const MSG = {
         ANALYSIS_TYPE: '',
         LP_ANALYSIS_VALUES: '',
         IA_ROOT_PATH_ENG: '',
+    },
+    SYSTEM: {
+        PROCESS_ALREADY_RUNNING: 'Process is already running.',
+        STOP_PROCESS: 'Process is terminating.',
+        FULLSCREEN_SUGGEST: 'Please click the full screen button.',
+    },
+    GENERAL: {
+        SAVE: 'Save',
+        LEAVE: 'Leave',
+        CANCEL: 'Cancel',
+        CLOSE: 'Close',
+        COPY: 'Copy',
+        MOVE: 'Move',
+        DELETE: 'Delete',
+        UPLOAD: 'Upload',
+        OK: 'OK',
+        SUCCESS: 'Success',
     }
 } as const;
 
-export const enum MSG_TOAST {
-    SUCCESS = 'success',
-    ERROR = 'error',
-    BAR_CODE_SUCCESS = 'Barcode Copied',
-    SAVED = 'Saved',
-}
+export const MSG_TOAST = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    BAR_CODE_SUCCESS: 'Barcode Copied',
+    SAVED: 'Saved',
+} as const;
 
-export const enum TOAST_MSG_TYPE {
-    SUCCESS = 'success',
-    ERROR = 'error',
-}
+export const TOAST_MSG_TYPE = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+} as const;
+
+export const ALERT_TYPE = {
+    CORE_ERROR: 'CORE_ERROR',
+    SUCCESS: 'success',
+    ERROR: 'error',
+} as const;

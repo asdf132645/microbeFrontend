@@ -45,6 +45,8 @@ export interface CommonState {
     currentAnalyzingSlotNo: number;
     currentPowerType: 'LP' | 'HP';
     refreshClass: boolean;
+    isErrorAlarm: boolean;
+    isCompleteAlarm: boolean;
 }
 
 interface CommonModule {
@@ -94,6 +96,8 @@ interface CommonModule {
         setCurrentAnalyzingSlotNo: (state: CommonState, value: number) => void;
         setCurrentPowerType: (state: CommonState, value: 'LP' | 'HP') => void;
         setRefreshClass: (state: CommonState, value: boolean) => void;
+        setIsErrorAlarm: (state: CommonState, value: boolean) => void;
+        setIsCompleteAlarm: (state: CommonState, value: boolean) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -144,6 +148,8 @@ export const commonModule: CommonModule = {
         currentAnalyzingSlotNo: 0,
         currentPowerType: 'LP',
         refreshClass: false,
+        isErrorAlarm: false,
+        isCompleteAlarm: false,
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -278,6 +284,12 @@ export const commonModule: CommonModule = {
         },
         setRefreshClass(state: CommonState, value: boolean): void {
             state.refreshClass = value;
+        },
+        setIsErrorAlarm(state: CommonState, value: boolean): void {
+            state.isErrorAlarm = value;
+        },
+        setIsCompleteAlarm(state: CommonState, value: boolean): void {
+            state.isErrorAlarm = value;
         }
     },
     actions: {
@@ -413,6 +425,12 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('refreshClass')) {
                 commit('setRefreshClass', payload.refreshClass);
+            }
+            if (payload.hasOwnProperty('isErrorAlarm')) {
+                commit('setIsErrorAlarm', payload.isErrorAlarm);
+            }
+            if (payload.hasOwnProperty('isCompleteAlarm')) {
+                commit('setIsCompleteAlarm', payload.isCompleteAlarm);
             }
         },
     },

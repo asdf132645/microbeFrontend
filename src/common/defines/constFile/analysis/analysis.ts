@@ -86,3 +86,23 @@ export const DEFAULT_SLOT_INFO: SLOT_INFO_TYPE = {
     tactTime: '',
     isNormal: true,
 };
+
+export const JOB_CMD = {
+    SYSINFO: 'SYSINFO',
+    INIT: 'INIT',
+    START: 'START',
+    RUNNING_INFO: 'RUNNING_INFO',
+    STOP: 'STOP',
+    RUNNING_COMP: 'RUNNING_COMP',
+    PAUSE: 'PAUSE',
+    RESTART: 'RESTART',
+    RECOVERY: 'RECOVERY',
+    END: 'END',
+    ERROR_CLEAR: 'ERROR_CLEAR',
+    SETTINGS: 'SETTINGS',
+    SEARCH_CARD_COUNT: 'SEARCH_CARD_COUNT',
+    CLIENT_EXIT: 'clientExit',
+    CAMERA_RESET: 'CAMERA_RESET',
+    GRIPPER_OPEN: 'GRIPPER_OPEN',
+    OIL_PRIME: 'OIL_PRIME',
+} as const

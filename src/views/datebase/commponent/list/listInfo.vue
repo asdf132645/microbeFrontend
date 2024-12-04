@@ -3,28 +3,28 @@
   <div class="mt12 h-half list-info-container">
     <div v-if="!isObjectEmpty(selectedItem)" class="mt12 ">
       <h3 class="orderTitle hh3title">Order Information</h3>
-      <div class="orderListWrapper" style="padding: 0;">
+      <div class="orderListWrapper">
         <ul class="orderListUi">
-          <li class="flex-justify-between">
-            <span class="mb10">Order ID:</span>
-            <span class="mb20">{{ selectedItem?.slotId }}</span>
-          </li>
-          <li class="flex-justify-between">
-            <span class="mb10">Cassette ID:</span>
-            <span v-if="selectedItem?.cassetId" class="mb20">{{ selectedItem?.cassetId.split('_')[0] }}</span>
-          </li>
-          <li v-if="selectedItem?.patientId" class="flex-justify-between">
-            <span class="mb10">Patient ID:</span>
-            <span class="mb20">{{ selectedItem?.patientId }}</span>
-          </li>
-          <li v-if="selectedItem?.patientNm" class="flex-justify-between">
-            <span class="mb10">Patient Name:</span>
-            <span class="mb20">{{ selectedItem?.patientNm }}</span>
+          <li class="flex-justify-start mt12">
+            <span class="w100">Slot ID</span>
+            <span>{{ selectedItem?.slotId }}</span>
           </li>
           <li class="flex-justify-start">
-            <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath" class="orderListBarcodeImg" />
+            <span class="w100">Cassette ID</span>
+            <span v-if="selectedItem?.cassetId">{{ selectedItem?.cassetId.split('_')[0] }}</span>
+          </li>
+          <li v-if="selectedItem?.patientId" class="flex-justify-start">
+            <span class="w100">Patient ID</span>
+            <span>{{ selectedItem?.patientId }}</span>
+          </li>
+          <li v-if="selectedItem?.patientNm" class="flex-justify-start">
+            <span class="w100">Patient Name</span>
+            <span>{{ selectedItem?.patientNm }}</span>
           </li>
         </ul>
+        <div class="orderList-image-wrapper">
+          <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath" class="orderListBarcodeImg" />
+        </div>
       </div>
     </div>
   </div>
