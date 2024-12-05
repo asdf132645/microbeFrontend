@@ -1,15 +1,14 @@
 <template>
-  <div class="classImageSlider-hover-container"></div>
-  <div v-if="localAllImages.length > 0" class="classImageSliderContainer container-shadow">
-    <div class="classImageSliderContainer-top-wrapper">
-      <font-awesome-icon :icon="['fas', 'caret-up']" style="color: black;" />
+  <div v-if="localAllImages.length > 0" class="classImageSliderContainer container-shadow" :class="isSliderComponentOpen ? 'classImageSliderContainer-open' : ''">
+    <div class="classImageSliderContainer-top-wrapper" @click="handleSliderComponent">
+      <font-awesome-icon v-if="!isSliderComponentOpen" :icon="['fas', 'caret-up']" style="color: black;" />
+      <font-awesome-icon v-else :icon="['fas', 'caret-down']" style="color: black;" />
     </div>
-    <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }" class="splide-container">
+    <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }">
       <SplideTrack>
         <SplideSlide v-for="image in localAllImages" :key="image.url">
           <img
-              style="width: 100px; cursor:pointer; margin-top: 4px; opacity: 1"
-              class="slideImage cursor-pointer"
+              class="splideSlide-img slideImage cursor-pointer"
               :class="[
                   image.isWatched ? 'watched-image' : '',
                   currentImageName.split('.')[0] ===  image.imageName.split('.')[0] ? 'selected-image' : '',
@@ -22,7 +21,8 @@
         </SplideSlide>
       </SplideTrack>
 
-      <div class="splide__arrows splide__arrows--ltr" :style="{ display: localAllImages.length <= 10 ? 'none' : '' }"></div>
+      <div class="splide__arrows splide__arrows--ltr" :style="{ display: localAllImages.length <= 8 ? 'none' : '' }"></div>
+
     </Splide>
     <p class="classImageSlider-imageIndex-wrapper">{{ currentImageIndex }} / {{ allImages.length }}</p>
   </div>
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import '@splidejs/vue-splide/css';
-import { ref, defineProps, computed, watch } from "vue";
+import {ref, defineProps, computed, watch, onMounted, onUnmounted} from "vue";
 import {useRoute} from "vue-router";
 import { useStore } from "vuex";
 import { Splide, SplideSlide, SplideTrack } from '@splidejs/vue-splide';
@@ -45,6 +45,15 @@ const currentPowerType = computed(() => store.state.commonModule.currentPowerTyp
 const localAllImages = ref(props.allImages);
 const splide = ref();
 const currentImageIndex = ref(1);
+const isSliderComponentOpen = ref(false);
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+})
 
 watch([() => route.params.id, () => currentPowerType.value], () => {
   if (splide.value) splide.value.go(0);
@@ -73,6 +82,26 @@ const selectImage = async (imageIndex: number, imageFileName: string) => {
 
 const hideImage = (fileName: string) => {
   hiddenImages.value[fileName] = true;
+}
+
+const handleSliderComponent = () => {
+  isSliderComponentOpen.value = !isSliderComponentOpen.value;
+}
+
+const handleKeyDown = async (e: KeyboardEvent) => {
+  const currentIndex = localAllImages.value.findIndex((item: any) => item.imageName.split('.')[0] === currentImageName.value.split('.')[0]);
+  if (currentIndex === -1) return;
+
+  const direction = e.code === 'ArrowRight' ? 1 : e.code === 'ArrowLeft' ? -1 : null;
+  if (direction !== null) {
+    const targetIndex = currentIndex + direction;
+    const targetImage = localAllImages.value[currentIndex + direction]?.imageName;
+    if (targetImage) {
+      await store.dispatch('commonModule/setCommonInfo', { currentImageName: targetImage });
+      emits('goToSelectImage', currentIndex + direction);
+      splide.value.go(targetIndex);
+    }
+  }
 }
 
 </script>

@@ -10,11 +10,12 @@
       </li>
       <li class="relative">
         <font-awesome-icon class="memoOpenBtn classDetailFont" :icon="['fas', 'pen-to-square']" @click="memoOpen" />
-        <div v-if="memoModal" class="memoModal">
-          <textarea v-model="memo"></textarea>
-          <button class="memoModalBtn" @click="memoChange">OK</button>
-          <button class="memoModalBtn" @click="memoCancel">CANCEL</button>
-        </div>
+        <MemoBox
+            v-model:memo="memo"
+            :showMemoModal="showMemoModal"
+            @saveMemo="handleMemoSave"
+            @closeMemo="handleCloseMemo"
+        />
       </li>
       <li
           @click="commitConfirmed"
@@ -167,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch } from 'vue';
+import {computed, defineEmits, defineProps, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import { getBarcodeDetailImageUrl, getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
 import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
 
@@ -190,6 +191,7 @@ import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/co
 import {RouteType} from "@/common/type/generalTypes";
 import Toast from "@/components/commonUi/Toast.vue";
 import GradeBox from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeBox.vue";
+import MemoBox from "@/components/commonUi/MemoBox.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -200,7 +202,7 @@ const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const barcodeImg = ref('');
 const memo = ref('');
-const memoModal = ref(false);
+const showMemoModal = ref(false);
 const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
@@ -315,21 +317,21 @@ const onCommit = async () => {
   emits('submitStateChanged', 'Submit');
 }
 
-const memoChange = async () => {
-  const enterAppliedmemo = memo.value.replaceAll('\r\n', '<br>');
+const handleMemoSave = async (memo: string) => {
+  const enterAppliedmemo = memo.replaceAll('\r\n', '<br>');
   const updatedItem = { memo: enterAppliedmemo };
   const result: any = await detailRunningApi(String(props.selectItems?.id));
   const updatedRuningInfo = {...result.data, ...updatedItem}
   await resRunningItem({ updatedRunningInfo: updatedRuningInfo, type: 'memo' });
-  memoModal.value = false;
+  showMemoModal.value = false;
 }
 
 const memoOpen = () => {
-  memoModal.value = !memoModal.value;
+  showMemoModal.value = !showMemoModal.value;
 }
 
-const memoCancel = () => {
-  memoModal.value = false;
+const handleCloseMemo = () => {
+  showMemoModal.value = false;
 }
 
 const checkGrade = (gradeText: string, paramGrade: string) => {
@@ -416,5 +418,4 @@ const showToast = async (message: string) => {
     toastMessage.value = ''; // 메시지를 숨기기 위해 빈 문자열로 초기화
   }, 1500); // 5초 후 토스트 메시지 사라짐
 };
-
 </script>
