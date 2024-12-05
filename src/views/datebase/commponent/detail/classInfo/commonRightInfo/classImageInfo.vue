@@ -1,10 +1,10 @@
 <template>
-  <div class="mo-right-detail-container rbc-container imgList container-shadow borderRadiusRound">
+  <div class="mo-right-detail-container imgList container-shadow borderRadiusRound">
 
     <div class="flex-column-justify-center">
       <div class="flex-justify-around mt12">
           <div class="classImageInfo-container container-shadow">
-            <div class="tiling-viewer_img_list-box_img_list">
+            <div class="tiling-viewer_img_list-box_img_list" style="border-radius: 4px;">
               <div v-if="tileExist"
                    ref="tilingViewerLayer"
                    id="tiling-viewer_img_list"

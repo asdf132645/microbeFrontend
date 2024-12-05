@@ -36,7 +36,7 @@
               </label>
               <label>
                 <input type="checkbox" value="00" @change="changeTestType('00')" :checked="testType === MO_TEST_TYPE_CODE.URINE"/>
-                <span>Sputum</span>
+                <span>Urine</span>
               </label>
               <label>
                 <input type="checkbox" value="01" @change="changeTestType('01')" :checked="testType === MO_TEST_TYPE_CODE.SPUTUM"/>

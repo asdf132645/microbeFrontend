@@ -1,6 +1,6 @@
 <!-- ListInfo.vue -->
 <template>
-  <div class="mt12 h-half list-info-container">
+  <div class="list-info-container">
     <div v-if="!isObjectEmpty(selectedItem)" class="mt12 ">
       <h3 class="orderTitle hh3title">Order Information</h3>
       <div class="orderListWrapper">

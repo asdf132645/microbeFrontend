@@ -1,5 +1,5 @@
 <template>
-  <table class="no-css-table" :class="isCheckable ? 'container-shadow' : ''" v-if="!isObjectEmpty(classInfo)">
+  <table class="no-css-table container-shadow" v-if="!isObjectEmpty(classInfo)">
     <thead v-if="!noHead">
       <th></th>
       <th></th>

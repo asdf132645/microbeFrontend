@@ -1,10 +1,14 @@
 <template>
-  <div v-if="localAllImages.length > 0" class="classImageSliderContainer">
-    <Splide :has-track="false" ref="splide" :options="{ perPage: 10, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }">
+  <div class="classImageSlider-hover-container"></div>
+  <div v-if="localAllImages.length > 0" class="classImageSliderContainer container-shadow">
+    <div class="classImageSliderContainer-top-wrapper">
+      <font-awesome-icon :icon="['fas', 'caret-up']" style="color: black;" />
+    </div>
+    <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }" class="splide-container">
       <SplideTrack>
         <SplideSlide v-for="image in localAllImages" :key="image.url">
           <img
-              style="width: 112px; cursor:pointer; margin-top: 4px;"
+              style="width: 100px; cursor:pointer; margin-top: 4px; opacity: 1"
               class="slideImage cursor-pointer"
               :class="[
                   image.isWatched ? 'watched-image' : '',
@@ -20,6 +24,7 @@
 
       <div class="splide__arrows splide__arrows--ltr" :style="{ display: localAllImages.length <= 10 ? 'none' : '' }"></div>
     </Splide>
+    <p class="classImageSlider-imageIndex-wrapper">{{ currentImageIndex }} / {{ allImages.length }}</p>
   </div>
 </template>
 
@@ -39,6 +44,7 @@ const currentImageName = computed(() => store.state.commonModule.currentImageNam
 const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const localAllImages = ref(props.allImages);
 const splide = ref();
+const currentImageIndex = ref(1);
 
 watch([() => route.params.id, () => currentPowerType.value], () => {
   if (splide.value) splide.value.go(0);
@@ -51,8 +57,9 @@ watch(() => props.allImages, async (newAllImages) => {
 })
 
 watch(() => currentImageName.value, () => {
-  localAllImages.value = localAllImages.value.map((item) => {
+  localAllImages.value = localAllImages.value.map((item, index: number) => {
     if (item.imageName.split('.')[0] === currentImageName.value.split('.')[0]) {
+      currentImageIndex.value = index + 1;
       return {...item, isWatched: true };
     }
     return item;

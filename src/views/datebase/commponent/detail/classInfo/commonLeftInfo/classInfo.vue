@@ -9,7 +9,7 @@
         <font-awesome-icon class="classDetailFont" :icon="['fas', 'copy']"/>
       </li>
       <li class="relative">
-        <font-awesome-icon :icon="['fas', 'comment-dots']" class="memoOpenBtn classDetailFont" @click="memoOpen"/>
+        <font-awesome-icon class="memoOpenBtn classDetailFont" :icon="['fas', 'pen-to-square']" @click="memoOpen" />
         <div v-if="memoModal" class="memoModal">
           <textarea v-model="memo"></textarea>
           <button class="memoModalBtn" @click="memoChange">OK</button>
@@ -30,26 +30,53 @@
 <!--      </li>-->
     </ul>
   </div>
+  <div class="classInfoHorizontalRule"></div>
 
 <!-- 무조건 Total 값으로 계산 -->
   <div class="classInfoDetailContainer">
-    <div class="classInfoDetailTop">
-      <h3>Category</h3>
-      <h3>Grade</h3>
+    <div v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
+      <GradeBox
+          title="Cell"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)"
+      />
+      <GradeBox
+          title="Cell"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)"
+      />
     </div>
 
-    <template v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD && !isObjectEmpty(moInfoTotal)">
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
-    </template>
 
+    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
+      <GradeBox
+          title="Cell"
+          :grades="FOUR_GRADES"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.WBC)"
+      />
+      <GradeBox
+          title="Bacteria"
+          :grades="FOUR_GRADES"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST && item.classId !== CLASS_INFO_ID.WBC)"
+      />
+      <GradeBox
+          title="Fungi"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)"
+      />
+    </div>
 
-    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && !isObjectEmpty(moInfoTotal)">
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)" />
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
-    </template>
-
-    <template v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM && !isObjectEmpty(moInfoTotal)">
+    <div v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
       <div class="w-full flex-align-center-justify-start" v-for="category in moInfoTotal" :key="category.classId">
         <template v-if="category.classId === '15'">
           <div class="classDetailInfoWrapper w-full" v-for="category in moInfoTotal?.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
@@ -109,7 +136,7 @@
 
       <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.GPC || item.classId === CLASS_INFO_ID.GNB || item.classId === CLASS_INFO_ID.GPB || item.classId === CLASS_INFO_ID.GNDC)" />
       <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST || item.classId === CLASS_INFO_ID.HYPHAE)" />
-    </template>
+    </div>
 
   </div>
 
@@ -162,6 +189,7 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import {RouteType} from "@/common/type/generalTypes";
 import Toast from "@/components/commonUi/Toast.vue";
+import GradeBox from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeBox.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -196,10 +224,6 @@ onMounted(async () => {
     getTotalMoInfo(props.selectItems);
   }
 })
-
-// watch(() => props.isCommitChanged, () => {
-//   selectItems.value?.submitState = 'Submit';
-// })
 
 watch([() => currentPowerType.value, () => route.name], async () => {
   await nextTick();

@@ -644,7 +644,6 @@ const convertMoInfo = (cassetteType: string, moInfo: MoInfoInterface[]) => {
       id: moItem.id,
       name: moItem.name,
       classInfo: updatingClassInfo,
-      detailMemo: '',
       isWatched: false,
     }
     convertedMoInfo.push(updatedMoInfoItem);

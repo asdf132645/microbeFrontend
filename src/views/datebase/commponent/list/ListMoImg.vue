@@ -1,25 +1,29 @@
 <template>
   <div v-show="!isObjectEmpty(selectedItem)" class="listTableImageContainer">
-    <h3 class="mb10 hh3title infoImageTitle">Images</h3>
-    <div v-if="allImages.length > 0" class="dbImageContainer">
-      <template v-for="imageName in allImages" :key="imageName">
-        <img
-            class="dbRightImages"
-            :src="showImage(imageName)"
-            @error="hideImage(imageName, imageName)"
-            v-show="!hiddenImages[`${imageName}`]"
-            width="121px"
-            height="121px"
-        />
-      </template>
-    </div>
+    <h3 class="infoImageTitle">Images</h3>
+    <template v-if="allImages.length > 0">
+      <Splide ref="splide" class="listTable-images-wrapper" :options="{ perPage: 1, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }" @splide:mounted="initializedSplide">
+        <SplideSlide v-for="(imageName, index) in allImages" :key="imageName" @moved="updateImageIndex">
+          <img
+              width="540px"
+              height="540px"
+              :src="showImage(imageName, index)"
+              v-show="!hiddenImages[`${imageName}`]"
+              @error="hideImage(imageName, imageName)"
+          />
+        </SplideSlide>
+      </Splide>
+      <p class="infoImage-imageIndex-wrapper">{{ imageIndex }} / {{ allImages.length }}</p>
+    </template>
     <div v-else>No images available</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted, ref, watch} from 'vue';
+import '@splidejs/vue-splide/css';
+import {computed, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import {useStore} from "vuex";
+import { Splide, SplideSlide, SplideTrack } from '@splidejs/vue-splide';
 import {filterImageFiles, isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItem']);
@@ -27,12 +31,13 @@ const store = useStore();
 const iaRootPath = ref<any>(store.state.commonModule.iaRootPath);
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);
 const apiBaseUrl = viewerCheck.value === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
-
 const allImages = ref<any[]>([]);
 const hiddenImages = ref<{ [key: string]: boolean }>({});
-const selectedImage = ref('');
+const imageIndex = ref(1);
+const splide = ref();
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick();
   allImages.value = [];
   getImageFolder();
 });
@@ -41,6 +46,15 @@ watch(() => props.selectedItem, () => {
   allImages.value = [];
   getImageFolder();
 },{deep: true});
+
+const initializedSplide = (splideInstance: any) => {
+  splideInstance.on('ready', () => {
+    imageIndex.value = 1;
+  })
+  splideInstance.on('move', (newIndex: number) => {
+    imageIndex.value = newIndex + 1;
+  })
+}
 
 const getImageFolder = async () => {
   const { selectedItem } = props;
@@ -56,10 +70,9 @@ const getImageFolder = async () => {
   allImages.value = filterImageFiles(imageNames);
 }
 
-const showImage = (imageName: string) => {
+const showImage = (imageName: string, index: number) => {
   const { selectedItem } = props;
   if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) return '';
-
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
   const folderPath = `${path}/${slotId}/13_LOW_Detection`;
@@ -68,5 +81,9 @@ const showImage = (imageName: string) => {
 
 function hideImage(id: string, fileName: string) {
   hiddenImages.value[`${id}-${fileName}`] = true;
+}
+
+const updateImageIndex = (newIndex: number) => {
+  imageIndex.value = newIndex;
 }
 </script>

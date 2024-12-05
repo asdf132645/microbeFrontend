@@ -3,30 +3,27 @@
 
     <div class="classDetailInfo-title-container">
       <h3 class="classDetailInfo-title">{{ currentAnalysisType }} Classification</h3>
-      <ul>
-        <li @click.stop="handleMemoOpen">
-          <font-awesome-icon class="classDetailFont" :icon="['fas', 'pen-to-square']" />
-        </li>
-      </ul>
-
-      <div v-if="showDetailMemo" class="detailMemo-container">
-        <textarea  v-model="detailMemo" class="detailMemo-textarea"></textarea>
-        <button @click="updateDetailMemo" class="detailMemo-button">Save</button>
-      </div>
     </div>
     <div class="classInfoHorizontalRule"></div>
 
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
-      <h1 class="fs12 classInfoClassTitle">Fungi</h1>
-      <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="detailClassInfo" />
+      <GradeBox
+          title="Fungi"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="detailClassInfo"
+      />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
-      <div class="classDetailInfoWrapper">
-        <h1 class="fs12 classInfoClassTitle">Bacteria</h1>
-      </div>
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="detailClassInfo" />
+      <GradeBox
+          title="Bacteria"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="detailClassInfo"
+      />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
@@ -45,31 +42,26 @@
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
-      <div v-show="moInfo?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST).length > 0">
-        <h1 class="classInfoClassTitle">Bacteria</h1>
-        <GradeInputWithTitle
-            :isCheckable="true"
-            @classCheck="classCheck"
-            :grades="FOUR_GRADES"
-            :moInfo="moInfo"
-            @updateGrade="updateGrade"
-            :classInfo="filterClassInfoByClassIds(detailClassInfo, 'delete', [CLASS_INFO_ID.YEAST])"
-        />
-      </div>
+      <GradeBox
+          title="Bacteria"
+          :grades="FOUR_GRADES"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="filterClassInfoByClassIds(detailClassInfo, 'delete', [CLASS_INFO_ID.YEAST])"
+          :isCheckable="true"
+          :classCheck="classCheck"
+      />
 
-      <div v-show="moInfo?.classInfo.filter((it: any) => it.classId === CLASS_INFO_ID.YEAST).length > 0" class="mt24">
-        <h1 class="classInfoClassTitle">Fungi</h1>
-        <GradeInputWithTitle
-            :isCheckable="true"
-            @classCheck="classCheck"
-            :grades="[GRADE_TEXT.EXIST]"
-            :moInfo="moInfo"
-            @updateGrade="updateGrade"
-            :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.YEAST])"
-        />
-      </div>
+      <GradeBox
+          title="Fungi"
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.YEAST])"
+          :isCheckable="true"
+          :classCheck="classCheck"
+      />
     </template>
-
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.SPUTUM)  && !isObjectEmpty(moInfo)">
       <h1 class="classInfoClassTitle mt24">Sputum</h1>
@@ -137,12 +129,15 @@
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM) && !isObjectEmpty(moInfo)">
-      <div class="classDetailInfoWrapper">
-        <h1 class="classInfoClassTitle">Bacteria</h1>
-        <div class="classInfoHorizontalRule"></div>
-      </div>
-
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo" />
+      <GradeBox
+          title="Bacteria"
+          :grades="FOUR_GRADES"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="moInfo?.classInfo"
+          :isCheckable="true"
+          :classCheck="classCheck"
+      />
     </template>
   </div>
 
@@ -181,6 +176,7 @@ import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/comm
 import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 import Toast from "@/components/commonUi/Toast.vue";
 import {MSG_TOAST, TOAST_MSG_TYPE} from "@/common/defines/constFile/constantMessageText";
+import GradeBox from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeBox.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -196,7 +192,6 @@ const checkedClassSet = ref<Set<string>>(new Set());
 const detailMemo = ref('');
 const toastMessage = ref('');
 const toastMessageType = ref(TOAST_MSG_TYPE.SUCCESS);
-const showDetailMemo = ref(false);
 
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
@@ -279,27 +274,6 @@ const handleGradeClick = (updatingMoInfo: any, className: string, grade: string)
   updateGrade(updatingMoInfo, className, grade);
 }
 
-const updateDetailMemo = async () => {
-  const updatedMoInfoObj = props.selectItems.classInfo.map((item: any) => {
-    if (item.id === moInfo.value.id && item.name === moInfo.value.name) {
-      return {...item, detailMemo: detailMemo.value };
-    }
-    return item;
-  })
-
-  moInfo.value.detailMemo = detailMemo.value;
-
-  const updatedSelectItems = {
-    ...props.selectItems,
-    classInfo: updatedMoInfoObj
-  }
-
-  updateRunningInfo(updatedSelectItems);
-  toastMessageType.value = TOAST_MSG_TYPE.SUCCESS;
-  await showToast(MSG_TOAST.SUCCESS);
-  showDetailMemo.value = false;
-}
-
 const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) => {
   const filteredMoInfo = updatingMoInfo.classInfo.find((item: any) => item.classId === classId)
   updatingMoInfo.classInfo = updatingMoInfo.classInfo.map((item: any) => {
@@ -345,10 +319,6 @@ const showToast = async (message: string) => {
     toastMessage.value = ''; // 메시지를 숨기기 위해 빈 문자열로 초기화
   }, 1500); // 5초 후 토스트 메시지 사라짐
 };
-
-const handleMemoOpen = () => {
-  showDetailMemo.value = !showDetailMemo.value;
-}
 
 
 </script>
