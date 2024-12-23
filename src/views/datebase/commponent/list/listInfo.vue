@@ -23,7 +23,7 @@
           </li>
         </ul>
         <div class="orderList-image-wrapper">
-          <img v-show="!barCodeImageShowError" @error="onImageError" :src="filePath" class="orderListBarcodeImg" />
+          <img v-show="!barCodeImageShowError" @error="onImageError" :src="barcodeImageSrc" class="orderListBarcodeImg" />
         </div>
       </div>
     </div>
@@ -39,7 +39,7 @@ const store = useStore();
 const props = defineProps(['selectedItem']);
 const iaRootPath = ref(store.state.commonModule.iaRootPath);
 const siteCd = computed(() => store.state.commonModule.siteCd);
-const filePath = ref('');
+const barcodeImageSrc = ref('');
 const barCodeImageShowError = ref(false);
 const apiBaseUrl = sessionStorage.getItem('viewerCheck') === 'viewer' ? window.MAIN_API_IP : window.APP_API_BASE_URL;
 
@@ -47,17 +47,26 @@ onMounted(async () => {
   barCodeImageShowError.value = false;
 
   // iaRootPath가 존재하면 getImageUrl 함수 호출
-  if (iaRootPath.value) filePath.value = getImageUrl('barcode_image.jpg');
+  if (iaRootPath.value) setBarcodeImage();
 });
 
 watch(() => props.selectedItem, () => {
   barCodeImageShowError.value = false;
-  if (iaRootPath.value) filePath.value = getImageUrl('barcode_image.jpg');
+  if (iaRootPath.value) setBarcodeImage();
 });
 
-const getImageUrl = (imageName: string) => {
-  const path = props.selectedItem?.img_drive_root_path !== '' && props.selectedItem?.img_drive_root_path ? props.selectedItem?.img_drive_root_path : iaRootPath.value;
-  return `${apiBaseUrl}/images?folder=${path + '/' + props.selectedItem.slotId + '/' + barcodeImgDir.barcodeDirName + '/'}&imageName=${imageName}`;
+const setBarcodeImage = () => {
+  if (isObjectEmpty(props.selectedItem)) return;
+
+  const path = props.selectedItem?.img_drive_root_path || iaRootPath.value;
+  const imageUrl = `${apiBaseUrl}/images?folder=${path + '/' + props.selectedItem.slotId + '/' + barcodeImgDir.barcodeDirName + '/'}&imageName=barcode_image.jpg`;
+  barcodeImageSrc.value = imageUrl;
+  preloadImage(imageUrl);
+}
+
+const preloadImage = (url: string) => {
+  const img = new Image();
+  img.src = url;
 }
 
 const onImageError = () => {

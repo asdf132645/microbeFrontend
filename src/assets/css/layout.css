@@ -2363,31 +2363,29 @@ ul.wbcImgWrap > li {
     bottom: -128px;
     transition: bottom 0.3s ease;
     z-index: 30;
-    opacity: 0.8;
     background-color: var(--main-bg-2-color);
 }
 
 .classImageSliderContainer-open {
     bottom: 0;
-    opacity: 1;
     background-color: var(--main-bg-2-color);
 }
 
 .classImageSliderContainer-top-wrapper {
     position:absolute;
     width: 100%;
-    background-color: var(--gray-1-color);
+    background-color: var(--white-color);
     height: 20px;
     z-index: 40;
     cursor: pointer;
 }
 
 .classImageSliderContainer-top-wrapper:hover {
-    background-color: var(--gray-bg-4-color);
+    background-color: var(--gray-1-color);
 }
 
 .classImageSliderContainer-top-wrapper:active {
-    background-color: var(--gray-bg-6-color);
+    background-color: var(--white-color);
 }
 
 .red {
@@ -3110,18 +3108,42 @@ table.tableClass {
 .memoModal {
     position: absolute;
     left: 0;
-    width: 400px;
+    width: 420px;
     background: var(--gray-bg-12-color);
-    padding: 10px 15px 10px 10px;
+    padding-bottom: 12px;
     z-index: 100;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
     border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: move;
+}
+
+.memoModal-top {
+    width: 100%;
+    position: relative;
+    background-color: #f1f1f1;
+    height: 24px;
+    margin-bottom: 10px;
+    user-select: none;
+    cursor: move;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+}
+
+.memoModal-top:hover {
+    opacity: 0.7;
 }
 
 .memoModal textarea {
-    width: 400px;
+    width: 380px;
     height: 200px;
     resize: none;
+}
+
+.memoModalBtn-wrapper {
+    text-align: right;
 }
 
 ul.editOrder li {

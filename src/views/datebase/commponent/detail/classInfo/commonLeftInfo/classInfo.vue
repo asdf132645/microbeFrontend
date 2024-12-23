@@ -9,7 +9,7 @@
         <font-awesome-icon class="classDetailFont" :icon="['fas', 'copy']"/>
       </li>
       <li class="relative">
-        <font-awesome-icon class="memoOpenBtn classDetailFont" :icon="['fas', 'pen-to-square']" @click="memoOpen" />
+        <font-awesome-icon class="memoOpenBtn classDetailFont" :icon="['fas', 'pen-to-square']" @mousedown.stop @click="memoOpen" />
         <MemoBox
             v-model:memo="memo"
             :showMemoModal="showMemoModal"
@@ -258,9 +258,16 @@ const getTotalMoInfo = (newSelectItems: any) => {
 }
 
 const setBarcodeImage = () => {
-  const imgDriveRootPath = props.selectItems?.img_drive_root_path
-  const path = imgDriveRootPath !== '' && imgDriveRootPath ? imgDriveRootPath : iaRootPath.value;
-  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
+  const path = props.selectItems?.img_drive_root_path || iaRootPath.value;
+  const imageUrl = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
+  barcodeImg.value = imageUrl;
+  preloadImage(imageUrl);
+
+}
+
+const preloadImage = (url: string) => {
+  const img = new Image();
+  img.src = url;
 }
 
 const lisModalOpen = () => {

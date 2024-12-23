@@ -1,5 +1,5 @@
 <template>
-  <div v-show="!isObjectEmpty(selectedItem)" class="listTableImageContainer">
+  <div v-if="isImagesLoaded && !isObjectEmpty(selectedItem)" class="listTableImageContainer">
     <h3 class="infoImageTitle">Images</h3>
     <template v-if="allImages.length > 0">
       <Splide ref="splide" class="listTable-images-wrapper" :options="{ perPage: 1, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }" @splide:mounted="initializedSplide">
@@ -7,6 +7,7 @@
           <img
               width="540px"
               height="540px"
+              :loading="index === 0 ? 'eager' : 'lazy'"
               :src="showImage(imageName, index)"
               v-show="!hiddenImages[`${imageName}`]"
               @error="hideImage(imageName, imageName)"
@@ -23,7 +24,7 @@
 import '@splidejs/vue-splide/css';
 import {computed, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import {useStore} from "vuex";
-import { Splide, SplideSlide, SplideTrack } from '@splidejs/vue-splide';
+import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import {filterImageFiles, isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const props = defineProps(['dbData', 'selectedItem']);
@@ -35,16 +36,19 @@ const allImages = ref<any[]>([]);
 const hiddenImages = ref<{ [key: string]: boolean }>({});
 const imageIndex = ref(1);
 const splide = ref();
+const isImagesLoaded = ref(false);
 
 onMounted(async () => {
-  await nextTick();
   allImages.value = [];
-  getImageFolder();
+  await getImageFolder();
+  isImagesLoaded.value = true;
 });
 
-watch(() => props.selectedItem, () => {
+watch(() => props.selectedItem, async () => {
   allImages.value = [];
-  getImageFolder();
+  isImagesLoaded.value = false;
+  await getImageFolder();
+  isImagesLoaded.value = true;
 },{deep: true});
 
 const initializedSplide = (splideInstance: any) => {
@@ -76,7 +80,7 @@ const showImage = (imageName: string, index: number) => {
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
   const folderPath = `${path}/${slotId}/13_LOW_Detection`;
-  return `${apiBaseUrl}/images/getImageRealTime?folder=${folderPath}&imageName=${imageName}`;
+  return `${apiBaseUrl}/images/getImageWbc?folder=${folderPath}&imageName=${imageName}`;
 }
 
 function hideImage(id: string, fileName: string) {

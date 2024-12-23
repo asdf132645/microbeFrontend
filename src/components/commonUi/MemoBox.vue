@@ -2,13 +2,19 @@
   <div
       v-if="showMemoModal"
       class="memoModal"
-      @mousedown.self="startDrag"
+      @mousedown="startDrag"
       ref="memoModalRef"
       :style="modalStyle"
   >
-    <textarea v-model="memo"></textarea>
-    <button class="memoModalBtn" @click="handleMemoSave">OK</button>
-    <button class="memoModalBtn" @click="handleCloseMemo">CLOSE</button>
+    <div class="memoModal-top"></div>
+    <div>
+      <textarea @mousedown.stop v-model="memo"></textarea>
+      <div class="memoModalBtn-wrapper">
+        <Button @mousedown.stop className="memoModalBtn" @handleClickBtn="handleMemoSave" text="OK" />
+        <Button @mousedown.stop className="memoModalBtn" @handleClickBtn="handleCloseMemo" text="CLOSE" />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -16,6 +22,7 @@
 
 import {ref, onUnmounted, defineProps, defineEmits, computed, onMounted, StyleValue } from "vue";
 import {useClickOutside} from "@/common/lib/utils/useClickOutside";
+import Button from "@/components/commonUi/Button.vue";
 
 const memo = defineModel<string>('memo');
 const props = defineProps({ showMemoModal: Boolean })
@@ -55,8 +62,17 @@ const startDrag = (e: MouseEvent) => {
 // Drag method
 const onDrag = (e: MouseEvent) => {
   if (!isDragging.value) return
-  currentModalPos.value.currentX = e.clientX - currentModalPos.value.offsetX
-  currentModalPos.value.currentY = e.clientY - currentModalPos.value.offsetY
+
+  const modalWidth = memoModalRef.value?.offsetWidth || 420;
+  const modalHeight = memoModalRef.value?.offsetHeight || 280;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  const currentX = Math.min(Math.max(e.clientX - currentModalPos.value.offsetX, 0), screenWidth - modalWidth);
+  const currentY = Math.min(Math.max(e.clientY - currentModalPos.value.offsetY, 0), screenHeight - modalHeight);
+
+  currentModalPos.value.currentX = currentX;
+  currentModalPos.value.currentY = currentY;
 }
 
 const stopDrag = () => {

@@ -23,10 +23,10 @@
       </li>
     </ul>
     <div class="wbcMenuBottom">
-      <button @click="moveWbc('up')" :disabled="isButtonDisabled">
+      <button @click="moveSample('up')" :disabled="isButtonDisabled">
         <font-awesome-icon :icon="['fas', 'circle-up']"/>
       </button>
-      <button @click="moveWbc('down')" :disabled="isButtonDisabled">
+      <button @click="moveSample('down')" :disabled="isButtonDisabled">
         <font-awesome-icon :icon="['fas', 'circle-down']"/>
       </button>
     </div>
@@ -76,7 +76,7 @@ const showAlert = ref(false);
 const alertType = ref('');
 const alertMessage = ref('');
 const resData = ref<any>([]);
-let timeoutId: IntervalType = null;
+let timeoutId: IntervalType = undefined;
 let socketTimeoutId: IntervalType = undefined; // 타이머 ID 저장
 const isButtonDisabled = ref(false);
 const pageMoveDeleteStop = ref(false);
@@ -101,7 +101,7 @@ onUnmounted(async () => {
 
 watch(props.isNext, (newVal) => {
   if (newVal) {
-    moveWbc('down')
+    moveSample('down')
   }
 });
 
@@ -153,7 +153,7 @@ const upDownBlockAccess = async () => {
 }
 
 const delayedEmit = (type: string, payload: string, delay: number) => {
-  if (socketTimeoutId !== undefined) clearTimeout(socketTimeoutId);
+  if (socketTimeoutId) clearTimeout(socketTimeoutId);
 
   socketTimeoutId = window.setTimeout(() => {
     instance?.appContext.config.globalProperties.$socket.emit('state', {
@@ -178,13 +178,17 @@ async function pageUpDownRunning(id: number, step: string, type: string) {
     const {startDate, endDate, page, searchText, testType} = JSON.parse(day);
     const dayQuery = startDate + endDate + page + searchText + testType;
     const req = `id=${id}&step=${step}&type=${type}&dayQuery=${dayQuery}`
-    return await pageUpDownRunningApi(req);
+    const res = await pageUpDownRunningApi(req);
+    if (res.data !== null) {
+      resData.value = res.data;
+      await store.dispatch('commonModule/setCommonInfo', {selectedSampleId: String(res.data.id)});
+    }
   } catch (e) {
     console.error(e)
   }
 }
 
-const moveWbc = async (direction: any) => {
+const moveSample = async (direction: any) => {
   if (direction === 'up') {
     if (dbListDataFirstNum.value === selectItems.value?.id) {
       showAlert.value = true;
@@ -201,7 +205,7 @@ const moveWbc = async (direction: any) => {
     }
   }
 
-  if (timeoutId !== null) clearTimeout(timeoutId);
+  if (timeoutId) clearTimeout(timeoutId);
   isButtonDisabled.value = true; // 버튼 비활성화
   await processNextDbIndex(direction, selectItems.value?.id);
 
@@ -213,31 +217,29 @@ const moveWbc = async (direction: any) => {
 
 const processNextDbIndex = async (direction: any, id: number) => {
   const result = await pageUpDownRunning(id, '1', direction);
-  if (result?.data !== null) resData.value = result?.data;
-
-  if (result?.data?.lock_status) {
+  if (resData.value?.lock_status) {
     showAlert.value = true;
     alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
     alertMessage.value = 'Someone else is editing.';
     return;
   }
 
-  await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: String(result?.data.id) });
-  await handleDataResponse(result?.data);
+  await handleDataResponse(resData.value?.id);
 };
 
-const handleDataResponse = async (selectItemsNewVal: any) => {
+const handleDataResponse = async (dbId: any) => {
   if (!resData.value) return;
-  await updateUpDown(selectItemsNewVal);
+  await store.dispatch('commonModule/setCommonInfo', { selectedSampleId: String(dbId) });
+  await updateUpDown();
 };
 
-const updateUpDown = async (selectItemsNewVal: any) => {
+const updateUpDown = async () => {
   await store.dispatch('commonModule/setCommonInfo', { refreshClass: true });
-  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: selectItemsNewVal });
-  emits('refreshClass', selectItemsNewVal);
+  await store.dispatch('commonModule/setCommonInfo', { currentSelectItems: resData.value });
+  emits('refreshClass', resData.value);
 
   if (isActive("database") && !keepPage.value) {
-    await pageGo(`/databaseDetail/${selectItemsNewVal.id}?pageType=LP`);
+    await pageGo(`/databaseDetail/${resData.value.id}?pageType=LP`);
   }
   pageMoveDeleteStop.value = true;
   await upDownBlockAccess();

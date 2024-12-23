@@ -6,13 +6,14 @@
     </div>
     <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }">
       <SplideTrack>
-        <SplideSlide v-for="image in localAllImages" :key="image.url">
+        <SplideSlide v-for="(image, index) in localAllImages" :key="image.url">
           <img
               class="splideSlide-img slideImage cursor-pointer"
               :class="[
                   image.isWatched ? 'watched-image' : '',
                   currentImageName.split('.')[0] ===  image.imageName.split('.')[0] ? 'selected-image' : '',
               ]"
+              :loading="index < 8 ? 'eager' : 'lazy'"
               :src="image.url"
               v-show="!hiddenImages[`${image.url}`]"
               @error="hideImage(image.url)"

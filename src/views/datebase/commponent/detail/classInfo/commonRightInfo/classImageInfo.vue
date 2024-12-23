@@ -138,10 +138,12 @@ const initElement = async () => {
   try {
     viewer.value = OpenSeadragon({
       id: "tiling-viewer_img_list",
-      animationTime: 0.4,
+      animationTime: 0.2,
       showNavigator: false,
       sequenceMode: true,
+      preload: true,
       defaultZoomLevel: 1,
+      imageLoaderLimit: 5,
       prefixUrl: openseadragonPrefixUrl(apiBaseUrl),
       tileSources: tilesInfo,
       showSequenceControl: true,
@@ -153,7 +155,10 @@ const initElement = async () => {
       zoomPerClick: 1.2, // 클릭 확대 비율 설정
       zoomPerScroll: 1.2, // 스크롤 확대 비율 설정
       viewportMargins: {top: 0, left: 0, bottom: 0, right: 0}, // 뷰포트 여백 설정
-      visibilityRatio: 1.0 // 이미지를 뷰포트에 맞추기 위한 비율 설정
+      visibilityRatio: 1.0,
+      useCanvas: true,
+      immediateRender: true
+
     });
 
     // 캔버스 오버레이 생성 및 추가
@@ -335,11 +340,7 @@ const extractWidthHeightFromDzi = (fileName: string, xmlString: any): any => {
 const extractSubStringBeforeFiles = (str: string) => {
   const searchString = '_files';
   const endIndex = str.indexOf(searchString);
-
-  if (endIndex !== -1) {
-    return str.substring(0, endIndex);
-  }
-
+  if (endIndex !== -1) return str.substring(0, endIndex);
   return str;
 }
 
