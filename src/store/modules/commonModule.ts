@@ -47,6 +47,7 @@ export interface CommonState {
     refreshClass: boolean;
     isErrorAlarm: boolean;
     isCompleteAlarm: boolean;
+    isRewindingBelt: boolean;
 }
 
 interface CommonModule {
@@ -98,6 +99,7 @@ interface CommonModule {
         setRefreshClass: (state: CommonState, value: boolean) => void;
         setIsErrorAlarm: (state: CommonState, value: boolean) => void;
         setIsCompleteAlarm: (state: CommonState, value: boolean) => void;
+        setIsRewindingBelt: (state: CommonState, value: boolean) => void;
     };
     actions: {
         setCommonInfo: (context: { commit: Commit }, payload: CommonState) => void;
@@ -150,6 +152,7 @@ export const commonModule: CommonModule = {
         refreshClass: false,
         isErrorAlarm: false,
         isCompleteAlarm: false,
+        isRewindingBelt: false,
     }),
     mutations: {
         setStartEmbedded(state: CommonState, value: boolean): void {
@@ -290,6 +293,9 @@ export const commonModule: CommonModule = {
         },
         setIsCompleteAlarm(state: CommonState, value: boolean): void {
             state.isErrorAlarm = value;
+        },
+        setIsRewindingBelt(state: CommonState, value: boolean): void {
+            state.isRewindingBelt = value;
         }
     },
     actions: {
@@ -431,6 +437,9 @@ export const commonModule: CommonModule = {
             }
             if (payload.hasOwnProperty('isCompleteAlarm')) {
                 commit('setIsCompleteAlarm', payload.isCompleteAlarm);
+            }
+            if (payload.hasOwnProperty('isRewindingBelt')) {
+                commit('setIsRewindingBelt', payload.isRewindingBelt);
             }
         },
     },

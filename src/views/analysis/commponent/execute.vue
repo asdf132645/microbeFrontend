@@ -13,11 +13,15 @@
       <select v-model="lpCaptureCount" :disabled="isRunningState">
         <option v-for="option in lpCaptureCountType" :key="option.value" :value="option.value">{{ option.text }}</option>
       </select>
-      <div class="initBtn" @click="sendInit" :class="{'isInitDisabled': isInit === 'Y'}">
-        <font-awesome-icon :icon="['fas', 'rotate-right']" style="font-size: 0.9rem;"
-                           :class="{ 'disabled': isInit !== 'N' }"
-        />
-        <span> INITIALIZING </span>
+
+      <div class="flex-justify-between">
+        <div v-if="is100A" class="rewindBtn flex-center" @mousedown="sendRewindBelt(true)" @mouseup="sendRewindBelt(false)">
+          <font-awesome-icon :icon="['fas', 'backward-fast']" flip="horizontal" />
+        </div>
+
+        <div class="initBtn" @click="sendInit" :class="{'isInitDisabled': isInit === 'Y', 'initBtn-is100a': is100A}">
+          <span>{{ isRunningState ? 'INITIALIZING' : 'INITIALIZE' }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick, defineEmits } from "vue";
+import {ref, computed, watch, onMounted, nextTick, defineEmits, onBeforeMount} from "vue";
 import { useStore } from "vuex";
 import { LP_CAPTURE_OPTIONS } from '@/common/defines/constFile/analysis/analysis';
 import { MESSAGES } from '@/common/defines/constFile/constantMessageText';
@@ -61,7 +65,7 @@ const runInfo = computed(() => store.state.commonModule);
 const executeState = computed(() => store.state.executeModule);
 const commonDataGet = computed(() => store.state.commonModule);
 const isPause = ref(runInfo.value?.isPause);
-const isRunningState = ref(executeState.value?.isRunningState);
+const isRunningState = computed(() => store.state.commonModule.isRunningState);
 const userStop = ref(embeddedStatusJobCmd.value?.userStop);
 const isRecoveryRun = ref(embeddedStatusJobCmd.value?.isRecoveryRun);
 const isInit = ref(embeddedStatusJobCmd.value?.isInit);
@@ -78,6 +82,11 @@ const confirmMessage = ref('');
 const siteCd = ref('');
 const lpCaptureCount = ref('20');
 const lpCaptureCountType = LP_CAPTURE_OPTIONS;
+const is100A = ref(false);
+
+onBeforeMount(() => {
+  is100A.value = window.MACHINE_VERSION === '100a';
+})
 
 onMounted(async () => {
   await initDataExecute();
@@ -104,10 +113,6 @@ watch(commonDataGet.value, (value) => {
 
 watch([runInfo.value], async (newVals) => {
   await nextTick();
-  const [newRunInfo] = newVals;
-
-  const {isRunningState: newIsRunningState } = newRunInfo || {};
-  isRunningState.value = newIsRunningState;
 
   if (isRunningState.value) {
     btnStatus.value = 'isRunning';
@@ -130,6 +135,10 @@ watch([embeddedStatusJobCmd.value, executeState.value], async (newVals) => {
     isRecoveryRun: newIsRecoveryRun,
     isInit: newIsInit,
   } = newEmbeddedStatusJobCmd || {};
+
+  if (is100A.value && Number(newEmbeddedStatusJobCmd.sysInfo.autoStart)) {
+    toggleStartStop('start', 'autoStart');
+  }
 
   isPause.value = newIsPause;
   userStop.value = newUserStop;
@@ -162,22 +171,22 @@ const initDataExecute = async () => {
 }
 
 //웹소켓으로 백엔드에 전송
-const emitSocketData = async (payload: any) => {
+const emitSocketData = async (type: string, payload: any) => {
   EventBus.publish('childEmitSocketData', payload);
 };
 
-const toggleStartStop = (action: 'start' | 'stop') => {
+const toggleStartStop = (action: 'start' | 'stop', autoStart = '') => {
   if (viewerCheck.value !== 'main' && window.FORCE_VIEWER !== 'main') return;
 
   if (action === 'start') {
     if (isPause.value) { // 일시정지인 상태일 경우 임베디드에게 상태값을 알려준다.
 
       tcpReq().embedStatus.restart.reqUserId = userId.value;
-      emitSocketData(tcpReq().embedStatus.restart);
+      emitSocketData('SEND_DATA', tcpReq().embedStatus.restart);
       return;
     }
     // 실행 여부 체크
-    if (isRunningState.value) {
+    if (isRunningState.value && autoStart !== 'autoStart') {
       showSuccessAlert(MESSAGES.IDS_ERROR_ALREADY_RUNNING);
       return;
     } else if (userStop.value) {
@@ -193,9 +202,13 @@ const toggleStartStop = (action: 'start' | 'stop') => {
       reqUserId: userId.value,
     });
 
+    if (is100A.value) {
+      Object.assign(startAction, { autoStart: Number(autoStart) });
+    }
+
     if (isInit.value === 'Y') { // 초기화 여부 체크 초기화가 되어있는 상태이면 실행
       // 웹소켓으로 백엔드에 전송
-      emitSocketData(startAction);
+      emitSocketData('SEND_DATA', startAction);
       const InfoData = {
         startEmbedded: true,
       }
@@ -210,10 +223,8 @@ const toggleStartStop = (action: 'start' | 'stop') => {
     }
     store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', {userStop: true});
     tcpReq().embedStatus.stop.reqUserId = userId.value;
-    emitSocketData(tcpReq().embedStatus.stop);
-
+    emitSocketData('SEND_DATA', tcpReq().embedStatus.stop);
   }
-
 };
 
 const showSuccessAlert = (message: string) => {
@@ -239,7 +250,7 @@ const hideConfirm = () => {
 const handleOkConfirm = () => {
   showConfirm.value = false;
   tcpReq().embedStatus.recovery.reqUserId = userId.value;
-  emitSocketData(tcpReq().embedStatus.recovery);
+  emitSocketData('SEND_DATA', tcpReq().embedStatus.recovery);
 }
 
 const sendInit = () => { // 장비 초기화 진행
@@ -250,18 +261,20 @@ const sendInit = () => { // 장비 초기화 진행
   }
 
   tcpReq().embedStatus.init.reqUserId = userId.value;
-  emitSocketData(tcpReq().embedStatus.init);
+  emitSocketData('SEND_DATA', tcpReq().embedStatus.init);
   emits('initDataChangeText', true);
+}
+
+const sendRewindBelt = async (isRewindingBelt: boolean) => {
+  await store.dispatch('commonModule/setCommonInfo', { isRewindingBelt: isRewindingBelt });
 }
 
 const initData = async () => {
   const newObj = {...embeddedStatusJobCmd.value }
-  const runInfoObj = {...runInfo.value};
   isInit.value = newObj.isInit;
   isPause.value = newObj.isPause;
   userStop.value = newObj.userStop;
   isRecoveryRun.value = newObj.isRecoveryRun;
-  isRunningState.value = runInfoObj.isRunningState;
   showStopBtn.value = (isInit.value === 'N' || isInit.value === '') && !isRunningState.value;
 }
 

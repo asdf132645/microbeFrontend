@@ -121,6 +121,10 @@ export const MSG = {
     }
 } as const;
 
+export const TOOLTIP = {
+    SETTING_IA_ROOT_PATH: '검체 데이터 저장 경로 및 다운로드 진행 시 시작 경로',
+} as const;
+
 export const MSG_TOAST = {
     SUCCESS: 'success',
     ERROR: 'error',

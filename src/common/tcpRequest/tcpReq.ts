@@ -55,6 +55,8 @@ export const tcpReq:any = () => {
                 jobCmd: JOB_CMD.SYSINFO,
                 reqUserId: '',
                 reqDttm: reqDttm,
+                isRewindingBelt: false,
+                autoStart: 1,
             },
             pause: {
                 jobCmd: JOB_CMD.PAUSE,
@@ -76,7 +78,7 @@ export const tcpReq:any = () => {
                 reqUserId: '',
                 reqDttm: reqDttm,
                 saveReqDttm: saveReqDttm,
-                pbiaRootDir: 'D:/MOIA_Proc',
+                pbiaRootDir: 'D:/MOIA_proc',
                 oilCount: '',
                 isOilReset: '',
                 deviceType: '03',

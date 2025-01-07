@@ -729,6 +729,7 @@ progress::-webkit-progress-bar {
     font-size: 0.9rem;
     cursor: pointer;
     border: 1px solid;
+    width: 100%;
 }
 
 .initBtn:hover {
@@ -3421,9 +3422,17 @@ ul.editOrder li input {
     font-size: 2rem;
 }
 
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4D4F5C;
+}
+
 .searchInputBox {
-    padding: 8px;
-    border-radius: 5px;
+    padding: 8px 8px 8px 34px;
+    border-radius: 16px;
     width: 300px;
 }
 
@@ -3518,6 +3527,31 @@ button.rollbackButton {
 .initBtn.isInitDisabled {
     background: var(--gray-1-color);
     cursor: no-drop;
+}
+
+.initBtn-is100a {
+    width: 140px;
+}
+
+.rewindBtn {
+    width: 38px;
+    background: var(--main-bg-8-color);
+    color: var(--white-color);
+    border-radius: 5px;
+    padding: 8px;
+    margin: 12px 0 0 2px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid;
+}
+
+.rewindBtn:hover {
+    background: var(--white-color);
+    color: var(--main-bg-8-color);
+}
+
+.rewindBtn:active {
+    background: #DEDEDE;
 }
 
 .iconHeaderMenu {
@@ -3669,6 +3703,10 @@ p.menuIco {
     z-index: 1000;
 }
 
+.layer-content.oil {
+    max-width: 326px;
+}
+
 .layer-content {
     text-align: left;
     background-color: var(--main-bg-0-color);
@@ -3732,6 +3770,15 @@ p.menuIco {
 
 .contentRight > .contentRightChild.realtime {
     width: 65%;
+}
+
+.realTimeProcess-image-container > img {
+    position: absolute;
+}
+
+.realTimeProcess-image-container > canvas {
+    position: relative;
+    z-index: 4;
 }
 
 .grade-container {
@@ -3926,6 +3973,46 @@ p.menuIco {
     left: 20%;
     position: relative;
     top: -4px;
+}
+
+.tooltip-container {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    font-size: 0.8rem;
+    font-weight: lighter;
+    z-index: 999999999;
+    background-color: var(--main-bg-2-color);
+    padding: 6px;
+    border-radius: 4px;
+    box-shadow: 2px 2px 2px var(--black-color);
+}
+
+.tooltip-pos-top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tooltip-pos-bottom {
+    top: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tooltip-pos-left {
+    right: 150%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.tooltip-pos-right {
+    left: 150%;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 @media screen and (max-width: 1900px) {

@@ -123,8 +123,10 @@ export const MO_CATEGORY_CLASS_ID = {
 }
 
 export const FOLDER_NAME = {
+    ORIGIN_PATH: 'D:\\MOIA_proc',
     HIGH_POWER: '22_HIGH_Detection',
-    LOW_POWER: '13_LOW_Detection'
+    LOW_POWER: '13_LOW_Detection',
+    LOW_IDEAL: '11_LOW_Ideal',
 }
 
 export const MAP_TEST_TYPE_TO_TEST_NAME = {

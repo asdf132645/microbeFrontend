@@ -134,7 +134,7 @@
           </li>
           <li v-if="!barCodeImageShowError">
             <p>Barcode Image</p>
-            <img class="mt10" :src="barcodeImg" @error="onImageError"/>
+            <img class="mt10" width="376" :src="barcodeImg" @error="onImageError"/>
           </li>
         </ul>
 <!--      </div>-->
@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import {getBarcodeDetailImageUrl, getTestTypeText} from "@/common/lib/utils/conversionDataUtils";
+import { getImageUrl, getTestTypeText } from "@/common/lib/utils/conversionDataUtils";
 import {
   ref,
   onMounted,
@@ -552,7 +552,7 @@ const editData = async (item: any) => {
   itemObj.value.submitState = ['', 'Ready', 'checkFirst'].includes(itemObj.value.submitState) ? '' : itemObj.value.submitState;
   itemObj.value.testType = getTestTypeText(item?.testType);
   const path = item?.img_drive_root_path !== '' && item?.img_drive_root_path ? item?.img_drive_root_path : pbiaRootDir.value;
-  barcodeImg.value = getBarcodeDetailImageUrl('barcode_image.jpg', path, item.slotId, barcodeImgDir.barcodeDirName);
+  barcodeImg.value = getImageUrl('barcode_image.jpg', path, item.slotId, barcodeImgDir.barcodeDirName);
 
 }
 

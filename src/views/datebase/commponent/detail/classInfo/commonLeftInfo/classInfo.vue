@@ -168,8 +168,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, defineProps, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
-import { getBarcodeDetailImageUrl, getCurrentAnalysisType } from "@/common/lib/utils/conversionDataUtils";
+import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
+import { getCurrentAnalysisType, getImageUrl } from "@/common/lib/utils/conversionDataUtils";
 import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
@@ -259,7 +259,7 @@ const getTotalMoInfo = (newSelectItems: any) => {
 
 const setBarcodeImage = () => {
   const path = props.selectItems?.img_drive_root_path || iaRootPath.value;
-  const imageUrl = getBarcodeDetailImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
+  const imageUrl = getImageUrl('barcode_image.jpg', path, props.selectItems?.slotId, barcodeImgDir.barcodeDirName);
   barcodeImg.value = imageUrl;
   preloadImage(imageUrl);
 

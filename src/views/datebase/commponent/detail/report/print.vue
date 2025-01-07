@@ -133,7 +133,7 @@ import {useStore} from "vuex";
 import pako from 'pako';
 import {formatDateString} from "@/common/lib/utils/dateUtils";
 import {detailRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
-import {disableScroll, enableScroll} from "@/common/lib/utils/scrollBlock";
+import {disableScroll, enableScroll} from "@/common/lib/utils/scroll";
 
 const store = useStore();
 const viewerCheck = computed(() => store.state.commonModule.viewerCheck);

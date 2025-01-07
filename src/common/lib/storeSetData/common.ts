@@ -20,8 +20,7 @@ export const sysInfoStore = async (data: any): Promise<any> => {
         await store.dispatch('commonModule/setCommonInfo', deviceInfoData);
         await store.dispatch('embeddedStatusModule/setEmbeddedStatusInfo', embeddedInfoData);
         return null;
-    }else {
-        await store.dispatch('commonModule/setCommonInfo', {'appAlertOpen': true});
+    } else {
         return data?.resultMsg;
     }
 };

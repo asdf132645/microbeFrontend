@@ -73,19 +73,6 @@ export const barcodeImgDir = {
     barcodeDirName: '00_Barcode_Image'
 }
 
-export const DIR_NAME = {
-    rbcImageDirName: '02_RBC_Image',
-    barcodeDirName: '00_Barcode_Image',
-    bfDirName: '13_LOW_Detection',
-    bfHighDirName: '22_HIGH_Detection',
-    iaRootPath: 'D:/ia_proc',
-}
-
-export const FOLDER_NAME = {
-    HIGH_POWER: '22_HIGH_Detection',
-    LOW_POWER: '13_LOW_Detection'
-}
-
 export const SETTING_NAME = {
     cellImageAnalyzed: 'cellImageAnalyzed',
     gramRange: 'gramRange',

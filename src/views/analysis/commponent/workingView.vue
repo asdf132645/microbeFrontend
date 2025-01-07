@@ -67,25 +67,20 @@
 
     </div>
     <div class='slideCardWrap' v-if="machineVersion === '12a'">
-      <!-- input -->
       <ul class='slideContent'>
-        <li class="cassette" v-for="item in slideCardData.input" :key="item.slotNo" :class="getSlotStateClass(item.slotState, 'input')"></li>
-        <p class="mt10">INPUT</p>
+        <li v-for="item in slideCardData.input" :key="item.slotNo" :class="getSlotStateClass(item.slotState, 'input')"></li>
+        <p v-show="commonDataGet.isRunningState" class="mt10">INPUT</p>
       </ul>
-      <!-- output -->
       <ul class='slideContent'>
-        <li v-for="item in slideCardData.output" :key="item.slotNo"
-            :class="getSlotStateClass(item.slotState,'output')"></li>
-        <p class="mt10">OUTPUT</p>
+        <li v-for="item in slideCardData.output" :key="item.slotNo" :class="getSlotStateClass(item.slotState,'output')"></li>
+        <p v-show="commonDataGet.isRunningState" class="mt10">OUTPUT</p>
       </ul>
     </div>
     <div class='slideCardWrap' v-else>
-      <!-- input -->
       <ul class='slideContent pb100a'>
-        <li>INPUT : {{ casExistChangeText(iCasExist) }}</li>
-        <li class="cassette" v-for="item in [...slideCardData.input].reverse()" :key="item.slotNo"
-            :class="getSlotStateClass(item.slotState,'input')"></li>
-        <li class="mt10">OUTPUT : {{ casExistChangeText(oCasExist) }}</li>
+        <p v-show="commonDataGet.isRunningState">INPUT : {{ casExistChangeText(iCasExist) }}</p>
+        <li v-for="item in [...slideCardData.input].reverse()" :key="item.slotNo" :class="getSlotStateClass(item.slotState,'input')"></li>
+        <p v-show="commonDataGet.isRunningState" class="mt10">OUTPUT : {{ casExistChangeText(oCasExist) }}</p>
       </ul>
     </div>
   </div>

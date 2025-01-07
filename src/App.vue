@@ -47,12 +47,12 @@ import { existOrNone, getGradeByRange, getSputumGrade } from "@/common/lib/utils
 import {ApiResponse} from "@/common/api/httpClient";
 import {createRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import Alert from "@/components/commonUi/Alert.vue";
-import {createDeviceInfoApi, getDeviceInfoApi, getDeviceIpApi} from "@/common/api/service/device/deviceApi";
+import { getDeviceIpApi } from "@/common/api/service/device/deviceApi";
 import EventBus from "@/eventBus/eventBus";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
-import { DEFAULT_GRAM_RANGE } from "@/common/defines/constFile/settings/settings";
+import {barcodeImgDir, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
 import type { GRAM_RANGE_TYPE } from "@/common/defines/constFile/settings/settings.dto";
 import {
   MO_CATEGORY_NAME,
@@ -68,6 +68,7 @@ import { MoInfoInterface, RUNNING_INFO_INTERFACE } from "@/common/type/tcp";
 import {IntervalType} from "@/common/type/generalTypes";
 import {getValidClassIds} from "@/common/lib/utils/conversionDataUtils";
 import {JOB_CMD} from "@/common/defines/constFile/analysis/analysis";
+import {getDateTimeStr, getDateTimeStrForUI} from "@/common/lib/utils/dateUtils";
 
 const router = useRouter();
 const store = useStore();
@@ -101,12 +102,15 @@ const userModuleDataGet = computed(() => store.state.userModule);
 const reqArr = computed(() => store.state.commonModule);
 const iaRootPath = computed(() => store.state.commonModule.iaRootPath);
 const currentAnalyzingSlotNo = computed(() => store.state.commonModule.currentAnalyzingSlotNo);
+const isRewindingBelt = computed(() => store.state.commonModule.isRewindingBelt);
+const currentSlotId = ref('');
 
 const wbcConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.WBC)[0]);
 const epCellConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.EP_CELL)[0]);
 const gramConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.GRAM)[0]);
 
 instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async (isTcpConnected) => {
+  console.log('isTCPConnected');
   if (isTcpConnected) {
     setTimeout(async () => {
       await store.dispatch('commonModule/setCommonInfo', {isTcpConnected: true});
@@ -236,6 +240,7 @@ onMounted(async () => {
   await cellImgGet();
   await getGramRange();
   startChecking();
+
   const result = await getDeviceIpApi();
   ipMatches.value = isIpMatching(window.APP_API_BASE_URL, result.data);
   window.addEventListener('beforeunload', leave);
@@ -281,12 +286,14 @@ instance?.appContext.config.globalProperties.$socket.on('chat', async (data) => 
 });
 
 async function socketData(data: any) {
-  if (commonDataGet.value.viewerCheck !== 'main') return;
+  if (commonDataGet.value.viewerCheck !== 'main') {
+    return;
+  }
   deleteData.value = false;
   try {
     if (typeof data === 'string') {
       await showSuccessAlert(MESSAGES.TCP_DiSCONNECTED);
-      return
+      return;
     }
     const textDecoder = new TextDecoder('utf-8');
     const stringData = textDecoder.decode(data);
@@ -499,12 +506,19 @@ async function socketData(data: any) {
 
     async function saveRunningInfo(runningInfo: any, slotId: string) {
       try {
-        let result: ApiResponse<void>;
-        result = await createRunningApi({userId: Number(userId.value), runingInfoDtoItems: runningInfo});
-
-        if (result) {
+        if (currentSlotId.value === '' || currentSlotId.value !== runningInfo.slotId) {
+          let result: ApiResponse<void>;
+          result = await createRunningApi({userId: Number(userId.value), runingInfoDtoItems: runningInfo});
+          if (result) {
+            if (runningInfo.slotId) {
+              currentSlotId.value = runningInfo.slotId;
+            }
+            delayedEmit('SEND_DATA', 'refreshDb', 300);
+          }
+        } else {
           delayedEmit('SEND_DATA', 'refreshDb', 300);
         }
+
       } catch (e) {
         console.error(e);
       }
@@ -543,6 +557,16 @@ const removeDuplicateJobCmd = (reqArr: any) => {
 const startSysPostWebSocket = async () => {
   tcpReq().embedStatus.sysInfo.reqUserId = userId.value;
   const req = tcpReq().embedStatus.sysInfo;
+  await store.dispatch('commonModule/setCommonInfo', { reqArr: req });
+  let autoStart: string | number = sessionStorage.getItem('autoStart') || 1;
+  if (autoStart === 'true') autoStart = 1;
+  else if (autoStart === 'false') autoStart = 0;
+
+  if (machineVersion.value === '100a') {
+    Object.assign(req, { isRewindingBelt: isRewindingBelt.value });
+    Object.assign(req, { autoStart: autoStart });
+  }
+
   await store.dispatch('commonModule/setCommonInfo', {reqArr: req});
 };
 

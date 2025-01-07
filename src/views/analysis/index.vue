@@ -6,18 +6,18 @@
   </div>
   <div class="contentRight" v-show="props.isClass">
     <workingView  :initValData="initValData" :parsedData="props.parsedData" :pb100aCassette="pb100aCassette" class="contentRightChild workingView container-shadow" />
-    <RealTimeProcess  class="contentRightChild realtime container-shadow"/>
+    <RealTimeProcess  class="contentRightChild realtime container-shadow" :parsedData="props.parsedData" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { defineEmits, defineProps, ref, onBeforeMount, computed } from "vue";
+import { useStore } from "vuex";
 import ProcessInfo from '@/views/analysis/commponent/processInfo.vue';
 import Execute from '@/views/analysis/commponent/execute.vue';
 import workingView from '@/views/analysis/commponent/workingView.vue';
 import orderList from './commponent/orderList.vue';
-import { defineEmits, defineProps, ref, onBeforeMount, computed } from "vue";
 import router from "@/router";
-import { useStore } from "vuex";
 import RealTimeProcess from "@/views/analysis/commponent/realTimeProcess.vue";
 
 const emits = defineEmits();

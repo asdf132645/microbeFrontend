@@ -1,7 +1,7 @@
 import { commonCodeList } from '@/common/defines/constFile/commonCodeList';
 import {
     BLOOD_HIGH_POWER_CLASS_IDS,
-    BLOOD_LOW_POWER_CLASS_IDS, BLOOD_TOTAL_CLASS_IDS, CLASS_INFO_ID,
+    BLOOD_LOW_POWER_CLASS_IDS, BLOOD_TOTAL_CLASS_IDS, CLASS_INFO_ID, FOLDER_NAME,
     MO_TEST_TYPE, SPUTUM_HIGH_POWER_CLASS_IDS, SPUTUM_LOW_POWER_CLASS_IDS, SPUTUM_TOTAL_CLASS_IDS,
     TEST_TYPE,
     URINE_HIGH_POWER_CLASS_IDS,
@@ -36,9 +36,14 @@ export const getTestTypeText = (value: string) => {
     return matchingOption ? matchingOption.text : '';
 };
 
-export const getBarcodeDetailImageUrl =  (imageName: string, iaRootPath: string, slotId: string, barcodeDirName: string): string => {
+export const getImageUrl = (imageName: string, iaRootPath: string, slotId: string, dirName: string): string => {
     const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
-    return `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + "/" + slotId + "/" + barcodeDirName + "/"}&imageName=${imageName}`;
+    return `${apiBaseUrl}/images/getImageRealTime?folder=${iaRootPath + "/" + slotId + "/" + dirName + "/"}&imageName=${imageName}`;
+}
+
+export const getStitchingImageUrl = (iaRootPath: string, slotId: string) => {
+    const apiBaseUrl = window.APP_API_BASE_URL || 'http://192.168.0.115:3002';
+    return `${apiBaseUrl}/images/getStitchingImage?folder=${iaRootPath + "/" + slotId + "/" + FOLDER_NAME.LOW_IDEAL + "/"}&imageName=stitching.bmp`;
 }
 
 export const getCurrentAnalysisType = (testType: string) => {

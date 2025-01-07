@@ -241,6 +241,7 @@ import Confirm from "@/components/commonUi/Confirm.vue";
 import { useRouter } from "vue-router";
 import ConfirmThreeBtn from "@/components/commonUi/ConfirmThreeBtn.vue";
 import {IntervalType} from "@/common/type/generalTypes";
+import { scrollToTop } from "@/common/lib/utils/scroll";
 
 const instance = getCurrentInstance();
 const store = useStore();
@@ -444,6 +445,7 @@ const cellImgSet = async () => {
     if (result) {
       const text = saveHttpType.value === 'post' ? MESSAGES.SETTING_SAVE_SUCCESS : MESSAGES.UPDATE_SUCCESSFULLY;
       showSuccessAlert(text);
+      scrollToTop();
       const data = result?.data;
       await store.dispatch('commonModule/setCommonInfo', { cellImageAnalyzedSetting: cellImgSet });
       await store.dispatch('commonModule/setCommonInfo', {resetAnalyzing: true});
@@ -495,6 +497,7 @@ const uploadConfirm = async (uploadType: 'move' | 'copy') => {
       showErrorAlert(result.data);
     } else {
       showSuccessAlert('Upload completed successfully');
+      scrollToTop();
     }
   } catch (e) {
     console.error(e);
