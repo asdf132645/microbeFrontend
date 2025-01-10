@@ -51,8 +51,7 @@ import { getDeviceIpApi } from "@/common/api/service/device/deviceApi";
 import EventBus from "@/eventBus/eventBus";
 import Analysis from "@/views/analysis/index.vue";
 import {logoutApi} from "@/common/api/service/user/userApi";
-import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
-import {barcodeImgDir, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
+import { DEFAULT_GRAM_RANGE } from "@/common/defines/constFile/settings/settings";
 import type { GRAM_RANGE_TYPE } from "@/common/defines/constFile/settings/settings.dto";
 import {
   MO_CATEGORY_NAME,
@@ -61,14 +60,14 @@ import {
   MAP_TEST_TYPE_TO_TEST_NAME,
   URINE_LOW_POWER_CLASS_IDS,
   BLOOD_LOW_POWER_CLASS_IDS,
-  SPUTUM_LOW_POWER_CLASS_IDS
+  SPUTUM_LOW_POWER_CLASS_IDS, FILE_NAME
 } from "@/common/defines/constFile/dataBase";
 import {CommonState} from "@/store/modules/commonModule";
 import { MoInfoInterface, RUNNING_INFO_INTERFACE } from "@/common/type/tcp";
 import {IntervalType} from "@/common/type/generalTypes";
 import {getValidClassIds} from "@/common/lib/utils/conversionDataUtils";
 import {JOB_CMD} from "@/common/defines/constFile/analysis/analysis";
-import {getDateTimeStr, getDateTimeStrForUI} from "@/common/lib/utils/dateUtils";
+import {readJsonFile} from "@/common/api/service/fileReader/fileReaderApi";
 
 const router = useRouter();
 const store = useStore();
@@ -108,6 +107,7 @@ const currentSlotId = ref('');
 const wbcConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.WBC)[0]);
 const epCellConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.EP_CELL)[0]);
 const gramConvertSetting = ref<GRAM_RANGE_TYPE>(DEFAULT_GRAM_RANGE.filter(item => item.fullNm === MO_CATEGORY_NAME.GRAM)[0]);
+const currentMoInfoArr = ref<any[]>([]);
 
 instance?.appContext.config.globalProperties.$socket.on('isTcpConnected', async (isTcpConnected) => {
   console.log('isTCPConnected');
@@ -420,11 +420,6 @@ async function socketData(data: any) {
           await store.dispatch('runningInfoModule/setSlideBoolean', {key: 'slideBoolean', value: true});
         }
 
-        // if (machineVersion.value === '100a') {
-        //   if (data?.iCasChange === '1') pb100aCassette.value = 'reset';
-        //   else pb100aCassette.value = '';
-        // }
-
         // iCasStat (0 - 없음, 1 - 있음, 2 - 진행중, 3 - 완료, 4 - 에러, 9 - 스캔)
         if ((dataICasStat.search(regex) < 0) || data?.oCasStat === '111111111111' && !commonDataGet.value.runningInfoStop) {
           tcpReq().embedStatus.runIngComp.reqUserId = userModuleDataGet.value.userId;
@@ -461,47 +456,47 @@ async function socketData(data: any) {
 
     }
 
-    async function saveTestHistory(data: any) {
+    async function saveTestHistory(data: RUNNING_INFO_INTERFACE) {
       const completeSlot = data.slotInfo;
       if (!completeSlot) return;
 
       Object.assign(completeSlot, { userId: userId.value, isNormal: true });
 
-      /** TODO MO Normal 조건 추가 필요 */
-      if (isObjectEmpty(data?.MOInfo)) {
-        console.log('검체 데이터 저장 실패');
-        return;
+      const moInfoData = await getMoInfoFromFolder(completeSlot.slotId);
+
+      if (moInfoData) {
+        const convertedMoInfo = convertMoInfo(MAP_TEST_TYPE_TO_TEST_NAME[completeSlot.testType], moInfoData);
+
+        const traySlotFirstNum = machineVersion.value === '100a' ? `${data?.traySlot}` : '1';
+
+        const newObj = {
+          slotNo: completeSlot.slotNo,
+          lock_status: false,
+          traySlot: traySlotFirstNum + '-' + completeSlot.slotNo,
+          barcodeNo: completeSlot.barcodeNo,
+          patientId: completeSlot.patientId,
+          patientNm: completeSlot.patientNm,
+          gender: completeSlot.gender,
+          birthDay: completeSlot.birthDay,
+          slotId: completeSlot.slotId,
+          orderDttm: completeSlot.orderDttm,
+          testType: completeSlot.testType,
+          analyzedDttm: tcpReq().embedStatus.settings.saveReqDttm,
+          tactTime: completeSlot.tactTime,
+          classInfo: convertedMoInfo,
+          cassetId: data?.cassetId,
+          isNormal: true,
+          // isNormal: completeSlot?.isNormal,
+          submitState: '',
+          submitOfDate: '',
+          submitUserId: '',
+          memo: '',
+        }
+        await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: completeSlot.slotNo });
+        await saveRunningInfo(newObj, completeSlot.slotId);
+      } else {
+        await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: completeSlot.slotNo });
       }
-
-      const moInfoNewVal = data?.MOInfo;
-      const convertedMoInfo = convertMoInfo(MAP_TEST_TYPE_TO_TEST_NAME[completeSlot.testType], moInfoNewVal);
-
-      const traySlotFirstNum = machineVersion.value === '100a' ? `${data?.traySlot}` : '1';
-
-      const newObj = {
-        slotNo: completeSlot.slotNo,
-        lock_status: false,
-        traySlot: traySlotFirstNum + '-' + completeSlot.slotNo,
-        barcodeNo: completeSlot.barcodeNo,
-        patientId: completeSlot.patientId,
-        patientNm: completeSlot.patientNm,
-        gender: completeSlot.gender,
-        birthDay: completeSlot.birthday,
-        slotId: completeSlot.slotId,
-        orderDttm: completeSlot.orderDttm,
-        testType: completeSlot.testType,
-        analyzedDttm: tcpReq().embedStatus.settings.saveReqDttm,
-        tactTime: completeSlot.tactTime,
-        classInfo: convertedMoInfo,
-        cassetId: data?.cassetId,
-        isNormal: completeSlot.isNormal,
-        submitState: '',
-        submitOfDate: '',
-        submitUserId: '',
-        memo: '',
-      }
-      await store.dispatch('commonModule/setCommonInfo', { currentAnalyzingSlotNo: completeSlot.slotNo });
-      await saveRunningInfo(newObj, completeSlot.slotId);
     }
 
     async function saveRunningInfo(runningInfo: any, slotId: string) {
@@ -512,6 +507,7 @@ async function socketData(data: any) {
           if (result) {
             if (runningInfo.slotId) {
               currentSlotId.value = runningInfo.slotId;
+              currentMoInfoArr.value = [];
             }
             delayedEmit('SEND_DATA', 'refreshDb', 300);
           }
@@ -628,32 +624,37 @@ const sendMessage = async (payload: any) => {
   deleteData.value = true;
 };
 
-const convertMoInfo = (cassetteType: string, moInfo: MoInfoInterface[]) => {
+const convertMoInfo = (cassetteType: keyof typeof MO_TEST_TYPE, moInfo: MoInfoInterface[]) => {
+
   const convertedMoInfo = [];
+
+  const totalMoInfo = moInfo.filter((item) => String(item.id) === '2')[0];
+  const totalLPCount = totalMoInfo.LPTotalCount;
+  const totalHPCount = totalMoInfo.HPTotalCount;
 
   for (const moItem of moInfo) {
     const validClassIds = getValidClassIds(cassetteType, String(moItem.id));
-    const updatingClassInfo = moItem.classInfo
+    const updatingClassInfo = moItem.classList
         .filter(moClassInfoItem => validClassIds.includes(moClassInfoItem.classId))
         .map(moClassInfoItem => ({
-          count: calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType),
+          count: calcCount(Number(totalLPCount), Number(totalHPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType),
           classId: moClassInfoItem.classId,
           beforeGrade: setMoInfoGrade({
             cassetteType,
             classId: moClassInfoItem.classId,
-            count: calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType),
+            count: calcCount(Number(totalLPCount), Number(totalHPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType),
           }),
           afterGrade: setMoInfoGrade({
             cassetteType,
             classId: moClassInfoItem.classId,
-            count: calcCount(Number(moItem?.LPCount), Number(moItem?.HPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType)
+            count: calcCount(Number(totalLPCount), Number(totalHPCount), Number(moClassInfoItem.count), moItem.id, moClassInfoItem.classId, cassetteType)
           }),
         }))
 
     if (cassetteType === MO_TEST_TYPE.SPUTUM) {
       // Sputum Gram 계산을 위한 WBC, EP Cell Count 추출
-      const wbcCount = moItem.classInfo.find(item => item.classId === CLASS_INFO_ID.WBC)?.count || 0;
-      const epCellCount = moItem.classInfo.find(item => item.classId === CLASS_INFO_ID.EP_CELL)?.count || 0;
+      const wbcCount = moItem.classList.find(item => item.classId === CLASS_INFO_ID.WBC)?.count || 0;
+      const epCellCount = moItem.classList.find(item => item.classId === CLASS_INFO_ID.EP_CELL)?.count || 0;
       const gradeText = getSputumGrade(wbcCount, epCellCount);
       const sputumItem = {
         count: 0,
@@ -666,7 +667,7 @@ const convertMoInfo = (cassetteType: string, moInfo: MoInfoInterface[]) => {
 
     const updatedMoInfoItem = {
       id: moItem.id,
-      name: moItem.name,
+      name: moItem.fileName,
       classInfo: updatingClassInfo,
       isWatched: false,
     }
@@ -730,6 +731,19 @@ const cellImgGet = async () => {
     }
   } catch (e) {
     console.error(e);
+  }
+}
+
+const getMoInfoFromFolder = async (slotId: string) => {
+  const url = `${iaRootPath.value}/${slotId}/${FILE_NAME.MO_INFO}`;
+  try {
+    const response = await readJsonFile(({ fullPath: url }));
+    if (response?.data) {
+      return response?.data.MOinfo;
+    }
+  } catch (error) {
+    console.error(error);
+    return undefined;
   }
 }
 

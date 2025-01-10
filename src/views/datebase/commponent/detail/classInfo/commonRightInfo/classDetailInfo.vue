@@ -237,13 +237,13 @@ const getMoInfo = (selectItems: any, pageType: string) => {
   const imageName = currentImageName.value.split('.')[0];
   if (pageType === POWER_MODE.LOW_POWER) {
     moInfo.value = selectItems.classInfo.filter((item: any) => {
-      if (item.id === '0') {
+      if (String(item.id) === '0') {
         return item.name.includes(imageName)
       }
     })[0];
   } else if (pageType === POWER_MODE.HIGH_POWER) {
     moInfo.value = selectItems.classInfo.filter((item: any) => {
-      if (item.id === '1') {
+      if (String(item.id) === '1') {
         return item.name.includes(imageName);
       }
     })[0];
@@ -284,7 +284,7 @@ const updateGrade = async (updatingMoInfo: any, classId: string, grade: string) 
   })
 
   const updatedMoInfoObj = props.selectItems.classInfo.map((item: any) => {
-    if (item.id === filteredMoInfo.id && item.name === filteredMoInfo.name) {
+    if (String(item.id) === String(filteredMoInfo.id) && item.name === filteredMoInfo.name) {
       return {...item, ...filteredMoInfo };
     }
     return item;

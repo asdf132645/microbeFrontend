@@ -5,10 +5,10 @@ export interface ClassInfoInterface {
 
 export interface MoInfoInterface {
     id: string;
-    name: string;
-    LPCount?: number;
-    HPCount?: number;
-    classInfo: ClassInfoInterface[]
+    fileName: string;
+    classList: ClassInfoInterface[];
+    LPTotalCount?: number;
+    HPTotalCount?: number;
 }
 
 export interface SlotInfoInterface {
@@ -24,11 +24,10 @@ export interface SlotInfoInterface {
     stateCd: string;
     tactTime: string;
     testType: string;
-    MOInfo: MoInfoInterface[];
 }
 
 export interface DefaultResponseInterface {
-    resultCd: string;
+    resultCode: string;
     resultMsg: string;
     jobCmd: string;
     errorLevel: string;
@@ -43,6 +42,7 @@ export interface RUNNING_INFO_INTERFACE extends DefaultResponseInterface {
     workingDone?: string;
     iCasExist?: string;
     oCasExist?: string;
+    traySlot?: number;
 }
 
 export interface SYS_INFO_INTERFACE extends DefaultResponseInterface {

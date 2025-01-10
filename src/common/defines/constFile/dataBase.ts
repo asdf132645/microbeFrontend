@@ -129,6 +129,10 @@ export const FOLDER_NAME = {
     LOW_IDEAL: '11_LOW_Ideal',
 }
 
+export const FILE_NAME = {
+    MO_INFO: 'MOinfo.json',
+}
+
 export const MAP_TEST_TYPE_TO_TEST_NAME = {
     '00': MO_TEST_TYPE.URINE,
     '01': MO_TEST_TYPE.SPUTUM,

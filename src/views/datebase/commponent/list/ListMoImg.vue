@@ -26,6 +26,7 @@ import {computed, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import {useStore} from "vuex";
 import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import {filterImageFiles, isObjectEmpty} from "@/common/lib/utils/checkUtils";
+import {FOLDER_NAME} from "@/common/defines/constFile/dataBase";
 
 const props = defineProps(['dbData', 'selectedItem']);
 const store = useStore();
@@ -68,7 +69,7 @@ const getImageFolder = async () => {
 
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
-  const folderPath = `${path}/${slotId}/13_LOW_Detection`;
+  const folderPath = `${path}/${slotId}/${FOLDER_NAME.LOW_POWER}`;
   const result = await fetch(`${apiBaseUrl}/folders?folderPath=${folderPath}`);
   const imageNames = await result.json()
   allImages.value = filterImageFiles(imageNames);
@@ -79,7 +80,7 @@ const showImage = (imageName: string, index: number) => {
   if (!selectedItem?.classInfo || selectedItem?.classInfo.length === 0) return '';
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
-  const folderPath = `${path}/${slotId}/13_LOW_Detection`;
+  const folderPath = `${path}/${slotId}/${FOLDER_NAME.LOW_POWER}`;
   return `${apiBaseUrl}/images/getImageWbc?folder=${folderPath}&imageName=${imageName}`;
 }
 

@@ -5,30 +5,39 @@
     <h3 class="wbcClassInfoLeft">{{ currentAnalysisType }} Total Classification</h3>
 
     <ul class="leftWbcInfo">
-      <li @click="barcodeCopy">
-        <font-awesome-icon class="classDetailFont" :icon="['fas', 'copy']"/>
+      <li
+          class="relative"
+          @mouseenter="tooltipVisibleFunc('barcodeCopy', true)"
+          @mouseleave="tooltipVisibleFunc('barcodeCopy', false)"
+      >
+        <font-awesome-icon @click="barcodeCopy" :icon="['fas', 'copy']" class="hoverSizeAction" />
+        <Tooltip :isVisible="tooltipVisible.barcodeCopy" className="mb08" :message="MSG.TOOLTIP.BARCODE_COPY" />
       </li>
-      <li class="relative">
-        <font-awesome-icon class="memoOpenBtn classDetailFont" :icon="['fas', 'pen-to-square']" @mousedown.stop @click="memoOpen" />
-        <MemoBox
-            v-model:memo="memo"
-            :showMemoModal="showMemoModal"
-            @saveMemo="handleMemoSave"
-            @closeMemo="handleCloseMemo"
-        />
+
+      <li
+          class="relative"
+          @mouseenter="tooltipVisibleFunc('memo', true)"
+          @mouseleave="tooltipVisibleFunc('memo', false)"
+      >
+        <font-awesome-icon class="hoverSizeAction" :icon="['fas', 'pen-to-square']" @mousedown.stop @click="memoOpen" />
+        <Tooltip :isVisible="tooltipVisible.memo" className="mb08" position="top" type="" :message="MSG.TOOLTIP.MEMO" />
       </li>
+      <MemoBox
+          v-model:memo="memo"
+          :showMemoModal="showMemoModal"
+          @saveMemo="handleMemoSave"
+          @closeMemo="handleCloseMemo"
+      />
       <li
           @click="commitConfirmed"
+          class="relative"
           :class="{'submitted': selectItems?.submitState === 'Submit',}"
+          @mouseenter="tooltipVisibleFunc('confirm', true)"
+          @mouseleave="tooltipVisibleFunc('confirm', false)"
       >
-        <font-awesome-icon class="classDetailFont" :icon="['fas', 'square-check']"/>
+        <font-awesome-icon class="hoverSizeAction" :icon="['fas', 'square-check']"/>
+        <Tooltip :isVisible="tooltipVisible.confirm" className="mb08" position="top" type="" :message="MSG.TOOLTIP.CONFIRM" />
       </li>
-<!--      <li-->
-<!--          @click="lisModalOpen"-->
-<!--          :class="{'submitted': selectItems?.submitState === 'lis' || lisBtnColor,}"-->
-<!--      >-->
-<!--        <font-awesome-icon :icon="['fas', 'upload']"/>-->
-<!--      </li>-->
     </ul>
   </div>
   <div class="classInfoHorizontalRule"></div>
@@ -168,30 +177,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
+import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
 import { getCurrentAnalysisType, getImageUrl } from "@/common/lib/utils/conversionDataUtils";
 import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
-import {MESSAGES, MSG_TOAST, TOAST_MSG_TYPE} from "@/common/defines/constFile/constantMessageText";
+import {MESSAGES, MSG, MSG_TOAST, TOAST_MSG_TYPE} from "@/common/defines/constFile/constantMessageText";
 import Alert from "@/components/commonUi/Alert.vue";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
-import {LocationQueryValue, useRoute} from "vue-router";
+import { useRoute } from "vue-router";
 import {
   CLASS_INFO_ID,
   FOUR_GRADES, GRADE_TEXT,
   MO_TEST_TYPE,
   SPUTUM_GRADES
 } from "@/common/defines/constFile/dataBase";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
-import {RouteType} from "@/common/type/generalTypes";
 import Toast from "@/components/commonUi/Toast.vue";
 import GradeBox from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeBox.vue";
 import MemoBox from "@/components/commonUi/MemoBox.vue";
+import type { TooltipClassInfoType } from "@/common/type/tooltipType";
+import Tooltip from "@/components/commonUi/Tooltip.vue";
 
 const store = useStore();
 const route = useRoute();
@@ -212,11 +222,19 @@ const confirmMessage = ref('');
 const okMessageType = ref('');
 const barCodeImageShowError = ref(false);
 const submittedScreen = ref(false);
-const lisBtnColor = ref(false);
 const currentAnalysisType = ref(MO_TEST_TYPE.URINE);
 const moInfoTotal = ref<any>([]);
 const toastMessage = ref('');
 const toastMessageType = ref(TOAST_MSG_TYPE.SUCCESS);
+const tooltipVisible = ref<TooltipClassInfoType>({
+  barcodeCopy: false,
+  memo: false,
+  confirm: false,
+  classMoveLock: false,
+  beforeCountPercent: false,
+  afterCountPercent: false,
+  lisUpload: false,
+})
 
 onMounted(async () => {
   await nextTick();
@@ -254,7 +272,7 @@ watch(() => props.selectItems, async (newSelectItems) => {
 }, { deep: true });
 
 const getTotalMoInfo = (newSelectItems: any) => {
-  moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => item.id === '2');
+  moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => String(item.id) === '2');
 }
 
 const setBarcodeImage = () => {
@@ -268,12 +286,6 @@ const setBarcodeImage = () => {
 const preloadImage = (url: string) => {
   const img = new Image();
   img.src = url;
-}
-
-const lisModalOpen = () => {
-  showConfirm.value = true;
-  confirmMessage.value = MESSAGES.IDS_MSG_UPLOAD_LIS;
-  okMessageType.value = 'lis';
 }
 
 const barcodeCopy = async () => {
@@ -297,12 +309,7 @@ const commitConfirmed = () => {
 
 const handleOkConfirm = () => {
   if (okMessageType.value == 'commit') onCommit();
-  else uploadLis();
   showConfirm.value = false;
-}
-
-const uploadLis = async () => {
-  //
 }
 
 const hideConfirm = () => {
@@ -425,4 +432,9 @@ const showToast = async (message: string) => {
     toastMessage.value = ''; // 메시지를 숨기기 위해 빈 문자열로 초기화
   }, 1500); // 5초 후 토스트 메시지 사라짐
 };
+
+const tooltipVisibleFunc = (type: keyof TooltipClassInfoType, visible: boolean) => {
+  tooltipVisible.value[type] = visible;
+}
+
 </script>

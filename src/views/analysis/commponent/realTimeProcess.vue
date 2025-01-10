@@ -50,8 +50,9 @@ watch(() => props.parsedData, () => {
   slotId.value = props.parsedData.slotInfo.slotId;
   processingCode.value = props.parsedData.processingCode;
 
-  if (Number(processingCode.value) < 300) {
-    resetStitchingImage();
+  if (Number(processingCode.value) < 500) {
+    removeCanvas();
+    stitchingImage.value = '';
   }
 
   if (300 <= Number(processingCode.value)) {
@@ -80,14 +81,8 @@ const showRealTimeImage = () => {
   }
 }
 
-const resetStitchingImage = () => {
-  previousCoordinates.value = [];
-  stitchingImage.value = '';
-}
-
 const setStitchingImage = () => {
   const imageUrl = getStitchingImageUrl(iaRootPath.value, slotId.value);
-  // const imageUrl = getStitchingImageUrl(iaRootPath.value, '20241204144917_00_20241204144917');
   stitchingImage.value = imageUrl;
   preloadImage(imageUrl);
 }
@@ -101,7 +96,7 @@ const preloadImage = (url: string) => {
 
   preloadImageInstance.onerror = () => {
     imageShowError.value = true;
-    setTimeout(() => preloadImage(url), 1000);
+    setTimeout(() => preloadImage(url), 500);
   }
 }
 
@@ -111,6 +106,18 @@ const onImageError = () => {
 
 const onImageLoad = () => {
   imageShowError.value = false;
+}
+
+const removeCanvas = () => {
+  const canvas = canvasRef.value;
+  if (!canvas) return null;
+
+  const context = canvas.getContext('2d');
+  if (!context) return undefined;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.beginPath();
+  previousCoordinates.value = [];
 }
 
 const drawCanvas = () => {

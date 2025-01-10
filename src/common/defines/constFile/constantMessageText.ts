@@ -118,11 +118,22 @@ export const MSG = {
         UPLOAD: 'Upload',
         OK: 'OK',
         SUCCESS: 'Success',
+    },
+    TOOLTIP: {
+        BARCODE_COPY: 'Copy barcodeNo',
+        MEMO: 'Memo On/Off',
+        CONFIRM: 'Confirm',
+        LIS_UPLOAD: 'Upload LIS',
+        COUNT_PERCENT: 'Count   Percent',
+        IA_ROOT_PATH: 'Analysis Data Save Path',
+        ALARM: 'Alarm & Alarm Timer On/Off',
+        KEEP_PAGE: 'Maintain page state when navigating',
+        DOWNLOAD_SAVE_PATH: 'Download Save Path & Upload Data Path',
+        DOWNLOAD: '1. Select the date for download\n2. Click \'Copy\' to back up the data or \'Move\' to change the storage location.',
+        UPLOAD: 'Select Upload Destination Path',
+        OPEN_DOWNLOAD_SAVE_PATH: 'Open Download Save Path',
+        LIS_UPLOAD_CHECK: 'Show LIS Upload Button after viewing all cell',
     }
-} as const;
-
-export const TOOLTIP = {
-    SETTING_IA_ROOT_PATH: '검체 데이터 저장 경로 및 다운로드 진행 시 시작 경로',
 } as const;
 
 export const MSG_TOAST = {

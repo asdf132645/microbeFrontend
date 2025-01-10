@@ -3,7 +3,7 @@
       v-if="isVisible"
       :class="`tooltip-container tooltip-pos-${position} ${className}`"
   >
-    <pre>{{ message }}</pre>
+    <pre :style="{ color: color }">{{ message }}</pre>
   </div>
 </template>
 
@@ -12,14 +12,15 @@ import { defineProps } from 'vue';
 
 interface PropsType {
   isVisible: boolean;
-  type?: string;
   message: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
+  color?: string;
 }
 
 const props = withDefaults(defineProps<PropsType>(), {
   position: 'top',
+  color: 'white',
 });
 
 </script>

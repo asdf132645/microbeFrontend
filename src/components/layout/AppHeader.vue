@@ -72,11 +72,21 @@
               <li>
                 <font-awesome-icon :icon="eqStatCdData.icon" :class="eqStatCdData.class"/>
               </li>
-              <li class="oliCount" @click="openLayer" :title="'oilCount: ' + (oilCountData || 0)">
-                <font-awesome-icon :icon="['fas', 'droplet']"/>
+              <li class="oilCount-wrapper" @click="openLayer">
+                <font-awesome-icon
+                    :icon="['fas', 'droplet']"
+                    @mouseenter="tooltipVisibleFunc('oilPrime', true)"
+                    @mouseleave="tooltipVisibleFunc('oilPrime', false)"
+                />
+                <Tooltip :isVisible="tooltipVisible.oilPrime" className="mb08" position="bottom" type="" :message="`OilCount: ${oilCountData || 0}`" />
               </li>
-              <li class="storage" :title="'storage: ' + (storagePercentData || 0)">
-                <font-awesome-icon :icon="['fas', 'database']"/>
+              <li class="storage">
+                <font-awesome-icon
+                    :icon="['fas', 'database']"
+                    @mouseenter="tooltipVisibleFunc('storage', true)"
+                    @mouseleave="tooltipVisibleFunc('storage', false)"
+                />
+                <Tooltip :isVisible="tooltipVisible.storage" className="mb08" position="bottom" type="" :message="`Storage: ${storagePercentData || 0}`" />
               </li>
             </ul>
           </div>
@@ -144,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import {LocationQueryValue, useRoute} from 'vue-router';
+import { useRoute } from 'vue-router';
 import {computed, getCurrentInstance, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 import router from "@/router";
@@ -155,7 +165,6 @@ import Alert from "@/components/commonUi/Alert.vue";
 import {tcpReq} from "@/common/tcpRequest/tcpReq";
 import Confirm from "@/components/commonUi/Confirm.vue";
 import EventBus from "@/eventBus/eventBus";
-import {getBrowserExit} from "@/common/api/service/browserExit/browserExitApi";
 import Button from "@/components/commonUi/Button.vue";
 import {getDateTimeStr} from "@/common/lib/utils/dateUtils";
 import {logoutApi} from "@/common/api/service/user/userApi";
@@ -163,6 +172,7 @@ import {getDeviceIpApi} from "@/common/api/service/device/deviceApi";
 import axios from "axios";
 import {SOUND_COMPLETE_ALARM, SOUND_ERROR_ALARM} from "@/common/lib/utils/assetUtils";
 import ProgressBar from "@/components/commonUi/ProgressBar.vue";
+import Tooltip from "@/components/commonUi/Tooltip.vue";
 
 const route = useRoute();
 const appHeaderLeftHidden = ref(false);
@@ -221,6 +231,10 @@ const autoStartTimer = ref(0);
 
 const formattedDate = computed(() => currentDate.value);
 const formattedTime = computed(() => currentTime.value);
+const tooltipVisible = ref({
+  oilPrime: false,
+  storage: false,
+})
 
 const updateDateTime = () => {
   const now = new Date();
@@ -530,5 +544,8 @@ const cellImgGet = async () => {
   }
 }
 
+const tooltipVisibleFunc = (type: 'oilPrime' | 'storage', visible: boolean) => {
+  tooltipVisible.value[type] = visible;
+}
 
 </script>

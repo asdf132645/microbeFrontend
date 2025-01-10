@@ -44,6 +44,7 @@ import {onCameraResetWebSocket, onGripperOpenWebSocket} from "@/common/lib/sendW
 import EventBus from "@/eventBus/eventBus";
 import {tcpReq} from "@/common/tcpRequest/tcpReq";
 import {remainingCount} from "@/common/api/service/setting/settingApi";
+import {getDeviceInfoApi, putDeviceInfoApi} from "@/common/api/service/device/deviceApi";
 
 const showAlert = ref(false);
 const alertType = ref('');
@@ -64,6 +65,7 @@ const autoStart = ref(false);
 onMounted(async () => {
   const newUserId = JSON.parse(JSON.stringify(userModuleDataGet.value));
   userId.value = newUserId.userId;
+  await getDeviceInfo();
 });
 
 watch([runInfo.value], async (newVals) => {
@@ -110,17 +112,30 @@ const onCameraReset = () => {
   }, 500);
 }
 
+const getDeviceInfo = async () => {
+  try {
+    const result = await getDeviceInfoApi()
+    autoStart.value = !!result.data[0]?.autoStart;
+  } catch (e) {
+    autoStart.value = true;
+  }
+  sessionStorage.setItem('autoStart', JSON.stringify(autoStart.value));
+}
+
+const updateDeviceInfo = async () => {
+  try {
+    await putDeviceInfoApi({ autoStart: autoStart.value })
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 const toggleAutoStart = async () => {
   autoStart.value = !autoStart.value;
   sessionStorage.setItem('autoStart', JSON.stringify(autoStart.value));
   await updateDeviceInfo();
 }
 
-const showSuccessAlert = (message: string) => {
-  showAlert.value = true;
-  alertType.value = MESSAGES.ALERT_TYPE_SUCCESS;
-  alertMessage.value = message;
-};
 const hideAlert = () => {
   showAlert.value = false;
 };

@@ -18,11 +18,7 @@ export const filterAvailableImageItems = (files: string[]) => {
         const baseName = fileName.split('.')[0];
 
         // 조건에 맞는 파일들이 모두 존재하는지 확인
-        if (
-            fileNameSet.has(`${baseName}.dzi`) &&
-            fileNameSet.has(`${baseName}.json`) &&
-            fileNameSet.has(`${baseName}_files`)
-        ) {
+        if (fileNameSet.has(`${baseName}.dzi`) && fileNameSet.has(`${baseName}_files`)) {
             // 모든 조건에 맞으면 해당 파일들을 추가
 
             if (fileNameSet.has(`${baseName}.bmp`)) validImageFileNames.add(`${baseName}.bmp`);

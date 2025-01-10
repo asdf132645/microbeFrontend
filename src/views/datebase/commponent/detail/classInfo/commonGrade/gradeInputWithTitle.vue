@@ -17,14 +17,14 @@
           <font-awesome-icon
               v-if="!checkedClasses[category?.classId]"
               :icon="['fas', 'eye-slash']"
-              @click="checkClassStatus(category?.classId, 'check')"
+              @click="checkClassStatus(category?.classId, 'check', category)"
               class="w20"
           />
           <font-awesome-icon
               v-else
               :icon="['fas', 'eye']"
               color="#29C7CA"
-              @click="checkClassStatus(category?.classId, 'disable')"
+              @click="checkClassStatus(category?.classId, 'disable', category)"
               class="w20"
           />
         </p>
@@ -56,11 +56,11 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, defineEmits, reactive, watch, computed, ref} from 'vue';
+import { defineProps, defineEmits, watch, computed, ref } from 'vue';
+import { useStore } from "vuex";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { GRADE_TEXT, MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
-import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
-import { useStore } from "vuex";
+import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 
 const store = useStore();
@@ -79,14 +79,13 @@ watch(() => selectItems.value, () => {
 })
 
 const checkGradeFunc = (beforeAfterGrade: string, gradeText: string) => {
-
   if (!props.grades.includes(GRADE_TEXT.EXIST)) {
     return checkGrade(gradeText, beforeAfterGrade);
   }
   return checkToggleGrade(beforeAfterGrade);
 }
 
-const checkClassStatus = (classId: string, type: 'check' | 'disable') => {
+const checkClassStatus = (classId: string, type: 'check' | 'disable', category: ClassInfoType) => {
   if (type === 'check') checkedClasses.value[classId] = true;
   else checkedClasses.value[classId] = false;
   const isChecked = type === 'check' ? true : false;

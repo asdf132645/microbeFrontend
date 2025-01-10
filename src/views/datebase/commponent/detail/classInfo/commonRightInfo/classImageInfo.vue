@@ -41,7 +41,7 @@ import { useStore } from "vuex";
 import { LocationQueryValue, useRoute } from "vue-router";
 import Alert from "@/components/commonUi/Alert.vue";
 import ClassDetailInfo from "@/views/datebase/commponent/detail/classInfo/commonRightInfo/classDetailInfo.vue";
-import {FOLDER_NAME, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
+import {FILE_NAME, FOLDER_NAME, MO_CATEGORY_CLASS_ID, POWER_MODE} from "@/common/defines/constFile/dataBase";
 import { MESSAGES } from "@/common/defines/constFile/constantMessageText";
 import { filterAvailableImageItems } from "@/common/lib/utils/checkUtils";
 import ClassInfoImageSlider
@@ -114,7 +114,7 @@ watch(() => currentImageName.value, async (curImgName) => {
   const getSelectItems = result.data;
   if (currentPowerType.value in powerModeToIdMap) {
     const updatedClassInfo = getSelectItems.classInfo.map((item: any) =>
-        item?.name && item.name.split('.')[0] === currentImageName.value.split('.')[0] && item.id === powerModeToIdMap[currentPowerType.value]
+        item?.name && item.name.split('.')[0] === currentImageName.value.split('.')[0] && String(item.id) === String(powerModeToIdMap[currentPowerType.value])
         ? { ...item, isWatched: true }
         : item);
 
@@ -219,12 +219,16 @@ const fetchImageJsonData = async (curImageName: string) => {
   if (!curImageName) return;
 
   const imageDriveRootPath = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
-  const folderName = currentPowerType.value === 'LP' ? FOLDER_NAME.LOW_POWER : FOLDER_NAME.HIGH_POWER;
-  const imageName = curImageName.split('.')[0];
-  const originJsonUrl = `${imageDriveRootPath}/${props.selectItems?.slotId}/${folderName}/${imageName}.json`;
+  const originJsonUrl = `${imageDriveRootPath}/${props.selectItems?.slotId}/${FILE_NAME.MO_INFO}`;
   try {
     const result = await readJsonFile({ fullPath: originJsonUrl });
-    classInfoPositionArr.value = result.data.classList;
+    if (result.data) {
+      const moInfoData = result.data.MOinfo;
+      const currentClassItem = moInfoData.filter((item) => String(item.id) !== '2' && item.fileName.split('.')[0] === curImageName.split('.')[0])[0];
+      classInfoPositionArr.value = currentClassItem.classList;
+    } else {
+      classInfoPositionArr.value = [];
+    }
   } catch (error) {
     console.error(error);
     classInfoPositionArr.value = [];
@@ -358,8 +362,6 @@ const fetchTileImagesInfo = async (folderPath: string) => {
     return acc;
   }, { files: [], images: [] });
 
-  console.log('sortedFileNames', sortedFileNames);
-
   sortedFileNames.files.sort((a: string, b: string) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
   sortedFileNames.images.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
   const { files: fileNamesEndsWithFiles, images: fileNamesWithImages } = sortedFileNames;
@@ -375,7 +377,7 @@ const fetchTileImagesInfo = async (folderPath: string) => {
     const targetId = powerModeToIdMap[currentPowerType.value];
     allImages.value = allImages.value.map((item: { url: string; imageName: string; index: number }) => {
       const matchedClassInfo = props.selectItems.classInfo.find(
-          (classInfoItem: any) => classInfoItem.id === targetId && classInfoItem.name.split('.')[0] === item.imageName.split('.')[0]
+          (classInfoItem: any) => String(classInfoItem.id) === String(targetId) && classInfoItem.name.split('.')[0] === item.imageName.split('.')[0]
       );
       return { ...item, isWatched: matchedClassInfo?.isWatched ?? false };
     });

@@ -497,6 +497,7 @@ main.content {
 
 .iconHeaderMenu > ul > li.storage {
     border-right: none;
+    position: relative;
 }
 
 .iconHeaderMenu > ul > li {
@@ -1496,14 +1497,6 @@ li.wbcTitleText p.firstP {
     margin-top: 10px;
 }
 
-.classDetailFont {
-    cursor: pointer;
-}
-
-.classDetailFont:hover {
-    transform: scale(1.1);
-}
-
 .classInfoWbc {
     display: flex !important;
     justify-content: space-evenly !important;
@@ -1885,7 +1878,8 @@ input.loginInput {
     transform: scale(1.1);
 }
 
-.oliCount {
+.oilCount-wrapper {
+    position: relative;
     cursor: pointer;
 }
 
