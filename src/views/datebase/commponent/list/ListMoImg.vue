@@ -81,7 +81,7 @@ const showImage = (imageName: string, index: number) => {
   const slotId = selectedItem.slotId || '';
   const path = selectedItem?.img_drive_root_path !== '' && selectedItem?.img_drive_root_path ? selectedItem?.img_drive_root_path : iaRootPath.value;
   const folderPath = `${path}/${slotId}/${FOLDER_NAME.LOW_POWER}`;
-  return `${apiBaseUrl}/images/getImageWbc?folder=${folderPath}&imageName=${imageName}`;
+  return `${apiBaseUrl}/images/getImageBySize?size=large&folder=${folderPath}&imageName=${imageName}`;
 }
 
 function hideImage(id: string, fileName: string) {

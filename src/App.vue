@@ -658,7 +658,7 @@ const convertMoInfo = (cassetteType: keyof typeof MO_TEST_TYPE, moInfo: MoInfoIn
       const gradeText = getSputumGrade(wbcCount, epCellCount);
       const sputumItem = {
         count: 0,
-        classId: '15',
+        classId: '90',
         beforeGrade: gradeText,
         afterGrade: gradeText,
       }
@@ -677,23 +677,23 @@ const convertMoInfo = (cassetteType: keyof typeof MO_TEST_TYPE, moInfo: MoInfoIn
 };
 
 const calcCount = (totalLPCount: number, totalHPCount: number, count: number, id: string, classId: string, cassetteType: string) => {
-  if (id === '2') {
+  if (String(id) === '2') {
     switch (cassetteType) {
       case MO_TEST_TYPE.URINE:
         if (URINE_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Number(count / totalLPCount) : 0;
+          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
         }
-        return Number(totalHPCount) > 0 ? Number(count / totalHPCount) : 0;
+        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
       case MO_TEST_TYPE.SPUTUM:
         if (SPUTUM_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Number(count / totalLPCount) : 0;
+          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
         }
-        return Number(totalHPCount) > 0 ? Number(count / totalHPCount) : 0;
+        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
       case MO_TEST_TYPE.BLOOD:
         if (BLOOD_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Number(count / totalLPCount) : 0;
+          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
         }
-        return Number(totalHPCount) > 0 ? Number(count / totalHPCount) : 0;
+        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
     }
   }
   return Number(count);

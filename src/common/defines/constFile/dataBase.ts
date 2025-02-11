@@ -1,8 +1,8 @@
 export const TEST_TYPE = [
     { value: '00', text: 'Urine' },
-    { value: '01', text: 'Blood' },
-    { value: '02', text: 'Sputum' },
-    { value: '03', text: 'Sputum' },
+    { value: '01', text: 'Sputum' },
+    { value: '02', text: 'Blood' },
+    { value: '03', text: 'Body Fluid' },
 ];
 
 export const FOUR_GRADES = ['Rare', 'Few', 'Moderate', 'Many'];
@@ -26,9 +26,9 @@ export const GRADE_TEXT = {
 
 export const SPUTUM_GRADES = {
     GRADES: ['1', '2', '3-1', '3-2', '4-1', '4-2', '5', '6'],
-    EPCELL_GRADES: ['> 25', '> 25', '> 25', '> 25', '10 ~ 25', '10 ~ 25', '< 10', '< 10'],
-    WBC_GRADES: ['< 10', '10 ~ 25', '> 25', '> 25', '> 25', '> 25', '> 25', '< 10'],
-    WBC_EPCELL_RATIO_GRADES: ['', '', 'x10 ↓', 'x10 ↑', 'x10 ↓', 'x10 ↑', '', ''],
+    EPCELL_GRADES: ['>25', '>25', '>25', '>25', '10-25', '10-25', '<10', '<10'],
+    WBC_GRADES: ['<10', '10-25', '>25', '>25', '>25', '>25', '>25', '<10'],
+    WBC_EPCELL_RATIO_GRADES: ['', '', 'x10↓', 'x10↑', 'x10↓', 'x10↑', '', ''],
     COLUMNS: ['Sputum', 'EP Cell', 'WBC', 'WBC/EP Cell']
 }
 
@@ -106,6 +106,7 @@ export const CLASS_INFO_ID = {
     GPB_LARGE: '12',
     GNDC: '13',
     GNCB: '14',
+    SPUTUM: '90',
 }
 
 export const MAP_CLASS_ID_TO_CLASS_NM = Object.fromEntries(
@@ -144,13 +145,13 @@ export const URINE_LOW_POWER_CLASS_IDS = [CLASS_INFO_ID.WBC];
 
 export const URINE_HIGH_POWER_CLASS_IDS = [CLASS_INFO_ID.GPC, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB, CLASS_INFO_ID.YEAST];
 
-export const SPUTUM_LOW_POWER_CLASS_IDS = [CLASS_INFO_ID.WBC, CLASS_INFO_ID.EP_CELL, CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE];
+export const SPUTUM_LOW_POWER_CLASS_IDS = [CLASS_INFO_ID.WBC, CLASS_INFO_ID.EP_CELL];
 
-export const SPUTUM_HIGH_POWER_CLASS_IDS = [CLASS_INFO_ID.GPC, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB, CLASS_INFO_ID.GNDC];
+export const SPUTUM_HIGH_POWER_CLASS_IDS = [CLASS_INFO_ID.GPC, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB, CLASS_INFO_ID.GNDC, CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE];
 
-export const BLOOD_LOW_POWER_CLASS_IDS = [CLASS_INFO_ID.YEAST];
+export const BLOOD_LOW_POWER_CLASS_IDS = [];
 
-export const BLOOD_HIGH_POWER_CLASS_IDS = [CLASS_INFO_ID.GPC_CLUSTERS, CLASS_INFO_ID.GPC_PAIRS, CLASS_INFO_ID.GPC_CHAINS, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB_SMALL, CLASS_INFO_ID.GPB_LARGE, CLASS_INFO_ID.GNDC, CLASS_INFO_ID.GNCB];
+export const BLOOD_HIGH_POWER_CLASS_IDS = [CLASS_INFO_ID.GPC_CLUSTERS, CLASS_INFO_ID.GPC_PAIRS, CLASS_INFO_ID.GPC_CHAINS, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB_SMALL, CLASS_INFO_ID.GPB_LARGE, CLASS_INFO_ID.GNDC, CLASS_INFO_ID.GNCB, CLASS_INFO_ID.YEAST];
 
 export const URINE_TOTAL_CLASS_IDS = [...URINE_HIGH_POWER_CLASS_IDS, ...URINE_LOW_POWER_CLASS_IDS];
 

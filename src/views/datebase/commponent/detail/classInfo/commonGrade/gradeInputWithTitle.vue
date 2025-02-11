@@ -11,8 +11,8 @@
     <tbody>
     <tr v-for="category in classInfo" :key="category?.classId">
       <td></td>
-      <td class="classDetail-gradeTitle">
-        {{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}
+      <td class="classDetail-gradeTitle-wrapper">
+        <p class="classDetail-gradeTitle">{{ MAP_CLASS_ID_TO_CLASS_NM[category?.classId] }}</p>
         <p v-if="isCheckable" class="ml12 cursor-pointer">
           <font-awesome-icon
               v-if="!checkedClasses[category?.classId]"

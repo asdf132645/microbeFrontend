@@ -136,8 +136,8 @@ watch([embeddedStatusJobCmd.value, executeState.value], async (newVals) => {
     isInit: newIsInit,
   } = newEmbeddedStatusJobCmd || {};
 
-  if (is100A.value && Number(newEmbeddedStatusJobCmd.sysInfo.autoStart)) {
-    toggleStartStop('start', 'autoStart');
+  if (is100A.value && Number(newEmbeddedStatusJobCmd.sysInfo.autoStart) && !isRunningState.value) {
+    toggleStartStop('start');
   }
 
   isPause.value = newIsPause;
@@ -175,7 +175,7 @@ const emitSocketData = async (type: string, payload: any) => {
   EventBus.publish('childEmitSocketData', payload);
 };
 
-const toggleStartStop = (action: 'start' | 'stop', autoStart = '') => {
+const toggleStartStop = (action: 'start' | 'stop') => {
   if (viewerCheck.value !== 'main' && window.FORCE_VIEWER !== 'main') return;
 
   if (action === 'start') {
@@ -186,7 +186,7 @@ const toggleStartStop = (action: 'start' | 'stop', autoStart = '') => {
       return;
     }
     // 실행 여부 체크
-    if (isRunningState.value && autoStart !== 'autoStart') {
+    if (isRunningState.value) {
       showSuccessAlert(MESSAGES.IDS_ERROR_ALREADY_RUNNING);
       return;
     } else if (userStop.value) {
@@ -195,15 +195,24 @@ const toggleStartStop = (action: 'start' | 'stop', autoStart = '') => {
       return;
     }
 
+    let reqAutoStart;
+    let autoStart = sessionStorage.getItem('autoStart');
+    if (autoStart === 'true') {
+      reqAutoStart = 1;
+    } else if (autoStart === 'false') {
+      reqAutoStart = 0;
+    }
+
     let startAction = tcpReq().embedStatus.startAction;
+
     Object.assign(startAction, {
       testType: '06',
       LPCount: lpCaptureCount.value,
       reqUserId: userId.value,
     });
 
-    if (is100A.value) {
-      Object.assign(startAction, { autoStart: Number(autoStart) });
+    if (is100A.value && !isRunningState.value) {
+      Object.assign(startAction, { autoStart: Number(reqAutoStart) });
     }
 
     if (isInit.value === 'Y') { // 초기화 여부 체크 초기화가 되어있는 상태이면 실행

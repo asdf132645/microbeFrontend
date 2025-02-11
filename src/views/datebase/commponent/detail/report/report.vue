@@ -78,7 +78,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(item) in moInfo" :key="item.id" class="wbcClassDbDiv">
+            <tr v-for="(item) in sortedMoInfo" :key="item.classId" class="wbcClassDbDiv">
               <td>{{ MAP_CLASS_ID_TO_CLASS_NM[item?.classId] }}</td>
               <td>{{ item?.afterGrade }}</td>
             </tr>
@@ -105,9 +105,13 @@ import { formatDateString } from "@/common/lib/utils/dateUtils";
 import ClassInfoMenu from "@/views/datebase/commponent/detail/classInfoMenu.vue";
 import { MAP_CLASS_ID_TO_CLASS_NM } from "@/common/defines/constFile/dataBase";
 import DetailHeader from "@/views/datebase/commponent/detail/detailHeader.vue";
+import { reClassification } from "@/common/lib/utils/reClassification";
+import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
+import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 
 const store = useStore();
-const moInfo = ref<any>(null);
+const moInfo = ref<ClassInfoType[]>([]);
+const sortedMoInfo = ref<ClassInfoType[]>([]);
 const printOnOff = ref(false);
 const selectItems = computed(() => store.state.commonModule.currentSelectItems);
 const instance = getCurrentInstance();
@@ -147,8 +151,12 @@ const printStart = (event: MouseEvent) => {
 
 const initData = async () => {
   if (selectItems.value?.classInfo && selectItems.value?.classInfo.length !== 0) {
-    moInfo.value = selectItems.value?.classInfo.find((item: any) => item.id === '2').classInfo;
+    moInfo.value = selectItems.value?.classInfo.find((item: any) => String(item.id) === '2')?.classInfo;
     totalCount.value = getTotalCountOfClassInfo(moInfo.value);
+    sortedMoInfo.value = reClassification(moInfo.value);
+    if (isObjectEmpty(sortedMoInfo.value)) {
+      sortedMoInfo.value = [];
+    }
   }
 };
 
