@@ -14,7 +14,9 @@
           />
         </SplideSlide>
       </Splide>
-      <p class="infoImage-imageIndex-wrapper">{{ imageIndex }} / {{ allImages.length }}</p>
+      <p class="infoImage-imageIndex-wrapper">
+        {{ imageIndex }} / {{ allImages.length }}
+      </p>
     </template>
     <div v-else>No images available</div>
   </div>
@@ -72,7 +74,8 @@ const getImageFolder = async () => {
   const folderPath = `${path}/${slotId}/${FOLDER_NAME.LOW_POWER}`;
   const result = await fetch(`${apiBaseUrl}/folders?folderPath=${folderPath}`);
   const imageNames = await result.json()
-  allImages.value = filterImageFiles(imageNames);
+  const imageFolderNames = filterImageFiles(imageNames);
+  allImages.value = imageFolderNames.map((item) => item + '/9/0_0.jpg');
 }
 
 const showImage = (imageName: string, index: number) => {

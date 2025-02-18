@@ -20,7 +20,9 @@
         <ClassDetailInfo :selectItems="selectItems" @checkedClassSet="checkedClassSetFunc" />
       </div>
 
-      <ClassInfoImageSlider :allImages="allImages" @goToSelectImage="goToSelectImage" />
+      <template v-if="isTileImageLoaded">
+        <ClassInfoImageSlider :allImages="allImages" @goToSelectImage="goToSelectImage" />
+      </template>
     </div>
 
   </div>
@@ -78,34 +80,28 @@ const powerModeToIdMap = {
   [POWER_MODE.LOW_POWER]: '0',
   [POWER_MODE.HIGH_POWER]: '1',
 };
+const isTileImageLoaded = ref(false);
 
-const checkAndInitialize = async () => {
-  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
-  if (tilingViewerLayer) {
-    tilingViewerLayer.innerHTML = '';
-    if (viewer.value) viewer.value.destroy();
-    await initElement();
-  }
-  await fetchImageJsonData(currentImageName.value);
-};
-
-watch(() => currentPowerType.value, async (newValue, oldValue) => {
-  if (newValue === oldValue || refreshClass.value) return;
-  await nextTick();
+onMounted(async () => {
   await checkAndInitialize();
-});
-
-watch(() => props.selectItems, async (newValue, oldValue) => {
-  if (newValue === oldValue || refreshClass.value) return;
-  await nextTick();
-  await checkAndInitialize();
-});
-
-watch(() => refreshClass.value, async () => {
-  if (!refreshClass.value) {
-    await checkAndInitialize();
-  }
 })
+
+watch([() => currentPowerType.value, () => refreshClass.value], async () => {
+  if (refreshClass.value) return;
+  await checkAndInitialize();
+});
+
+// watch(() => props.selectItems, async (newValue, oldValue) => {
+//   if (newValue === oldValue || refreshClass.value) return;
+//   await nextTick();
+//   await checkAndInitialize();
+// });
+
+// watch(() => refreshClass.value, async () => {
+//   if (!refreshClass.value) {
+//     await checkAndInitialize();
+//   }
+// })
 
 watch(() => currentImageName.value, async (curImgName) => {
   await fetchImageJsonData(curImgName);
@@ -127,6 +123,16 @@ watch(() => currentImageName.value, async (curImgName) => {
   }
 })
 
+const checkAndInitialize = async () => {
+  const tilingViewerLayer = document.getElementById('tiling-viewer_img_list');
+  if (tilingViewerLayer) {
+    tilingViewerLayer.innerHTML = '';
+    if (viewer.value) viewer.value.destroy();
+    await initElement();
+  }
+  await fetchImageJsonData(currentImageName.value);
+};
+
 const initElement = async () => {
   const rootPath = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
   const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
@@ -134,6 +140,8 @@ const initElement = async () => {
   const tilesInfo = await fetchTileImagesInfo(folderPath);
 
   if (!tilesInfo || tilesInfo.length === 0) return;
+
+  isTileImageLoaded.value = false;
 
   try {
     viewer.value = OpenSeadragon({
@@ -143,7 +151,8 @@ const initElement = async () => {
       sequenceMode: true,
       preload: true,
       defaultZoomLevel: 1,
-      imageLoaderLimit: 5,
+      imageLoaderLimit: 10,
+      immediateRender: false,
       prefixUrl: openseadragonPrefixUrl(apiBaseUrl),
       tileSources: tilesInfo,
       showSequenceControl: true,
@@ -157,29 +166,24 @@ const initElement = async () => {
       viewportMargins: {top: 0, left: 0, bottom: 0, right: 0}, // 뷰포트 여백 설정
       visibilityRatio: 1.0,
       useCanvas: true,
-      immediateRender: true
-
     });
 
     // 캔버스 오버레이 생성 및 추가
     const canvas = document.createElement('canvas');
+    canvas.id = 'myCanvas';
+    canvasOverlay.value = canvas;
     const overlay = viewer.value.addOverlay({
       element: canvas,
       location: new OpenSeadragon.Rect(0, 0, 1, 1), // 캔버스가 뷰어 전체를 덮도록 설정
     });
-    canvas.id = 'myCanvas';
-    canvasOverlay.value = canvas;
 
     viewer.value.addHandler('open', async (event: any) => {
       await store.dispatch('commonModule/setCommonInfo', { currentImageName: event.source.Image.imageName });
-
-      // 캔버스 크기를 조정
       canvas.width = event.source.Image.Size.Width;
       canvas.height = event.source.Image.Size.Height;
     });
 
     const fullPageButton = viewer.value.buttonGroup.buttons.find((button: any) => button.tooltip === 'Toggle full page');
-
     if (fullPageButton) {
       fullPageButton.element.addEventListener('click', async () => {
         if (viewer.value.isFullPage()) {
@@ -190,6 +194,10 @@ const initElement = async () => {
         }
       });
     }
+
+    viewer.value.addHandler('tile-drawing', () => {
+      isTileImageLoaded.value = true;
+    });
 
     viewer.value.addHandler('full-page', async (event: any) => {
       if (!event.fullPage) {
@@ -224,8 +232,17 @@ const fetchImageJsonData = async (curImageName: string) => {
     const result = await readJsonFile({ fullPath: originJsonUrl });
     if (result.data) {
       const moInfoData = result.data.MOinfo;
-      const currentClassItem = moInfoData.filter((item) => String(item.id) !== '2' && item.fileName.split('.')[0] === curImageName.split('.')[0])[0];
-      classInfoPositionArr.value = currentClassItem.classList;
+      let currentClassItem = [];
+      if (currentPowerType.value === 'LP') {
+        currentClassItem = moInfoData.filter((item) => {
+          return String(item.id) === '0' && item.fileName.split('.')[0] === curImageName.split('.')[0]
+        })[0];
+      } else if (currentPowerType.value === 'HP') {
+        currentClassItem = moInfoData.filter((item) => {
+          return String(item.id) === '1' && item.fileName.split('.')[0] === curImageName.split('.')[0]
+        })[0];
+      }
+      classInfoPositionArr.value = currentClassItem?.classList ?? [];
     } else {
       classInfoPositionArr.value = [];
     }
@@ -233,6 +250,84 @@ const fetchImageJsonData = async (curImageName: string) => {
     console.error(error);
     classInfoPositionArr.value = [];
   }
+}
+
+const dziWidthHeight = async (imageFileName: string): Promise<any> => {
+  const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
+  const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
+  const dziUrl = `${path}/${props.selectItems.slotId}/${powerFolderName}/${imageFileName}.dzi`;
+  const imageResponse = await readDziFile({ filePath: dziUrl });
+  return await extractWidthHeightFromDzi(imageResponse);
+}
+
+const extractWidthHeightFromDzi = (xmlString: any): any => {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+  const sizeElement = xmlDoc.getElementsByTagName("Size")[0];
+  const tileSizeEl = xmlDoc.getElementsByTagName('Image')[0];
+  const tileSize = tileSizeEl.getAttribute("TileSize");
+  const width = sizeElement.getAttribute("Width");
+  const height = sizeElement.getAttribute("Height");
+  return { width: Number(width), height: Number(height), tileSize: Number(tileSize) }
+}
+
+const extractSubStringBeforeFiles = (str: string) => {
+  const searchString = '_files';
+  const endIndex = str.indexOf(searchString);
+  if (endIndex !== -1) return str.substring(0, endIndex);
+  return str;
+}
+
+const fetchTileImagesInfo = async (folderPath: string) => {
+  const url = `${apiBaseUrl}/folders?folderPath=${folderPath}`;
+  const imageUrl = `${apiBaseUrl}/images/getImageBySize?size=small&folder=${folderPath}`;
+  const response = await fetch(url);
+  if (!response.ok) return;
+
+  const fileNames = await response.json();
+  const availableFileNames = filterAvailableImageItems(fileNames) as string[];
+
+  const sortedFileNames = availableFileNames.reduce((acc: { files: string[], images: string[] }, fileName: string) => {
+    if (fileName.endsWith('_files')) acc.files.push(fileName);
+    else if (fileName.endsWith('.jpg') || fileName.endsWith('.bmp')) acc.images.push(fileName);
+    return acc;
+  }, { files: [], images: [] });
+
+  sortedFileNames.files.sort((a: string, b: string) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
+  sortedFileNames.images.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
+  const { files: fileNamesEndsWithFiles, images: fileNamesWithImages } = sortedFileNames;
+
+  allImages.value = fileNamesEndsWithFiles
+      .map((imageSource, index) => ({
+        url: `${imageUrl}&imageName=${imageSource}/7/0_0.jpg`,
+        imageName: imageSource,
+        index,
+      }))
+
+  if (currentPowerType.value in powerModeToIdMap) {
+    const targetId = powerModeToIdMap[currentPowerType.value];
+    allImages.value = allImages.value.map((item: { url: string; imageName: string; index: number }) => {
+      const matchedClassInfo = props.selectItems.classInfo.find(
+          (classInfoItem: any) => String(classInfoItem.id) === String(targetId) && classInfoItem.name.split('.')[0] === item.imageName.split('_')[0]
+      );
+      return { ...item, isWatched: matchedClassInfo?.isWatched ?? false };
+    });
+  }
+
+  const { width, height, tileSize } = await dziWidthHeight('0');
+  return await Promise.all(
+      sortedFileNames.files.map(async (fileName) => ({
+        Image: {
+          xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+          Url: `${apiBaseUrl}/folders?folderPath=${folderPath}/${fileName}/`,
+          Format: "jpg",
+          Overlap: "1",
+          TileSize: tileSize,
+          imageName: `${extractSubStringBeforeFiles(fileName)}.jpg`,
+          Size: { Width: width, Height: height }
+        }
+      }))
+  );
 }
 
 const checkedClassSetFunc = (checkedClassSet: Set<string>) => {
@@ -321,93 +416,6 @@ const drawClassPosCanvas = (classInfoArr: any) => {
     }
   }
 };
-
-const dziWidthHeight = async (imageFileName: string): Promise<any> => {
-  const path = props.selectItems?.img_drive_root_path !== '' && props.selectItems?.img_drive_root_path ? props.selectItems?.img_drive_root_path : iaRootPath.value;
-  const powerFolderName = currentPowerType.value === POWER_MODE.HIGH_POWER ? FOLDER_NAME.HIGH_POWER : FOLDER_NAME.LOW_POWER;
-  const dziUrl = `${path}/${props.selectItems.slotId}/${powerFolderName}/${imageFileName}.dzi`;
-  const imageResponse = await readDziFile({ filePath: dziUrl });
-  return await extractWidthHeightFromDzi(`${imageFileName}.jpg`, imageResponse);
-}
-
-const extractWidthHeightFromDzi = (fileName: string, xmlString: any): any => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-  const sizeElement = xmlDoc.getElementsByTagName("Size")[0];
-  const tileSizeEl = xmlDoc.getElementsByTagName('Image')[0];
-  const tileSize = tileSizeEl.getAttribute("TileSize");
-  const width = sizeElement.getAttribute("Width");
-  const height = sizeElement.getAttribute("Height");
-  return {fileName, width: Number(width), height: Number(height), tileSize: Number(tileSize)}
-}
-
-const extractSubStringBeforeFiles = (str: string) => {
-  const searchString = '_files';
-  const endIndex = str.indexOf(searchString);
-  if (endIndex !== -1) return str.substring(0, endIndex);
-  return str;
-}
-
-const fetchTileImagesInfo = async (folderPath: string) => {
-  const url = `${apiBaseUrl}/folders?folderPath=${folderPath}`;
-  const response = await fetch(url);
-  if (!response.ok) return;
-
-  const fileNames = await response.json();
-  const availableFileNames = filterAvailableImageItems(fileNames) as string[];
-
-  const sortedFileNames = availableFileNames.reduce((acc: { files: string[], images: string[] }, fileName: string) => {
-    if (fileName.endsWith('_files')) acc.files.push(fileName);
-    else if (fileName.endsWith('.jpg') || fileName.endsWith('.bmp')) acc.images.push(fileName);
-    return acc;
-  }, { files: [], images: [] });
-
-  sortedFileNames.files.sort((a: string, b: string) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
-  sortedFileNames.images.sort((a: string, b: string) => Number(a.split('.')[0]) - Number(b.split('.')[0]));
-  const { files: fileNamesEndsWithFiles, images: fileNamesWithImages } = sortedFileNames;
-
-  allImages.value = fileNamesWithImages
-      .map((imageSource, index) => ({
-        url: `${url}\\${imageSource}`,
-        imageName: imageSource,
-        index,
-      }))
-
-  if (currentPowerType.value in powerModeToIdMap) {
-    const targetId = powerModeToIdMap[currentPowerType.value];
-    allImages.value = allImages.value.map((item: { url: string; imageName: string; index: number }) => {
-      const matchedClassInfo = props.selectItems.classInfo.find(
-          (classInfoItem: any) => String(classInfoItem.id) === String(targetId) && classInfoItem.name.split('.')[0] === item.imageName.split('.')[0]
-      );
-      return { ...item, isWatched: matchedClassInfo?.isWatched ?? false };
-    });
-  }
-
-  const tilesInfo = await Promise.all(
-      fileNamesEndsWithFiles
-          .map(async (fileName: string) => {
-            const fileNameResult = extractSubStringBeforeFiles(fileName);
-            const { width, height, tileSize, fileName: imageFileName } = await dziWidthHeight(fileNameResult);
-
-            return {
-              Image: {
-                xmlns: "http://schemas.microsoft.com/deepzoom/2009",
-                Url: `${apiBaseUrl}/folders?folderPath=${folderPath}/${fileName}/`,
-                Format: "jpg",
-                Overlap: "1",
-                TileSize: tileSize,
-                imageName: imageFileName,
-                Size: {
-                  Width: width,
-                  Height: height
-                }
-              }
-            }
-          })
-  )
-
-  return tilesInfo;
-}
 
 const goToSelectImage = async (imageIndex: number) => {
   viewer.value.goToPage(imageIndex);

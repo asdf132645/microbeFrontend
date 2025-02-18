@@ -8,7 +8,6 @@
 
     <template v-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.BLOOD) && !isObjectEmpty(moInfo)">
       <GradeBox
-          title="Fungi"
           :grades="[GRADE_TEXT.EXIST]"
           :totalClassInfo="moInfo"
           :updateGrade="updateGrade"
@@ -28,15 +27,14 @@
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.URINE) && !isObjectEmpty(moInfo)">
       <div class="classDetailInfoWrapper" v-for="category in moInfo?.classInfo" :key="category.classId">
-        <h1 class="classInfoClassTitle mb4">{{ getClassTitle(category.classId)  }}</h1>
-        <GradeInputWithTitle
-            v-if="category.classId === CLASS_INFO_ID.WBC"
-            :isCheckable="true"
-            @classCheck="classCheck"
+        <GradeBox
+            title="Cell"
             :grades="FOUR_GRADES"
-            :moInfo="moInfo"
-            @updateGrade="updateGrade"
+            :totalClassInfo="moInfo"
+            :updateGrade="updateGrade"
             :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.WBC])"
+            :isCheckable="true"
+            :classCheck="classCheck"
         />
       </div>
     </template>
@@ -53,7 +51,6 @@
       />
 
       <GradeBox
-          title="Fungi"
           :grades="[GRADE_TEXT.EXIST]"
           :totalClassInfo="moInfo"
           :updateGrade="updateGrade"
@@ -64,68 +61,79 @@
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.LOW_POWER, MO_TEST_TYPE.SPUTUM)  && !isObjectEmpty(moInfo)">
-      <h1 class="classInfoClassTitle mt24">Sputum</h1>
+      <h1 class="classInfoClassTitle mt24">Grade</h1>
 
-      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
-        <table class="no-css-table">
+      <div class="classDetailInfoWrapper" v-for="category in moInfo.classInfo.filter((item: any) => item.classId === '90')" :key="category.classId">
+        <table class="sputum-table">
             <thead>
               <th></th>
-              <th v-for="column in SPUTUM_GRADES.GRADES" :key="column" width="10%;">{{ column }}</th>
+              <th v-for="column in SPUTUM_GRADES.GRADES" :key="column" width="10%;" style="margin-bottom: 4px; border-collapse: collapse">{{ column }}</th>
             </thead>
             <colgroup>
-              <col width="2%" />
-              <col width="4%" />
-              <col width="16%" />
-              <col width="6%" />
-              <col width="10%" />
-              <col width="6%" />
-              <col width="16%" />
-              <col width="18%" />
+              <col width="12%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
+              <col width="11%" />
             </colgroup>
             <tbody>
               <tr>
-                <td class="text-left">Sputum</td>
+                <td class="fs08" style="border: none;">
+                  <font-awesome-icon
+                      v-if="!checkedClasses[category?.classId]"
+                      :icon="['fas', 'eye-slash']"
+                      @click="checkClassStatus(category?.classId, 'check', category)"
+                      class="w20 cursor-pointer"
+                      size="lg"
+                  />
+                  <font-awesome-icon
+                      v-else
+                      :icon="['fas', 'eye']"
+                      color="#29C7CA"
+                      @click="checkClassStatus(category?.classId, 'disable', category)"
+                      class="w20 cursor-pointer"
+                      size="lg"
+                  />
+                </td>
                 <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
-                  <td @click="handleGradeClick(moInfo, category.classId, grade)">
+                  <td @click="handleGradeClick(moInfo, category.classId, grade)" class="text-center relative" style="border-top: none;">
                     <font-awesome-icon
                         class="grade-dot-wrapper top-half"
                         :icon="['fac', 'half-circle-down']"
-                        size="lg"
                         :class="{ 'active-before': checkGrade(category.beforeGrade, grade)}"
+                        style="transform: translate(-50%, -20%)"
+                        size="lg"
                     />
                     <font-awesome-icon
                         class="grade-dot-wrapper bottom-half"
                         :icon="['fac', 'half-circle-up']"
-                        size="lg"
                         :class="{ 'active-after': checkGrade(category.afterGrade, grade)}"
+                        style="transform: translate(-50%, -20%)"
+                        size="lg"
                     />
                   </td>
                 </template>
 
               </tr>
               <tr>
-                <td class="fs08">EP Cell</td>
-                <td v-for="column in SPUTUM_GRADES.EPCELL_GRADES" :key="column" style="font-size: 0.8rem;">{{ column }}</td>
+                <td class="fs10" style="border: none; text-align: left">{{ SPUTUM_GRADES.COLUMNS[1] }}</td>
+                <td class="fs10" v-for="column in SPUTUM_GRADES.EPCELL_GRADES" :key="column">{{ column }}</td>
               </tr>
               <tr>
-                <td class="fs08">WBC</td>
-                <td v-for="column in SPUTUM_GRADES.WBC_GRADES" :key="column" style="font-size: 0.8rem;">{{ column }}</td>
+                <td class="fs10" style="border: none; text-align: left">{{ SPUTUM_GRADES.COLUMNS[2] }}</td>
+                <td class="fs10" v-for="column in SPUTUM_GRADES.WBC_GRADES" :key="column">{{ column }}</td>
               </tr>
               <tr>
-                <td class="fs08">WBC / EP Cell</td>
-                <td v-for="column in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="column" style="font-size: 0.8rem;">{{ column }}</td>
+                <td class="fs09" style="border: none; text-align: left">{{ SPUTUM_GRADES.COLUMNS[3] }}</td>
+                <td class="fs10" v-for="column in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="column" style="vertical-align: center; border-bottom: none;">{{ column }}</td>
               </tr>
             </tbody>
       </table>
       </div>
-
-      <h1 class="classInfoClassTitle mt24">Yeast</h1>
-      <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)" />
-
-      <h1 class="classInfoClassTitle">Hyphae</h1>
-      <div class="classInfoHorizontalRule"></div>
-      <GradeInputNoTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfo" @updateGrade="updateGrade" :classInfo="moInfo?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.HYPHAE)" />
     </template>
 
     <template v-else-if="showingByPowerAndAnalysisType(POWER_MODE.HIGH_POWER, MO_TEST_TYPE.SPUTUM) && !isObjectEmpty(moInfo)">
@@ -134,7 +142,16 @@
           :grades="FOUR_GRADES"
           :totalClassInfo="moInfo"
           :updateGrade="updateGrade"
-          :classInfo="moInfo?.classInfo"
+          :classInfo="filterClassInfoByClassIds(detailClassInfo, 'delete', [CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE])"
+          :isCheckable="true"
+          :classCheck="classCheck"
+      />
+
+      <GradeBox
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfo"
+          :updateGrade="updateGrade"
+          :classInfo="filterClassInfoByClassIds(detailClassInfo, 'include', [CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE])"
           :isCheckable="true"
           :classCheck="classCheck"
       />
@@ -171,8 +188,6 @@ import {
 import {useStore} from "vuex";
 import {updateRunningApi} from "@/common/api/service/runningInfo/runningInfoApi";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
-import GradeInputNoTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputNoTitle.vue";
 import {ClassInfoType} from "@/common/api/service/runningInfo/runningInfo.dto";
 import Toast from "@/components/commonUi/Toast.vue";
 import {MSG_TOAST, TOAST_MSG_TYPE} from "@/common/defines/constFile/constantMessageText";
@@ -192,6 +207,7 @@ const checkedClassSet = ref<Set<string>>(new Set());
 const detailMemo = ref('');
 const toastMessage = ref('');
 const toastMessageType = ref(TOAST_MSG_TYPE.SUCCESS);
+const checkedClasses = ref<any>({});
 
 watch(() => props.selectItems, async (newSelectItems) => {
   await nextTick();
@@ -220,19 +236,8 @@ watch(() => currentImageName.value, async () => {
   }
 })
 
-const getClassTitle = (classInfoId: string) => {
-  switch (classInfoId) {
-    case CLASS_INFO_ID.WBC:
-      return 'Cell';
-    case CLASS_INFO_ID.YEAST:
-      return 'Fungi';
-    default:
-      return 'Bacteria';
-  }
-}
-
 const getMoInfo = (selectItems: any, pageType: string) => {
-  if (currentImageName.value === '' || !currentImageName.value || !selectItems) return;
+  // if (currentImageName.value === '' || !currentImageName.value || !selectItems) return;
 
   const imageName = currentImageName.value.split('.')[0];
   if (pageType === POWER_MODE.LOW_POWER) {
@@ -260,6 +265,13 @@ const classCheck = ({ classId, isChecked }: { classId: string, isChecked: boolea
   if (isChecked) checkedClassSet.value.add(classId);
   else checkedClassSet.value.delete(classId);
   emits('checkedClassSet', checkedClassSet.value);
+}
+
+const checkClassStatus = (classId: string, type: 'check' | 'disable', category: ClassInfoType) => {
+  if (type === 'check') checkedClasses.value[classId] = true;
+  else checkedClasses.value[classId] = false;
+  const isChecked = type === 'check' ? true : false;
+  classCheck({ classId, isChecked });
 }
 
 const showingByPowerAndAnalysisType = (powerType: string, analysisType: string) => {

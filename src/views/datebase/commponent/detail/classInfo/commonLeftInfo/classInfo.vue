@@ -46,108 +46,116 @@
   <div class="classInfoDetailContainer">
     <div v-if="currentAnalysisType === MO_TEST_TYPE.BLOOD && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
       <GradeBox
-          title="Cell"
+          title="Cell (LP)"
           :grades="[GRADE_TEXT.EXIST]"
           :totalClassInfo="moInfoTotal"
           :updateGrade="updateGrade"
-          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST)"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'delete', [CLASS_INFO_ID.YEAST])"
       />
       <GradeBox
-          title="Cell"
           :grades="[GRADE_TEXT.EXIST]"
           :totalClassInfo="moInfoTotal"
           :updateGrade="updateGrade"
-          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'include', [CLASS_INFO_ID.YEAST])"
       />
     </div>
 
-
     <div v-else-if="currentAnalysisType === MO_TEST_TYPE.URINE && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
       <GradeBox
-          title="Cell"
+          title="Cell (LP)"
           :grades="FOUR_GRADES"
           :totalClassInfo="moInfoTotal"
           :updateGrade="updateGrade"
-          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.WBC)"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'include', [CLASS_INFO_ID.WBC])"
       />
       <GradeBox
-          title="Bacteria"
+          title="Bacteria (HP)"
           :grades="FOUR_GRADES"
           :totalClassInfo="moInfoTotal"
           :updateGrade="updateGrade"
-          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId !== CLASS_INFO_ID.YEAST && item.classId !== CLASS_INFO_ID.WBC)"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'delete', [CLASS_INFO_ID.WBC, CLASS_INFO_ID.YEAST])"
       />
       <GradeBox
-          title="Fungi"
           :grades="[GRADE_TEXT.EXIST]"
           :totalClassInfo="moInfoTotal"
           :updateGrade="updateGrade"
-          :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST)"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'include', [CLASS_INFO_ID.YEAST])"
       />
     </div>
 
     <div v-else-if="currentAnalysisType === MO_TEST_TYPE.SPUTUM && !isObjectEmpty(moInfoTotal)" class="classInfo-grade-wrapper">
-      <div class="w-full flex-align-center-justify-start" v-for="category in moInfoTotal" :key="category.classId">
-        <template v-if="category.classId === '15'">
-          <div class="classDetailInfoWrapper w-full" v-for="category in moInfoTotal?.classInfo.filter((item: any) => item.classId === '15')" :key="category.classId">
-            <table class="no-css-table">
-              <thead>
-                <th></th>
-                <th v-for="column in SPUTUM_GRADES.GRADES" :key="column" width="8%;">{{ column }}</th>
-              </thead>
-              <colgroup>
-                <col width="2%" />
-                <col width="4%" />
-                <col width="10%" />
-                <col width="10%" />
-                <col width="10%" />
-                <col width="10%" />
-                <col width="10%" />
-                <col width="10%" />
-              </colgroup>
-              <tbody>
-              <tr>
-                <td class="text-left">Sputum</td>
-                <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
-                  <td @click="handleGradeClick(moInfoTotal, category.classId, grade)">
-                    <font-awesome-icon
-                        class="grade-dot-wrapper top-half"
-                        :icon="['fac', 'half-circle-down']"
-                        size="lg"
-                        :class="{ 'active-before': checkGrade(category.beforeGrade, grade)}"
-                    />
-                    <font-awesome-icon
-                        class="grade-dot-wrapper bottom-half"
-                        :icon="['fac', 'half-circle-up']"
-                        size="lg"
-                        :class="{ 'active-after': checkGrade(category.afterGrade, grade)}"
-                    />
-                  </td>
-                </template>
 
-              </tr>
-              <tr>
-                <td class="fs08">EP Cell</td>
-                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.EPCELL_GRADES" :key="column">{{ column }}</td>
-              </tr>
-              <tr>
-                <td class="fs08">WBC</td>
-                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.WBC_GRADES" :key="column">{{ column }}</td>
-              </tr>
-              <tr>
-                <td class="fs08">WBC / EP Cell</td>
-                <td class="text-center fs08" v-for="column in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="column">{{ column }}</td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
+      <div class="w-98p" v-for="category in moInfoTotal?.classInfo.filter((item: any) => item.classId === '90')" :key="category.classId">
+        <h1 class="classInfoClassTitle mt24">Grade</h1>
+        <table class="sputum-table">
+          <thead>
+          <th></th>
+          <th v-for="column in SPUTUM_GRADES.GRADES" :key="column" width="8%;">{{ column }}</th>
+          </thead>
+          <colgroup>
+            <col width="12%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+            <col width="11%" />
+          </colgroup>
+          <tbody>
+          <tr>
+            <td class="fs08" style="border: none;">&nbsp;</td>
+            <template v-for="grade in SPUTUM_GRADES.GRADES" :key="grade">
+              <td @click="handleGradeClick(moInfoTotal, category.classId, grade)" class="text-center relative" style="border-top: none;">
+                <font-awesome-icon
+                    class="grade-dot-wrapper top-half"
+                    :icon="['fac', 'half-circle-down']"
+                    :class="{ 'active-before': checkGrade(category.beforeGrade, grade)}"
+                    style="transform: translate(-50%, -20%)"
+                    size="lg"
+                />
+                <font-awesome-icon
+                    class="grade-dot-wrapper bottom-half"
+                    :icon="['fac', 'half-circle-up']"
+                    :class="{ 'active-after': checkGrade(category.afterGrade, grade)}"
+                    style="transform: translate(-50%, -20%)"
+                    size="lg"
+                />
+              </td>
+            </template>
+          </tr>
+          <tr>
+            <td class="fs10" style="border: none;">{{ SPUTUM_GRADES.COLUMNS[1] }}</td>
+            <td class="text-center fs10" v-for="column in SPUTUM_GRADES.EPCELL_GRADES" :key="column">{{ column }}</td>
+          </tr>
+          <tr>
+            <td class="fs10" style="border: none;">{{ SPUTUM_GRADES.COLUMNS[2] }}</td>
+            <td class="text-center fs10" v-for="column in SPUTUM_GRADES.WBC_GRADES" :key="column">{{ column }}</td>
+          </tr>
+          <tr>
+            <td class="fs09" style="border: none;">{{ SPUTUM_GRADES.COLUMNS[3] }}</td>
+            <td class="text-center fs10" style="border-bottom: none;" v-for="column in SPUTUM_GRADES.WBC_EPCELL_RATIO_GRADES" :key="column">{{ column }}</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
 
-      <GradeInputWithTitle :grades="FOUR_GRADES" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal?.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.GPC || item.classId === CLASS_INFO_ID.GNB || item.classId === CLASS_INFO_ID.GPB || item.classId === CLASS_INFO_ID.GNDC)" />
-      <GradeInputWithTitle :grades="[GRADE_TEXT.EXIST]" :moInfo="moInfoTotal" @updateGrade="updateGrade" :classInfo="moInfoTotal.classInfo.filter((item: any) => item.classId === CLASS_INFO_ID.YEAST || item.classId === CLASS_INFO_ID.HYPHAE)" />
-    </div>
+      <GradeBox
+          title="Bacteria (HP)"
+          :grades="FOUR_GRADES"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'include', [CLASS_INFO_ID.GPC, CLASS_INFO_ID.GNB, CLASS_INFO_ID.GPB, CLASS_INFO_ID.GNDC])"
+      />
+      <GradeBox
+          :grades="[GRADE_TEXT.EXIST]"
+          :totalClassInfo="moInfoTotal"
+          :updateGrade="updateGrade"
+          :classInfo="filterClassInfoByClassIds(moInfoTotal.classInfo, 'include', [CLASS_INFO_ID.YEAST, CLASS_INFO_ID.HYPHAE])"
+      />
 
+    </div>
   </div>
 
   <Alert
@@ -178,8 +186,13 @@
 
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, nextTick, onMounted, ref, watch} from 'vue';
-import { getCurrentAnalysisType, getImageUrl } from "@/common/lib/utils/conversionDataUtils";
-import { barcodeImgDir } from "@/common/defines/constFile/settings/settings";
+import {
+  filterClassInfoByClassIds,
+  getCurrentAnalysisType,
+  getImageUrl,
+  getValidClassIds
+} from "@/common/lib/utils/conversionDataUtils";
+import {barcodeImgDir, DEFAULT_GRAM_RANGE} from "@/common/defines/constFile/settings/settings";
 
 import { detailRunningApi, updateRunningApi } from "@/common/api/service/runningInfo/runningInfoApi";
 import { useStore } from "vuex";
@@ -190,13 +203,12 @@ import moment from 'moment';
 import { isObjectEmpty } from "@/common/lib/utils/checkUtils";
 import { useRoute } from "vue-router";
 import {
-  CLASS_INFO_ID,
-  FOUR_GRADES, GRADE_TEXT,
+  CLASS_INFO_ID, FILE_NAME,
+  FOUR_GRADES, GRADE_TEXT, MAP_TEST_TYPE_TO_TEST_NAME, MO_CATEGORY_NAME,
   MO_TEST_TYPE,
-  SPUTUM_GRADES
+  SPUTUM_GRADES, SPUTUM_LOW_POWER_CLASS_IDS, URINE_LOW_POWER_CLASS_IDS
 } from "@/common/defines/constFile/dataBase";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import GradeInputWithTitle from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeInputWithTitle.vue";
 import Toast from "@/components/commonUi/Toast.vue";
 import GradeBox from "@/views/datebase/commponent/detail/classInfo/commonGrade/gradeBox.vue";
 import MemoBox from "@/components/commonUi/MemoBox.vue";
@@ -243,6 +255,8 @@ onMounted(async () => {
     currentAnalysisType.value = getCurrentAnalysisType(props.selectItems.testType);
     getTotalMoInfo(props.selectItems);
   }
+
+  // await test();
 })
 
 watch([() => currentPowerType.value, () => route.name], async () => {
@@ -262,7 +276,7 @@ watch(() => props.selectItems, async (newSelectItems) => {
     setBarcodeImage();
     await store.dispatch('commonModule/setCommonInfo', {testType: props.selectItems?.testType});
     if (props.selectItems?.submitState === "" || !props.selectItems?.submitState) {
-      const result: any = detailRunningApi(String(props.selectItems?.id));
+      const result: any = await detailRunningApi(String(props.selectItems?.id));
       const updatedItem = { id: props.selectItems?.id ,submitState: 'checkFirst' };
       const updatedRuningInfo = {...result.data, ...updatedItem}
       await resRunningItem({ updatedRunningInfo: updatedRuningInfo, noAlert: true });
@@ -270,6 +284,36 @@ watch(() => props.selectItems, async (newSelectItems) => {
     barCodeImageShowError.value = false;
   }
 }, { deep: true });
+
+const test =  async () => {
+  const result: any = await detailRunningApi(String(props.selectItems?.id));
+
+  for (const item of result.data.classInfo) {
+    if (String(item.id) === '0') {
+      for (const item2 of item.classInfo) {
+        let tmp;
+        let tmp2;
+        if (item2.classId === '02') {
+          tmp = item2;
+          const asdasd = result.data.classInfo.find((test: any) => String(test.id) === '1' && test.name === item.name);
+          if (!asdasd.classInfo.find((item3: any) => item3.classId === item2.classId)) {
+            asdasd.classInfo.push(tmp);
+          }
+        } else if (item2.classId === '03') {
+          tmp2 = item2;
+          const asdf = result.data.classInfo.find((test: any) => String(test.id) === '1' && test.name === item.name);
+          if (!asdf.classInfo.find((item3: any) => item3.classId === item2.classId)) {
+            asdf.classInfo.push(tmp2);
+          }
+        }
+      }
+    }
+  }
+
+  const updatedItem = { id: props.selectItems?.id , };
+  const updatedRuningInfo = {...result.data, ...updatedItem}
+  await resRunningItem({ updatedRunningInfo: updatedRuningInfo, noAlert: true });
+}
 
 const getTotalMoInfo = (newSelectItems: any) => {
   moInfoTotal.value = newSelectItems?.classInfo.find((item: any) => String(item.id) === '2');

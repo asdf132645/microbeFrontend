@@ -100,6 +100,7 @@ import { useRouter } from "vue-router";
 import {isObjectEmpty} from "@/common/lib/utils/checkUtils";
 import {MO_TEST_TYPE_CODE} from "@/common/defines/constFile/dataBase";
 import {ClassInfoType, RunningInfoResponse} from "@/common/api/service/runningInfo/runningInfo.dto";
+import { getDeviceIpApi } from "@/common/api/service/device/deviceApi";
 
 
 const store = useStore();
@@ -134,6 +135,7 @@ const eventTriggered = ref(false);
 const loadingDelayParents = ref(false);
 const notStartLoading = ref(false);
 const barcodeInput = ref<HTMLInputElement | null>(null);
+const myIp = ref('');
 
 const inputTimeout = ref<any>(null);
 const bufferDelay = 100; // 입력 완료 감지 지연 시간 (ms)
@@ -141,6 +143,13 @@ const inputBuffer = ref('');
 const router = useRouter();
 
 async function handleStateVal(data: any) {
+  const match = data.match(/(\d+\.\d+\.\d+\.\d+)/);
+  const extractedIp = match ? match[1] : null;
+
+  if (extractedIp && extractedIp === myIp.value.data) {
+    return;
+  }
+
   eventTriggered.value = true;
   notStartLoading.value = false;
   await removePageAllDataApi();
@@ -160,6 +169,7 @@ onMounted(async () => {
   notStartLoading.value = true;
   instance?.appContext.config.globalProperties.$socket.on('stateVal', handleStateVal);
   document.addEventListener('keydown', handleGlobalKeydown);
+  myIp.value = await getDeviceIpApi();
 
 });
 

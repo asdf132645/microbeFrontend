@@ -240,7 +240,7 @@
 
 .shadowBox {
     box-shadow: 2px 2px 2px var(--black-color);
-    border: 1px solid var(--gray-bg-8-color);
+    border-radius: 4px;
 }
 
 .borderRadiusRound {
@@ -311,8 +311,16 @@
     text-align: left;
 }
 
+.fs07 {
+    font-size: 0.7rem;
+}
+
 .fs08 {
     font-size: 0.8rem;
+}
+
+.fs09 {
+    font-size: 0.9rem;
 }
 
 .fs10 {
@@ -345,6 +353,23 @@
 
 .no-css-table tbody tr td {
     border: none;
+}
+
+.sputum-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-spacing: 0 10px;
+}
+
+.sputum-table thead th {
+    text-align: center;
+    height: 24px;
+}
+
+.sputum-table tbody td {
+    border: 1px solid white;
+    padding: 8px 0;
 }
 
 .grade-icon-container {
@@ -391,7 +416,8 @@
 
 .main-container {
     width: 100%;
-    height: 993px;
+    height: 999px;
+    /*height: 91vh;*/
 }
 
 .printStart {
@@ -1487,7 +1513,7 @@ li.wbcTitleText p.firstP {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .classDetailInfo-title-container {
@@ -2268,6 +2294,7 @@ ul.wbcInfoDbUl > li {
     background-color: black;
     border-radius: 4px;
     opacity: 0.7;
+    margin-bottom: 8px;
 }
 
 .classImageSlider-imageIndex-wrapper {
@@ -2401,7 +2428,7 @@ ul.wbcImgWrap > li {
 }
 
 .classInfoDetailContainer {
-    max-height: 62.5vh;
+    max-height: 59vh;
     width: 100%;
     height: 100%;
     overflow-x: auto;
@@ -3740,6 +3767,7 @@ p.menuIco {
     align-items: center;
     flex-direction: column;
     border-radius: 4px;
+    margin-top: 12px;
 }
 
 .classInfoClassTitle {
@@ -3747,15 +3775,14 @@ p.menuIco {
     width: 100%;
     font-size: 1rem;
     font-weight: 600;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 2px;
+    padding-bottom: 4px;
 }
 
 .classInfoHorizontalRule {
     border: 1px solid white;
     width: 100%;
     margin-top: 4px;
-    margin-bottom: 20px;
 }
 
 .contentRight > .contentRightChild.workingView {
@@ -3789,8 +3816,6 @@ p.menuIco {
 
 .grade-dot-wrapper {
     cursor: pointer;
-    /*width: 12px;*/
-    /*height: 12px;*/
     border-radius: 50%;
     background-color: var(--white-color);
 }
@@ -3889,10 +3914,15 @@ p.menuIco {
     }
 }
 
-.classDetail-gradeTitle {
+.classDetail-gradeTitle-wrapper {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+}
+
+.classDetail-gradeTitle {
+    width: 60px;
+    text-align: left;
 }
 
 .progress-component-container {

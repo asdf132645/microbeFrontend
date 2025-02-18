@@ -29,7 +29,7 @@ export const SPUTUM_GRADES = {
     EPCELL_GRADES: ['>25', '>25', '>25', '>25', '10-25', '10-25', '<10', '<10'],
     WBC_GRADES: ['<10', '10-25', '>25', '>25', '>25', '>25', '>25', '<10'],
     WBC_EPCELL_RATIO_GRADES: ['', '', 'x10↓', 'x10↑', 'x10↓', 'x10↑', '', ''],
-    COLUMNS: ['Sputum', 'EP Cell', 'WBC', 'WBC/EP Cell']
+    COLUMNS: ['Sputum', 'EPCell', 'WBC', 'WBC / EPCell']
 }
 
 export const POWER_MODE = {

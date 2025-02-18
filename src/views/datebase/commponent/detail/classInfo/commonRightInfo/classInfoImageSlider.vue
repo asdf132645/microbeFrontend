@@ -4,14 +4,14 @@
       <font-awesome-icon v-if="!isSliderComponentOpen" :icon="['fas', 'caret-up']" style="color: black;" />
       <font-awesome-icon v-else :icon="['fas', 'caret-down']" style="color: black;" />
     </div>
-    <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, lazyLoad: 'nearby', perMove: 1, pagination: false }">
+    <Splide :has-track="false" ref="splide" :options="{ perPage: 8, drag: true, wheel: true, perMove: 1, pagination: false }">
       <SplideTrack>
         <SplideSlide v-for="(image, index) in localAllImages" :key="image.url">
           <img
               class="splideSlide-img slideImage cursor-pointer"
               :class="[
                   image.isWatched ? 'watched-image' : '',
-                  currentImageName.split('.')[0] ===  image.imageName.split('.')[0] ? 'selected-image' : '',
+                  currentImageName.split('.')[0] ===  image.imageName.split('_')[0] ? 'selected-image' : '',
               ]"
               :loading="index < 8 ? 'eager' : 'lazy'"
               :src="image.url"
@@ -44,6 +44,7 @@ const emits = defineEmits();
 const currentImageName = computed(() => store.state.commonModule.currentImageName);
 const currentPowerType = computed(() => store.state.commonModule.currentPowerType);
 const localAllImages = ref(props.allImages);
+const visibleImages = ref([]);
 const splide = ref();
 const currentImageIndex = ref(1);
 const isSliderComponentOpen = ref(false);
@@ -64,11 +65,11 @@ watch(() => props.allImages, async (newAllImages) => {
   localAllImages.value = props.allImages;
   localAllImages.value[0].isWatched = true;
   await store.dispatch('commonModule/setCommonInfo', { currentImageName: newAllImages[0]?.imageName ?? '' });
-})
+}, { deep: true })
 
 watch(() => currentImageName.value, () => {
   localAllImages.value = localAllImages.value.map((item, index: number) => {
-    if (item.imageName.split('.')[0] === currentImageName.value.split('.')[0]) {
+    if (item.imageName.split('_')[0] === currentImageName.value.split('.')[0]) {
       currentImageIndex.value = index + 1;
       return {...item, isWatched: true };
     }
@@ -90,7 +91,7 @@ const handleSliderComponent = () => {
 }
 
 const handleKeyDown = async (e: KeyboardEvent) => {
-  const currentIndex = localAllImages.value.findIndex((item: any) => item.imageName.split('.')[0] === currentImageName.value.split('.')[0]);
+  const currentIndex = localAllImages.value.findIndex((item: any) => item.imageName.split('_')[0] === currentImageName.value.split('.')[0]);
   if (currentIndex === -1) return;
 
   const direction = e.code === 'ArrowRight' ? 1 : e.code === 'ArrowLeft' ? -1 : null;
