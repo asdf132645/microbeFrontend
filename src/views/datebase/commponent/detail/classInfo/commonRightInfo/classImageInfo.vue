@@ -371,7 +371,7 @@ const drawClassPosCanvas = (classInfoArr: any) => {
   const combinedPath = new Path2D();
   for (const classId of classInfoArr) {
     for (const classPosItem of classInfoPositionArr.value) {
-      if (classId === classPosItem.classId) {
+      if (classId === classPosItem.classId || isClassIdSputum(classId, classPosItem.classId)) {
         for (const detailPosItem of classPosItem.pos) {
           const drawObj = {
             classId: classId,
@@ -450,5 +450,10 @@ const showErrorAlert = (message: string) => {
 const hideAlert = () => {
   showAlert.value = false;
 };
+
+const isClassIdSputum = (checkedClassId: string, posItemClassId: string) => {
+  // WBC AND EPCELl
+  return checkedClassId === '90' && (posItemClassId === '00' || posItemClassId === '01');
+}
 
 </script>

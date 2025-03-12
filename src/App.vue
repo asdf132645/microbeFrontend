@@ -678,23 +678,18 @@ const convertMoInfo = (cassetteType: keyof typeof MO_TEST_TYPE, moInfo: MoInfoIn
 
 const calcCount = (totalLPCount: number, totalHPCount: number, count: number, id: string, classId: string, cassetteType: string) => {
   if (String(id) === '2') {
-    switch (cassetteType) {
-      case MO_TEST_TYPE.URINE:
-        if (URINE_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
-        }
-        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
-      case MO_TEST_TYPE.SPUTUM:
-        if (SPUTUM_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
-        }
-        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
-      case MO_TEST_TYPE.BLOOD:
-        if (BLOOD_LOW_POWER_CLASS_IDS.includes(classId)) {
-          return Number(totalLPCount) > 0 ? Math.ceil(Number(count) / Number(totalLPCount)) : 0;
-        }
-        return Number(totalHPCount) > 0 ? Math.ceil(Number(count) / Number(totalHPCount)) : 0;
+    const lowPowerClassIds = {
+      [MO_TEST_TYPE.URINE]: URINE_LOW_POWER_CLASS_IDS,
+      [MO_TEST_TYPE.SPUTUM]: SPUTUM_LOW_POWER_CLASS_IDS,
+      [MO_TEST_TYPE.BLOOD]: BLOOD_LOW_POWER_CLASS_IDS,
     }
+
+    if (Number(count) === 0) {
+      return 0;
+    }
+    const isLowPower = lowPowerClassIds[cassetteType]?.includes(classId);
+    const totalCount = isLowPower ? Number(totalLPCount) : Number(totalHPCount);
+    return totalCount > 0 ? Math.ceil(Number(count) / totalCount) : 0;
   }
   return Number(count);
 }

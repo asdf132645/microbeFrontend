@@ -41,7 +41,6 @@ export function parseXMLToJSON(xml: any): any {
 
 export const getSputumGrade = (wbcCount: number, epCellCount: number) => {
     const epCellWbcRatio = (epCellCount / wbcCount);
-
     if (epCellCount > 25 && wbcCount < 10) return GRADE_TEXT["1"];
     if (epCellCount > 25 && (10 <= wbcCount && wbcCount <= 25)) return GRADE_TEXT['2'];
     if (epCellCount > 25 && wbcCount > 25 && epCellWbcRatio < 10) return GRADE_TEXT['3-1'];
@@ -55,6 +54,7 @@ export const getSputumGrade = (wbcCount: number, epCellCount: number) => {
 }
 
 export const getGradeByRange = (settingObj: any, count: number) => {
+    if (count === 0) return '';
     if (count <= Number(settingObj.rareBoundary)) return GRADE_TEXT.RARE;
     if (count <= Number(settingObj.fewBoundary)) return GRADE_TEXT.FEW;
     if (count <= Number(settingObj.moderateBoundary)) return GRADE_TEXT.MODERATE;
